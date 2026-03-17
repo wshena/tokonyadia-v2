@@ -1,7 +1,7 @@
 import { getAllProducts } from "@/lib/db/products";
-import ContentContainer from "./components/ui/layouts/ContentContainer";
-import BannerCarousel from "./components/ui/carousel/BannerCarousel";
-import ProductLoadMore from './components/ui/ProductLoadMore';
+import ContentContainer from "../components/ui/layouts/ContentContainer";
+import BannerCarousel from "../components/ui/carousel/BannerCarousel";
+import ProductLoadMore from '../components/ui/ProductLoadMore';
 import { getAllCategories } from "@/lib/db/categories";
 import { getAllCollections } from "@/lib/db/collections";
 

@@ -1,6 +1,6 @@
-import Breadcrumb, { BreadcrumbItem } from '@/app/components/ui/Breadcrumb';
-import { ProductCard } from '@/app/components/ui/card/ProductCard';
-import ContentContainer from '@/app/components/ui/layouts/ContentContainer';
+import Breadcrumb, { BreadcrumbItem } from '@/components/ui/Breadcrumb';
+import { ProductCard } from '@/components/ui/card/ProductCard';
+import ContentContainer from '@/components/ui/layouts/ContentContainer';
 import { getAllProducts, getProductById, getRelatedProducts } from '@/lib/db/products';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
