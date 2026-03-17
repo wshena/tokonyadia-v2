@@ -1,0 +1,531 @@
+[
+  {
+    "collection_id": "COL-0001",
+    "title": "For Men's",
+    "description": "Starting at $24",
+    "thumbnail": "https://nexton-cdn.github.io/thumbnails/collections/for-mens.webp",
+    "path": "/collections/for-mens",
+    "products": [
+      "SKU-10240001",
+      "SKU-10240003",
+      "SKU-10240004",
+      "SKU-10240005",
+      "SKU-10240006",
+      "SKU-10240007",
+      "SKU-10240027",
+      "SKU-10240030",
+      "SKU-10240028",
+      "SKU-10240029"
+    ]
+  },
+  {
+    "collection_id": "COL-0002",
+    "title": "Black Friday Sale",
+    "description": "Up to 40% off",
+    "thumbnail": "https://nexton-cdn.github.io/thumbnails/collections/black-friday-sale.webp",
+    "path": "/collections/black-friday-sale",
+    "products": [
+      "SKU-10240009",
+      "SKU-10240022",
+      "SKU-10240032",
+      "SKU-10240058",
+      "SKU-10240010",
+      "SKU-10240015"
+    ]
+  },
+  {
+    "collection_id": "COL-0003",
+    "title": "For Women's",
+    "description": "Starting at $19",
+    "thumbnail": "https://nexton-cdn.github.io/thumbnails/collections/for-womens.webp",
+    "path": "/collections/for-womens",
+    "products": [
+      "SKU-10240008",
+      "SKU-10240009",
+      "SKU-10240010",
+      "SKU-10240011",
+      "SKU-10240012",
+      "SKU-10240017",
+      "SKU-10240018"
+    ]
+  },
+  {
+    "collection_id": "COL-0004",
+    "title": "Best Sellers",
+    "description": "Explore popular products",
+    "thumbnail": "https://nexton-cdn.github.io/thumbnails/collections/best-sellers.webp",
+    "path": "/collections/best-sellers",
+    "products": [
+      "SKU-10240008",
+      "SKU-10240027",
+      "SKU-10240011",
+      "SKU-10240016",
+      "SKU-10240003",
+      "SKU-10240030",
+      "SKU-10240005",
+      "SKU-10240062",
+      "SKU-10240053",
+      "SKU-10240007"
+    ]
+  },
+  {
+    "collection_id": "COL-0005",
+    "title": "New Arrivals",
+    "description": "Explore new arrivals",
+    "thumbnail": "https://nexton-cdn.github.io/thumbnails/collections/new-arrivals.webp",
+    "path": "/collections/new-arrivals",
+    "products": [
+      "SKU-10240063",
+      "SKU-10240062",
+      "SKU-10240055",
+      "SKU-10240054",
+      "SKU-10240043",
+      "SKU-10240042",
+      "SKU-10240035",
+      "SKU-10240034",
+      "SKU-10240026",
+      "SKU-10240025",
+      "SKU-10240018",
+      "SKU-10240017",
+      "SKU-10240007",
+      "SKU-10240006"
+    ]
+  },
+  {
+    "collection_id": "COL-0006",
+    "title": "Top Rated",
+    "description": "Explore top rated products",
+    "thumbnail": "https://nexton-cdn.github.io/thumbnails/collections/top-rated.webp",
+    "path": "/collections/top-rated",
+    "products": [
+      "SKU-10240016",
+      "SKU-10240027",
+      "SKU-10240003",
+      "SKU-10240008",
+      "SKU-10240053",
+      "SKU-10240062"
+    ]
+  },
+  {
+    "collection_id": "COL-0100",
+    "title": "Handmade Silk",
+    "description": "Starting at $198.19",
+    "thumbnail": "https://picsum.photos/seed/ohIlhXn/400/400?grayscale",
+    "path": "/collections/handmade-silk",
+    "products": [
+      "SKU-10240477",
+      "SKU-10240444",
+      "SKU-10240398",
+      "SKU-10240262",
+      "SKU-10240313",
+      "SKU-10240587",
+      "SKU-10240464",
+      "SKU-10240406",
+      "SKU-10240672",
+      "SKU-10240144",
+      "SKU-10240627",
+      "SKU-10240700",
+      "SKU-10240295",
+      "SKU-10240572"
+    ]
+  },
+  {
+    "collection_id": "COL-0101",
+    "title": "Handcrafted Silk",
+    "description": "Starting at $956.95",
+    "thumbnail": "https://picsum.photos/seed/N37LWGsMdB/400/400",
+    "path": "/collections/handcrafted-silk",
+    "products": [
+      "SKU-10240514",
+      "SKU-10240524",
+      "SKU-10240509",
+      "SKU-10240692",
+      "SKU-10240419",
+      "SKU-10240269",
+      "SKU-10240389",
+      "SKU-10240352",
+      "SKU-10240121",
+      "SKU-10240639",
+      "SKU-10240403",
+      "SKU-10240655",
+      "SKU-10240472",
+      "SKU-10240642"
+    ]
+  },
+  {
+    "collection_id": "COL-0102",
+    "title": "Frozen Cotton",
+    "description": "Starting at $173.30",
+    "thumbnail": "https://picsum.photos/seed/tA3kAHJgSH/400/400",
+    "path": "/collections/frozen-cotton",
+    "products": [
+      "SKU-10240520",
+      "SKU-10240502",
+      "SKU-10240385",
+      "SKU-10240605",
+      "SKU-10240587",
+      "SKU-10240289",
+      "SKU-10240161",
+      "SKU-10240202",
+      "SKU-10240277",
+      "SKU-10240445",
+      "SKU-10240138",
+      "SKU-10240203",
+      "SKU-10240673",
+      "SKU-10240169",
+      "SKU-10240244"
+    ]
+  },
+  {
+    "collection_id": "COL-0103",
+    "title": "Luxurious Silk",
+    "description": "Starting at $8.69",
+    "thumbnail": "https://picsum.photos/seed/UvaIggq3l/400/400?grayscale",
+    "path": "/collections/luxurious-silk",
+    "products": [
+      "SKU-10240384",
+      "SKU-10240621",
+      "SKU-10240370",
+      "SKU-10240525",
+      "SKU-10240520",
+      "SKU-10240495",
+      "SKU-10240577",
+      "SKU-10240682",
+      "SKU-10240276",
+      "SKU-10240476"
+    ]
+  },
+  {
+    "collection_id": "COL-0104",
+    "title": "Handcrafted Granite",
+    "description": "Starting at $490.15",
+    "thumbnail": "https://picsum.photos/seed/vny4BVP5xx/400/400",
+    "path": "/collections/handcrafted-granite",
+    "products": [
+      "SKU-10240534",
+      "SKU-10240227",
+      "SKU-10240488",
+      "SKU-10240147",
+      "SKU-10240549",
+      "SKU-10240265",
+      "SKU-10240115",
+      "SKU-10240609",
+      "SKU-10240406",
+      "SKU-10240596"
+    ]
+  },
+  {
+    "collection_id": "COL-0105",
+    "title": "Rustic Steel",
+    "description": "Starting at $121.89",
+    "thumbnail": "https://picsum.photos/seed/I7kHhmMT/400/400",
+    "path": "/collections/rustic-steel",
+    "products": [
+      "SKU-10240600",
+      "SKU-10240283",
+      "SKU-10240239",
+      "SKU-10240410",
+      "SKU-10240153",
+      "SKU-10240347",
+      "SKU-10240466",
+      "SKU-10240391",
+      "SKU-10240288",
+      "SKU-10240274",
+      "SKU-10240344",
+      "SKU-10240282"
+    ]
+  },
+  {
+    "collection_id": "COL-0106",
+    "title": "Awesome Marble",
+    "description": "Starting at $329.59",
+    "thumbnail": "https://picsum.photos/seed/GFS2sHZA/400/400",
+    "path": "/collections/awesome-marble",
+    "products": [
+      "SKU-10240467",
+      "SKU-10240209",
+      "SKU-10240128",
+      "SKU-10240187",
+      "SKU-10240177",
+      "SKU-10240349",
+      "SKU-10240393",
+      "SKU-10240568",
+      "SKU-10240192",
+      "SKU-10240615",
+      "SKU-10240679",
+      "SKU-10240418"
+    ]
+  },
+  {
+    "collection_id": "COL-0107",
+    "title": "Luxurious Cotton",
+    "description": "Starting at $849.85",
+    "thumbnail": "https://picsum.photos/seed/dzX42u/400/400?grayscale",
+    "path": "/collections/luxurious-cotton",
+    "products": [
+      "SKU-10240129",
+      "SKU-10240547",
+      "SKU-10240602",
+      "SKU-10240154",
+      "SKU-10240207",
+      "SKU-10240590",
+      "SKU-10240168",
+      "SKU-10240422",
+      "SKU-10240605",
+      "SKU-10240636",
+      "SKU-10240519"
+    ]
+  },
+  {
+    "collection_id": "COL-0108",
+    "title": "Handmade Bamboo",
+    "description": "Starting at $37.99",
+    "thumbnail": "https://picsum.photos/seed/66Bab5AsG/400/400",
+    "path": "/collections/handmade-bamboo",
+    "products": [
+      "SKU-10240351",
+      "SKU-10240299",
+      "SKU-10240515",
+      "SKU-10240602",
+      "SKU-10240503",
+      "SKU-10240399",
+      "SKU-10240295",
+      "SKU-10240196",
+      "SKU-10240519",
+      "SKU-10240578",
+      "SKU-10240531",
+      "SKU-10240386"
+    ]
+  },
+  {
+    "collection_id": "COL-0109",
+    "title": "Oriental Cotton",
+    "description": "Starting at $981.39",
+    "thumbnail": "https://picsum.photos/seed/RgHRtcXmzB/400/400",
+    "path": "/collections/oriental-cotton",
+    "products": [
+      "SKU-10240314",
+      "SKU-10240507",
+      "SKU-10240256",
+      "SKU-10240467",
+      "SKU-10240324",
+      "SKU-10240580",
+      "SKU-10240451",
+      "SKU-10240459",
+      "SKU-10240126",
+      "SKU-10240194",
+      "SKU-10240637"
+    ]
+  },
+  {
+    "collection_id": "COL-0110",
+    "title": "Tasty Metal",
+    "description": "Starting at $629.45",
+    "thumbnail": "https://picsum.photos/seed/6lPilWu3I/400/400",
+    "path": "/collections/tasty-metal",
+    "products": [
+      "SKU-10240181",
+      "SKU-10240566",
+      "SKU-10240188",
+      "SKU-10240145",
+      "SKU-10240326",
+      "SKU-10240195",
+      "SKU-10240159",
+      "SKU-10240390",
+      "SKU-10240267",
+      "SKU-10240454",
+      "SKU-10240686"
+    ]
+  },
+  {
+    "collection_id": "COL-0111",
+    "title": "Awesome Bamboo",
+    "description": "Starting at $596.90",
+    "thumbnail": "https://picsum.photos/seed/wgzeOdON/400/400?grayscale",
+    "path": "/collections/awesome-bamboo",
+    "products": [
+      "SKU-10240535",
+      "SKU-10240232",
+      "SKU-10240611",
+      "SKU-10240651",
+      "SKU-10240360",
+      "SKU-10240215",
+      "SKU-10240197",
+      "SKU-10240156",
+      "SKU-10240346",
+      "SKU-10240421"
+    ]
+  },
+  {
+    "collection_id": "COL-0112",
+    "title": "Recycled Granite",
+    "description": "Starting at $999.29",
+    "thumbnail": "https://picsum.photos/seed/6hoaXHbjE/400/400",
+    "path": "/collections/recycled-granite",
+    "products": [
+      "SKU-10240106",
+      "SKU-10240152",
+      "SKU-10240382",
+      "SKU-10240374",
+      "SKU-10240295",
+      "SKU-10240219",
+      "SKU-10240215",
+      "SKU-10240226",
+      "SKU-10240578",
+      "SKU-10240541",
+      "SKU-10240360",
+      "SKU-10240585"
+    ]
+  },
+  {
+    "collection_id": "COL-0113",
+    "title": "Unbranded Bamboo",
+    "description": "Starting at $556.15",
+    "thumbnail": "https://picsum.photos/seed/mQU1B/400/400?grayscale",
+    "path": "/collections/unbranded-bamboo",
+    "products": [
+      "SKU-10240212",
+      "SKU-10240439",
+      "SKU-10240259",
+      "SKU-10240185",
+      "SKU-10240109",
+      "SKU-10240190",
+      "SKU-10240619",
+      "SKU-10240391",
+      "SKU-10240675",
+      "SKU-10240167",
+      "SKU-10240141"
+    ]
+  },
+  {
+    "collection_id": "COL-0114",
+    "title": "Fantastic Bamboo",
+    "description": "Starting at $373.15",
+    "thumbnail": "https://picsum.photos/seed/4DMZs1KYL/400/400",
+    "path": "/collections/fantastic-bamboo",
+    "products": [
+      "SKU-10240352",
+      "SKU-10240261",
+      "SKU-10240605",
+      "SKU-10240230",
+      "SKU-10240205",
+      "SKU-10240477",
+      "SKU-10240410",
+      "SKU-10240219",
+      "SKU-10240690",
+      "SKU-10240575",
+      "SKU-10240326",
+      "SKU-10240433",
+      "SKU-10240689",
+      "SKU-10240106",
+      "SKU-10240667"
+    ]
+  },
+  {
+    "collection_id": "COL-0115",
+    "title": "Incredible Gold",
+    "description": "Starting at $130.45",
+    "thumbnail": "https://picsum.photos/seed/ZkIDRH/400/400?grayscale",
+    "path": "/collections/incredible-gold",
+    "products": [
+      "SKU-10240476",
+      "SKU-10240225",
+      "SKU-10240256",
+      "SKU-10240247",
+      "SKU-10240411",
+      "SKU-10240329",
+      "SKU-10240222",
+      "SKU-10240557",
+      "SKU-10240384",
+      "SKU-10240349"
+    ]
+  },
+  {
+    "collection_id": "COL-0116",
+    "title": "Generic Plastic",
+    "description": "Starting at $257.09",
+    "thumbnail": "https://picsum.photos/seed/xeCx8Iqchz/400/400?grayscale",
+    "path": "/collections/generic-plastic",
+    "products": [
+      "SKU-10240411",
+      "SKU-10240149",
+      "SKU-10240375",
+      "SKU-10240553",
+      "SKU-10240445",
+      "SKU-10240552",
+      "SKU-10240363",
+      "SKU-10240647",
+      "SKU-10240429",
+      "SKU-10240503",
+      "SKU-10240272",
+      "SKU-10240228",
+      "SKU-10240497",
+      "SKU-10240390",
+      "SKU-10240186"
+    ]
+  },
+  {
+    "collection_id": "COL-0117",
+    "title": "Fresh Plastic",
+    "description": "Starting at $53.49",
+    "thumbnail": "https://picsum.photos/seed/N8q22q9H/400/400",
+    "path": "/collections/fresh-plastic",
+    "products": [
+      "SKU-10240160",
+      "SKU-10240285",
+      "SKU-10240294",
+      "SKU-10240571",
+      "SKU-10240667",
+      "SKU-10240612",
+      "SKU-10240368",
+      "SKU-10240201",
+      "SKU-10240526",
+      "SKU-10240444",
+      "SKU-10240304",
+      "SKU-10240551"
+    ]
+  },
+  {
+    "collection_id": "COL-0118",
+    "title": "Tasty Gold",
+    "description": "Starting at $515.95",
+    "thumbnail": "https://picsum.photos/seed/j8tHE3bc/400/400?grayscale",
+    "path": "/collections/tasty-gold",
+    "products": [
+      "SKU-10240450",
+      "SKU-10240594",
+      "SKU-10240499",
+      "SKU-10240234",
+      "SKU-10240465",
+      "SKU-10240350",
+      "SKU-10240167",
+      "SKU-10240332",
+      "SKU-10240436",
+      "SKU-10240428",
+      "SKU-10240316",
+      "SKU-10240277",
+      "SKU-10240128",
+      "SKU-10240665",
+      "SKU-10240652"
+    ]
+  },
+  {
+    "collection_id": "COL-0119",
+    "title": "Incredible Wooden",
+    "description": "Starting at $835.39",
+    "thumbnail": "https://picsum.photos/seed/neGMgnoIi/400/400",
+    "path": "/collections/incredible-wooden",
+    "products": [
+      "SKU-10240397",
+      "SKU-10240565",
+      "SKU-10240560",
+      "SKU-10240563",
+      "SKU-10240335",
+      "SKU-10240408",
+      "SKU-10240226",
+      "SKU-10240205",
+      "SKU-10240377",
+      "SKU-10240216"
+    ]
+  }
+]

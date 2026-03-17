@@ -1,0 +1,439 @@
+[
+  {
+    "id": 1741138548734,
+    "userId": "55a0331c-6e6d-4b8f-96b5-601870ef0386",
+    "products": [
+      {
+        "productData": {
+          "product_id": "SKU-10240007",
+          "category_id": "CAT-0001",
+          "category": "Men's Fashion",
+          "title": "Men's Winter Top Jacket",
+          "path": "/products/mens-winter-top-jacket-10240007",
+          "description": "Conquer the cold with our Men's Winter Top Jacket. This heavy-duty jacket is designed to keep you warm and comfortable in the harshest winter conditions. It's made from high-quality materials and features a classic design for a timeless look.",
+          "specification": [
+            "Material: Insulated fabric",
+            "Color: Charcoal Blue",
+            "Lining: Quilted",
+            "Closure: Zipper and button"
+          ],
+          "images": {
+            "800x900": [
+              "https://nexton-cdn.github.io/products/800x900/product-7-1.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-7-2.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-7-3.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-7-4.webp"
+            ],
+            "320x360": [
+              "https://nexton-cdn.github.io/products/320x360/product-7-1.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-7-2.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-7-3.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-7-4.webp"
+            ],
+            "160x180": [
+              "https://nexton-cdn.github.io/products/160x180/product-7-1.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-7-2.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-7-3.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-7-4.webp"
+            ]
+          },
+          "stock": [
+            {
+              "type": "S",
+              "quantity": 10
+            },
+            {
+              "type": "M",
+              "quantity": 12
+            },
+            {
+              "type": "L",
+              "quantity": 15
+            },
+            {
+              "type": "XL",
+              "quantity": 8
+            },
+            {
+              "type": "XXL",
+              "quantity": 6
+            }
+          ],
+          "price": {
+            "currency": "USD",
+            "withoutDiscount": 99.99,
+            "withDiscount": 84.99,
+            "discountPercentage": 15
+          },
+          "performance": {
+            "sales": 16,
+            "ratingAverage": 5,
+            "ratingCount": 2
+          },
+          "keywords": [
+            "men's fashion",
+            "men's winter top jacket",
+            "heavy-duty outerwear",
+            "warm winter jacket"
+          ]
+        },
+        "variant": "S",
+        "stock": 10,
+        "price": 84.99,
+        "quantity": 1,
+        "timeAddToCart": 1741131356591
+      }
+    ],
+    "status": "pending",
+    "createdAt": "2025-03-05T01:35:48.734Z",
+    "totalAmount": 85.99,
+    "currency": "USD",
+    "address": "lalalala yeyeyeye",
+    "paymentMethod": "brivia",
+    "deliveryMethod": "standard",
+    "notes": ""
+  },
+  {
+    "id": 1741228430344,
+    "userId": "10b0e927-6d07-42b7-9fd9-a9155ecc2c0c",
+    "products": [
+      {
+        "productData": {
+          "product_id": "SKU-10240003",
+          "category_id": "CAT-0001",
+          "category": "Men's Fashion",
+          "title": "Men's Casual Hoodie",
+          "path": "/products/mens-casual-hoodie-10240003",
+          "description": "Stay comfortable and stylish with our Men's Casual Hoodie. This versatile hoodie is the perfect addition to your wardrobe. It's made from a soft and durable cotton blend and is designed for everyday wear. Keep warm and fashionable with this classic hoodie.",
+          "specification": [
+            "Material: Cotton blend",
+            "Color: Various",
+            "Style: Pullover",
+            "Sleeve Length: Long"
+          ],
+          "images": {
+            "800x900": [
+              "https://nexton-cdn.github.io/products/800x900/product-3-1.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-3-2.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-3-3.webp"
+            ],
+            "320x360": [
+              "https://nexton-cdn.github.io/products/320x360/product-3-1.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-3-2.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-3-3.webp"
+            ],
+            "160x180": [
+              "https://nexton-cdn.github.io/products/160x180/product-3-1.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-3-2.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-3-3.webp"
+            ]
+          },
+          "stock": [
+            {
+              "type": "S",
+              "quantity": 25
+            },
+            {
+              "type": "M",
+              "quantity": 30
+            },
+            {
+              "type": "L",
+              "quantity": 28
+            },
+            {
+              "type": "XL",
+              "quantity": 22
+            },
+            {
+              "type": "XXL",
+              "quantity": 15
+            }
+          ],
+          "price": {
+            "currency": "USD",
+            "withoutDiscount": 49.99,
+            "withDiscount": 39.99,
+            "discountPercentage": 20
+          },
+          "performance": {
+            "sales": 18,
+            "ratingAverage": 4.66666667,
+            "ratingCount": 3
+          },
+          "keywords": [
+            "men's fashion",
+            "men's hoodie",
+            "casual wear",
+            "fashionable pullover"
+          ]
+        },
+        "variant": "S",
+        "stock": 25,
+        "price": 39.99,
+        "quantity": 1,
+        "timeAddToCart": 1741228239512
+      }
+    ],
+    "status": "pending",
+    "createdAt": "2025-03-06T02:33:50.344Z",
+    "totalAmount": 40.99,
+    "currency": "USD",
+    "address": "cansas, texas, amerika serikat",
+    "paymentMethod": "brivia",
+    "deliveryMethod": "standard",
+    "notes": "Tidak ada hal khusus, cuman ya tolong lah nggole kirim di bener"
+  },
+  {
+    "id": 1741230274222,
+    "userId": "10b0e927-6d07-42b7-9fd9-a9155ecc2c0c",
+    "products": [
+      {
+        "productData": {
+          "product_id": "SKU-10240012",
+          "category_id": "CAT-0002",
+          "category": "Women's Fashion",
+          "title": "Soft Jean Jacket",
+          "path": "/products/soft-jean-jacket-10240012",
+          "description": "Elevate your casual style with our Soft Jean Jacket. This comfortable jacket is a wardrobe essential, combining the classic jean jacket look with a soft and cozy feel. It's perfect for layering or wearing on its own to complete your everyday outfit.",
+          "specification": [
+            "Material: Soft denim",
+            "Color: Blue",
+            "Closure: Button",
+            "Sleeve Length: Long"
+          ],
+          "images": {
+            "800x900": [
+              "https://nexton-cdn.github.io/products/800x900/product-12-1.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-12-2.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-12-3.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-12-4.webp"
+            ],
+            "320x360": [
+              "https://nexton-cdn.github.io/products/320x360/product-12-1.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-12-2.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-12-3.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-12-4.webp"
+            ],
+            "160x180": [
+              "https://nexton-cdn.github.io/products/160x180/product-12-1.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-12-2.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-12-3.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-12-4.webp"
+            ]
+          },
+          "stock": [
+            {
+              "type": "S",
+              "quantity": 18
+            },
+            {
+              "type": "M",
+              "quantity": 22
+            },
+            {
+              "type": "L",
+              "quantity": 25
+            },
+            {
+              "type": "XL",
+              "quantity": 20
+            },
+            {
+              "type": "XXL",
+              "quantity": 15
+            }
+          ],
+          "price": {
+            "currency": "USD",
+            "withoutDiscount": 69.99,
+            "withDiscount": 59.99,
+            "discountPercentage": 14
+          },
+          "performance": {
+            "sales": 16,
+            "ratingAverage": 4,
+            "ratingCount": 1
+          },
+          "keywords": [
+            "women's fashion",
+            "soft jean jacket",
+            "casual outerwear",
+            "cozy denim"
+          ]
+        },
+        "variant": "S",
+        "stock": 18,
+        "price": 59.99,
+        "quantity": 1,
+        "timeAddToCart": 1741230245817
+      },
+      {
+        "productData": {
+          "product_id": "SKU-10240018",
+          "category_id": "CAT-0002",
+          "category": "Women's Fashion",
+          "title": "Women's Colorful Scarf",
+          "path": "/products/womens-colorful-scarf-10240018",
+          "description": "Brighten up your look with our Women's Colorful Scarf. This vibrant scarf is designed to add a pop of color to your outfit. It's made from soft and lightweight fabric, making it perfect for all seasons. Wrap yourself in style with this chic and versatile accessory.",
+          "specification": [
+            "Material: Lightweight fabric",
+            "Color: Various",
+            "Style: Rectangle",
+            "Length: Long"
+          ],
+          "images": {
+            "800x900": [
+              "https://nexton-cdn.github.io/products/800x900/product-18-1.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-18-2.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-18-3.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-18-4.webp"
+            ],
+            "320x360": [
+              "https://nexton-cdn.github.io/products/320x360/product-18-1.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-18-2.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-18-3.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-18-4.webp"
+            ],
+            "160x180": [
+              "https://nexton-cdn.github.io/products/160x180/product-18-1.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-18-2.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-18-3.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-18-4.webp"
+            ]
+          },
+          "stock": [
+            {
+              "type": "One Size",
+              "quantity": 40
+            }
+          ],
+          "price": {
+            "currency": "USD",
+            "withoutDiscount": 24.99,
+            "withDiscount": 19.99,
+            "discountPercentage": 20
+          },
+          "performance": {
+            "sales": 0,
+            "ratingAverage": null,
+            "ratingCount": 0
+          },
+          "keywords": [
+            "women's colorful scarf",
+            "vibrant accessory",
+            "versatile fashion",
+            "stylish wrap"
+          ]
+        },
+        "variant": "One Size",
+        "stock": 40,
+        "price": 19.99,
+        "quantity": 1,
+        "timeAddToCart": 1741230252281
+      }
+    ],
+    "status": "pending",
+    "createdAt": "2025-03-06T03:04:34.222Z",
+    "totalAmount": 87.98,
+    "currency": "USD",
+    "address": "cansas, texas, amerika serikat",
+    "paymentMethod": "cod",
+    "deliveryMethod": "instant",
+    "notes": "Aku laku"
+  },
+  {
+    "id": 1741236033744,
+    "userId": "10b0e927-6d07-42b7-9fd9-a9155ecc2c0c",
+    "products": [
+      {
+        "productData": {
+          "product_id": "SKU-10240007",
+          "category_id": "CAT-0001",
+          "category": "Men's Fashion",
+          "title": "Men's Winter Top Jacket",
+          "path": "/products/mens-winter-top-jacket-10240007",
+          "description": "Conquer the cold with our Men's Winter Top Jacket. This heavy-duty jacket is designed to keep you warm and comfortable in the harshest winter conditions. It's made from high-quality materials and features a classic design for a timeless look.",
+          "specification": [
+            "Material: Insulated fabric",
+            "Color: Charcoal Blue",
+            "Lining: Quilted",
+            "Closure: Zipper and button"
+          ],
+          "images": {
+            "800x900": [
+              "https://nexton-cdn.github.io/products/800x900/product-7-1.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-7-2.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-7-3.webp",
+              "https://nexton-cdn.github.io/products/800x900/product-7-4.webp"
+            ],
+            "320x360": [
+              "https://nexton-cdn.github.io/products/320x360/product-7-1.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-7-2.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-7-3.webp",
+              "https://nexton-cdn.github.io/products/320x360/product-7-4.webp"
+            ],
+            "160x180": [
+              "https://nexton-cdn.github.io/products/160x180/product-7-1.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-7-2.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-7-3.webp",
+              "https://nexton-cdn.github.io/products/160x180/product-7-4.webp"
+            ]
+          },
+          "stock": [
+            {
+              "type": "S",
+              "quantity": 10
+            },
+            {
+              "type": "M",
+              "quantity": 12
+            },
+            {
+              "type": "L",
+              "quantity": 15
+            },
+            {
+              "type": "XL",
+              "quantity": 8
+            },
+            {
+              "type": "XXL",
+              "quantity": 6
+            }
+          ],
+          "price": {
+            "currency": "USD",
+            "withoutDiscount": 99.99,
+            "withDiscount": 84.99,
+            "discountPercentage": 15
+          },
+          "performance": {
+            "sales": 16,
+            "ratingAverage": 5,
+            "ratingCount": 2
+          },
+          "keywords": [
+            "men's fashion",
+            "men's winter top jacket",
+            "heavy-duty outerwear",
+            "warm winter jacket"
+          ]
+        },
+        "variant": "S",
+        "stock": 10,
+        "price": 84.99,
+        "quantity": 1,
+        "timeAddToCart": 1741236021582
+      }
+    ],
+    "status": "pending",
+    "createdAt": "2025-03-06T04:40:33.744Z",
+    "totalAmount": 85.99,
+    "currency": "USD",
+    "address": "cansas, texas, amerika serikat",
+    "paymentMethod": "cod",
+    "deliveryMethod": "standard",
+    "notes": ""
+  }
+]
