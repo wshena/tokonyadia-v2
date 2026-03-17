@@ -1,14 +1,22 @@
-import { getAllProducts } from '@/lib/db/products';
-import { NextRequest, NextResponse } from 'next/server';
+import { getAllProducts, getFilteredProducts } from '@/lib/db/products'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
-  // ambil query params, fallback ke default
-  const page   = Math.max(1, parseInt(searchParams.get('page')   ?? '1'))
-  const limit  = Math.max(1, parseInt(searchParams.get('limit')  ?? '20'))
+  const page     = Math.max(1, parseInt(searchParams.get('page')     ?? '1'))
+  const limit    = Math.max(1, parseInt(searchParams.get('limit')    ?? '20'))
+  const keyword  = searchParams.get('keyword')  ?? undefined
+  const category = searchParams.get('category') ?? undefined
+  const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined
+  const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined
+  const sortBy   = searchParams.get('sortBy')   ?? undefined
 
-  const result = getAllProducts(page, limit)
+  // Kalau ada filter, pakai getFilteredProducts
+  // Kalau tidak, pakai getAllProducts biasa
+  const result = (keyword || category || minPrice || maxPrice || sortBy)
+    ? getFilteredProducts({ keyword, category, minPrice, maxPrice, sortBy: sortBy as any, page, limit })
+    : getAllProducts(page, limit)
 
   return NextResponse.json({
     success: true,

@@ -109,7 +109,7 @@ const FooterLinks = () => {
 
 const Footer = () => {
   return (
-    <footer className='w-full'>
+    <footer className='w-full bg-white'>
       <ContentContainer>
         <div className="flex flex-col lg:flex-row gap-7.5 lg:gap-0 justify-between">
           <FooterLinks />

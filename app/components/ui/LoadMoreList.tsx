@@ -3,7 +3,6 @@
 import React, { useState, useCallback } from 'react'
 import Button from './button/Button'
 
-
 interface PaginationMeta {
   total: number
   page: number
@@ -14,17 +13,14 @@ interface PaginationMeta {
 }
 
 interface LoadMoreListProps<T> {
-  // Fungsi fetcher — terima page, return data + pagination
   fetcher: (page: number) => Promise<{ data: T[], pagination: PaginationMeta }>
-  // Komponen UI untuk render tiap item
   renderItem: (item: T, index: number) => React.ReactNode
-  // Data awal dari server (opsional, untuk SSR)
+  renderSkeleton?: () => React.ReactNode
+  skeletonCount?: number
   initialData?: T[]
   initialPagination?: PaginationMeta
-  // Styling
   className?: string
   gridClassName?: string
-  // Label button
   loadMoreLabel?: string
   emptyLabel?: string
 }
@@ -32,6 +28,8 @@ interface LoadMoreListProps<T> {
 function LoadMoreList<T>({
   fetcher,
   renderItem,
+  renderSkeleton,
+  skeletonCount = 10,
   initialData = [],
   initialPagination,
   className,
@@ -46,13 +44,12 @@ function LoadMoreList<T>({
 
   const loadMore = useCallback(async () => {
     const nextPage = (pagination?.page ?? 0) + 1
-
     setIsLoading(true)
     setError(null)
 
     try {
       const result = await fetcher(nextPage)
-      setItems(prev => [...prev, ...result.data])    // ← append ke list
+      setItems(prev => [...prev, ...result.data])
       setPagination(result.pagination)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Gagal memuat data')
@@ -67,17 +64,24 @@ function LoadMoreList<T>({
 
   return (
     <div className={className}>
-      {/* Grid Items */}
       <div className={gridClassName}>
+        {/* Items */}
         {items.map((item, index) => renderItem(item, index))}
+
+        {/* Skeleton — muncul saat loading */}
+        {isLoading && renderSkeleton && (
+          Array.from({ length: skeletonCount }).map((_, i) => (
+            <React.Fragment key={`skeleton-${i}`}>
+              {renderSkeleton()}
+            </React.Fragment>
+          ))
+        )}
       </div>
 
-      {/* Error */}
       {error && (
         <p className="text-center text-red-500 mt-4">{error}</p>
       )}
 
-      {/* Load More Button */}
       {pagination?.hasNextPage && (
         <div className="flex flex-col items-center gap-2 mt-8">
           <Button
@@ -90,7 +94,6 @@ function LoadMoreList<T>({
         </div>
       )}
 
-      {/* Semua item sudah ditampilkan */}
       {!pagination?.hasNextPage && items.length > 0 && (
         <p className="text-center text-sm text-gray-400 mt-8">
           Semua {pagination?.total} item sudah ditampilkan

@@ -9,6 +9,7 @@ import Link from 'next/link';
 import CarouselButton from './CarouselButton';
 import { AngleLeftIcon, AngleRightIcon } from '../../icon';
 import { cn } from '@/lib/utils';
+import CarouselDots from './CarouselDots';
 
 const BannerImages = [
   '/homeCarousel/item.jpg.webp',
@@ -125,6 +126,17 @@ const BannerCarousel = () => {
         >
           <AngleRightIcon size={30} color='black' />
         </CarouselButton>
+      </div>
+
+      {/* carousel dots */}
+      <div className="absolute bottom-0 w-full h-10 flex items-center justify-center">
+        <CarouselDots
+          store={carouselStore}
+          className="space-x-4"
+          dotClassName="w-3 h-3 bg-white/70 rounded-full cursor-pointer"
+          activeDotClassName="w-3 h-3 bg-white rounded-full cursor-pointer"
+          customCount={BannerImages?.length}
+        />
       </div>
     </div>
   )
