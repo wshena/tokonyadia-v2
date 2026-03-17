@@ -11,13 +11,6 @@ import { AngleLeftIcon, AngleRightIcon } from '../../icon';
 import { cn } from '@/lib/utils';
 import CarouselDots from './CarouselDots';
 
-const BannerImages = [
-  '/homeCarousel/item.jpg.webp',
-  '/homeCarousel/item1.jpg',
-  '/homeCarousel/item2.jpg',
-  '/homeCarousel/item3.jpg',
-]
-
 const Banner = ({ image }: { image: string }) => {
   return (
     <div className='w-full h-full rounded-[10px] md:rounded-[20px]'>
@@ -26,7 +19,7 @@ const Banner = ({ image }: { image: string }) => {
   )
 }
 
-const BannerCarousel = () => {
+const BannerCarousel = ({images}:{images:string[]}) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [slideWidth, setSlideWidth] = useState(0)
 
@@ -66,7 +59,7 @@ const BannerCarousel = () => {
   );
 
   const carouselItems = useMemo(() => (
-    BannerImages.map((item, idx) => (
+    images.map((item, idx) => (
       <CarouselItem key={`${item} + ${idx}`} onClick={() => {}} className='rounded-[10px] md:rounded-[20px]'>
         <Link href={'#'} className='rounded-md'>
           <div className='relative w-full aspect-1280/600 md:aspect-1208/300'>
@@ -135,7 +128,7 @@ const BannerCarousel = () => {
           className="space-x-4"
           dotClassName="w-3 h-3 bg-white/70 rounded-full cursor-pointer"
           activeDotClassName="w-3 h-3 bg-white rounded-full cursor-pointer"
-          customCount={BannerImages?.length}
+          customCount={images?.length}
         />
       </div>
     </div>

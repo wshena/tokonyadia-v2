@@ -5,6 +5,13 @@ import ProductLoadMore from '../components/ui/ProductLoadMore';
 import { getAllCategories } from "@/lib/db/categories";
 import { getAllCollections } from "@/lib/db/collections";
 
+const HomeBannerImages = [
+  '/homeCarousel/item.jpg.webp',
+  '/homeCarousel/item1.jpg',
+  '/homeCarousel/item2.jpg',
+  '/homeCarousel/item3.jpg',
+]
+
 export default async function Home() {
 
   const { data: initialProductData, pagination } = getAllProducts(1, 20)
@@ -17,7 +24,7 @@ export default async function Home() {
     <main className="w-full pt-10 md:pt-20">
       <ContentContainer>
         <div className='space-y-10'>
-          <BannerCarousel />
+          <BannerCarousel images={HomeBannerImages} />
           <ProductLoadMore initialData={initialProductData} initialPagination={pagination} />
         </div>
       </ContentContainer>
