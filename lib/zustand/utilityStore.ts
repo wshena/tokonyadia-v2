@@ -9,12 +9,17 @@ interface UtilityStateProps {
     label: string
     type: AlertType
   }
+  cartButtonHover: boolean,
+  modalBackground: boolean,
+
   toggleMenu: () => void
   closeMenu: () => void
   toggleModal: () => void
   closeModal: () => void
 
   setAlert: (alert: { label: string; type: AlertType }) => void
+  setCartButtonHover: (hover: boolean) => void
+  setModalBackground: (background: boolean) => void
 }
 
 export const useUtilityStore = create<UtilityStateProps>((set) => ({
@@ -24,6 +29,8 @@ export const useUtilityStore = create<UtilityStateProps>((set) => ({
     label: '',
     type: 'info',
   },
+  cartButtonHover: false,
+  modalBackground: false,
   
   toggleMenu: () => set((state) => ({ isMenuOpen: !state.isMenuOpen })),
   closeMenu: () => set({ isMenuOpen: false }),
@@ -32,4 +39,6 @@ export const useUtilityStore = create<UtilityStateProps>((set) => ({
   closeModal: () => set({ isModalOpen: false }),
 
   setAlert: (alert) => set({ alert }),
+  setCartButtonHover: (hover: boolean) => set({ cartButtonHover: hover }),
+  setModalBackground: (background: boolean) => set({ modalBackground: background }),
 }))

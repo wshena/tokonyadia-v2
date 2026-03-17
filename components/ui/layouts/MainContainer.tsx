@@ -9,7 +9,7 @@ interface MainContainerProps {
 }
 
 const MainContainer = ({ children }: MainContainerProps) => {
-  const alert = useUtilityStore(state => state.alert)
+  const alert = useUtilityStore(state => state.alert)  
 
   return (
     <div className="relative min-h-screen w-full">
