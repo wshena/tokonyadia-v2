@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { createCarouselStore, CarouselStore } from '@/lib/zustand/store';
+import { createCarouselStore, CarouselStore } from '@/lib/zustand/utilityStore';
 
 export const useCarousel = (initialState?: {
   itemsPerView?: number;

@@ -1,4 +1,7 @@
+import ProductDescription from '@/components/ProductDescription';
+import ProductImage from '@/components/ProductImage';
 import Breadcrumb, { BreadcrumbItem } from '@/components/ui/Breadcrumb';
+import AddToCartCard from '@/components/ui/card/AddToCartCard';
 import { ProductCard } from '@/components/ui/card/ProductCard';
 import ContentContainer from '@/components/ui/layouts/ContentContainer';
 import { getAllProducts, getProductById, getRelatedProducts } from '@/lib/db/products';
@@ -30,8 +33,21 @@ const page = async ({params}:{params:{id:string; slug:string}}) => {
     <main className='w-full pt-10 md:pt-20'>
       <ContentContainer>
         <div className="flex flex-col gap-8">
+          {/* breadcrumb */}
           <Breadcrumb items={breadcrumbs} className="mb-4" />
-          <h1>product name: {product?.title}</h1>
+
+          {/* product data display */}
+          <div className="flex flex-col md:flex-row flex-nowrap md:flex-wrap lg:flex-nowrap items-start justify-between color-black relative gap-7.5 md:gap-0 mb-12.5">
+
+            {/* product image */}
+            <ProductImage imageArray={product?.images?.["800x900"]} />
+
+            {/* product description */}
+            <ProductDescription product={product} />
+
+            {/* add to cart card */}
+            <AddToCartCard productData={product} />
+          </div>
           
           {/* related product */}
           <div className="space-y-5">

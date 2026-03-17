@@ -19,7 +19,7 @@ import { IoCartOutline } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
 import { HiMagnifyingGlass } from "react-icons/hi2";
 import { AiOutlineMenuFold } from "react-icons/ai";
-import { MdCancelPresentation } from "react-icons/md";
+import { MdOutlineCancel } from "react-icons/md";
 import { GoPersonFill } from "react-icons/go";
 import { FaRegTrashCan, FaHeart } from "react-icons/fa6";
 
@@ -102,7 +102,7 @@ export const ArrowUpIcon = ({size, color, className}: IconProps) => {
 }
 
 export const CancelIcon = ({size, color, className}: IconProps) => {
-  return <MdCancelPresentation size={size} color={color} className={className} />
+  return <MdOutlineCancel size={size} color={color} className={className} />
 }
 
 export const MenuIcon = ({size, color, className}: IconProps) => {

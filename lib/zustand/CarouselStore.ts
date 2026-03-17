@@ -1,18 +1,5 @@
-import { create } from 'zustand'
+import {create} from 'zustand'
 
-// utility
-export const useUtilityStore = create((set) => ({
-  isMenuOpen: false,
-  isModalOpen: false,
-  
-  toggleMenu: () => set((state:any) => ({ isMenuOpen: !state.isMenuOpen })),
-  closeMenu: () => set({ isMenuOpen: false }),
-  
-  toggleModal: () => set((state:any) => ({ isModalOpen: !state.isModalOpen })),
-  closeModal: () => set({ isModalOpen: false }),
-}))
-
-// carousel state
 export interface CarouselState {
   // State
   currentIndex: number;

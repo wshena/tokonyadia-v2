@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { CarouselStore } from '@/lib/zustand/store';
+import { CarouselStore } from '@/lib/zustand/utilityStore';
 
 interface CarouselProps {
   children: React.ReactNode[];

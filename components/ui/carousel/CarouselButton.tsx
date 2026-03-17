@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CarouselStore } from '@/lib/zustand/store';
+import { CarouselStore } from '@/lib/zustand/utilityStore';
 
 interface CarouselButtonProps {
   direction: 'prev' | 'next';

@@ -1,4 +1,4 @@
-import { createCarouselStore, CarouselStore } from '@/lib/zustand/store';
+import { CarouselStore, createCarouselStore } from '@/lib/zustand/CarouselStore';
 import { useRef } from 'react';
 
 // Map untuk menyimpan store instances berdasarkan ID
