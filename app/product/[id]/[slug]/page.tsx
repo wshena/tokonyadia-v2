@@ -27,8 +27,6 @@ const page = async ({params}:{params:{id:string; slug:string}}) => {
   // all product
   const allProduct = getAllProducts(1, 12)
 
-  console.log(allProduct)
-
   return (
     <main className='w-full pt-10 md:pt-20'>
       <ContentContainer>

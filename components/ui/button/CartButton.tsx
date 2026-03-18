@@ -41,7 +41,7 @@ const CartButton = ({ withBackground = true }: CartButtonProps) => {
       {/* Background overlay — diklik untuk tutup */}
       {cartButtonHover && withBackground && (
         <div
-          className="fixed top-0 left-0 w-full h-screen bg-black/80 z-40"
+          className="fixed top-20 left-0 w-full h-screen bg-black/50 z-40"
           onMouseEnter={handleMouseLeave}  // ← mouse masuk overlay = tutup
         />
       )}
@@ -69,7 +69,7 @@ const CartButton = ({ withBackground = true }: CartButtonProps) => {
         {/* Cart Modal */}
         {cartButtonHover && (
           <div
-            className="absolute top-7.5 -right-25 z-50"
+            className="absolute top-10 -right-25 z-50"
             onMouseEnter={handleMouseEnter}  // ← mouse masuk modal = batalkan close
             onMouseLeave={handleMouseLeave}  // ← mouse keluar modal = tutup
           >

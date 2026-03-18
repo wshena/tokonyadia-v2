@@ -44,7 +44,7 @@ const CartModal = () => {
   const currency = carts?.products[0]?.productData?.price?.currency
 
   return (
-    <div className="z-50 hidden lg:block p-4 w-87.5 h-fit rounded-[10px] bg-white text-black shadow-lg">
+    <div className="z-50 hidden lg:block p-4 w-87.5 h-fit rounded-[10px] bg-white text-black shadow-xl">
       <div className="flex flex-col items-center gap-5">
         {carts?.products?.length <= 0 ? (
           <IfEmpty />

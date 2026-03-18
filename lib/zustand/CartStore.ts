@@ -22,6 +22,7 @@ interface CartState {
   addToCart: (product: Product) => void
   removeFromCart: (payload: { id: string; variant: string }) => void
   tryAddToCart: (product: Product) => void
+  updateQuantity: (payload: { id: string; variant: string; quantity: number }) => void
 }
 
 // Helper — tampilkan alert lalu clear otomatis setelah 3 detik
@@ -99,5 +100,23 @@ export const useCartStore = create<CartState>((set, get) => ({
 
     addToCart(product)
     showAlert('Product berhasil disimpan di keranjang!', 'success')
-  }
+  },
+
+  updateQuantity: ({ id, variant, quantity }) => set((state) => {
+    const products = [...state.carts.products]
+    const index = products.findIndex(
+      item =>
+        item.productData?.product_id === id &&
+        item.variant === variant
+    )
+
+    if (index === -1) return state
+
+    // Jangan melebihi stock
+    const clampedQuantity = Math.min(Math.max(1, quantity), products[index].stock)
+
+    products[index] = { ...products[index], quantity: clampedQuantity }
+
+    return { carts: { ...state.carts, products } }
+  }),
 }))
