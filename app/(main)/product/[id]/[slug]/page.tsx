@@ -5,6 +5,7 @@ import AddToCartCard from '@/components/ui/card/AddToCartCard';
 import { ProductCard } from '@/components/ui/card/ProductCard';
 import ContentContainer from '@/components/ui/layouts/ContentContainer';
 import { getAllProducts, getProductById, getRelatedProducts } from '@/lib/db/products';
+import { createSlug } from '@/lib/utils';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -19,10 +20,12 @@ const page = async ({params}:{params:{id:string; slug:string}}) => {
 
   const breadcrumbs: BreadcrumbItem[] = [
     { label: 'Beranda', href: '/' },
-    { label: 'Produk', href: '/products' },
-    { label: product?.category ?? '', href: `/categories/${product?.category}` },
+    { label: 'Produk'},
+    { label: product?.category ?? '', href: `/categories/${product?.category_id}/${createSlug(product?.category)}` },
     { label: product?.title ?? '' },
   ]
+
+  console.log(product?.category_id)
 
   // all product
   const allProduct = getAllProducts(1, 12)
