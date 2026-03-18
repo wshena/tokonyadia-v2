@@ -101,6 +101,18 @@ export const getRelatedProducts = (productId: string, limit: number = 10) => {
     // .slice(0, limit)
 }
 
+// Get related products dengan pagination
+export const getRelatedProductsPaginated = (productId: string, page: number = 1, limit: number = 10) => {
+  const current = getProductById(productId)
+  if (!current) return paginate([], page, limit)
+
+  const related = products.filter(p =>
+    p.category === current.category && p.product_id !== productId
+  )
+
+  return paginate(related, page, limit)
+}
+
 // Filter gabungan (search + category + price + sort)
 export interface FilterParams {
   keyword?:  string

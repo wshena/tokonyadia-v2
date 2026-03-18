@@ -51,7 +51,7 @@ const page = async ({params}:{params:{id:string; slug:string}}) => {
           <div className="space-y-5">
             <div className="flex items-center justify-between">
               <h2 className='font-bold text-[1.5rem] lg:text-[2rem]'>Produk terkait</h2>
-              <Link href={`/related/${product?.product_id}`} className="text-green-500 hover:text-green-700">
+              <Link href={`/related/${product?.product_id}/${slug}`} className="text-green-500 hover:text-green-700">
                 Lihat semua
               </Link>
             </div>

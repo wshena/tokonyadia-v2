@@ -20,7 +20,7 @@ const Copyright = () => {
   return (
     <div className="flex items-center justify-center">
       <div className="w-[250px] md:w-[300px] xl:w-[460px] h-fit flex flex-col items-center gap-[20px]">
-        <div className="bg-center bg-cover relative w-full h-[223px]">
+        <div className="bg-center bg-cover relative w-full h-[200px] md:h-[223px]">
           <Image src={'/image/footer_img.png'} alt='footer-image' fill />
         </div>
         <div className="flex items-center gap-[15px]">

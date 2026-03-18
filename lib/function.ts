@@ -76,6 +76,11 @@ export const GetProductById = async (id: string) => {
   return fetcher(`/api/products/${id}`, {}, 'get');
 };
 
+// GET /api/products/[id]/related
+export const GetRelatedProducts = async (id: string, params?: FetcherParams) => {
+  return fetcher(`/api/products/${id}/related`, params, 'get');
+};
+
 // ===== CATEGORIES =====
 
 export const GetAllCategories = async (params?: FetcherParams) => {

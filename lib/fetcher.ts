@@ -13,6 +13,7 @@ import {
   SearchCollections,
   GetCollectionsByProduct,
   GetCollectionById,
+  GetRelatedProducts,
 } from '@/lib/function'
 
 // ===== PRODUCTS =====
@@ -29,6 +30,12 @@ export interface ProductFilterParams {
   maxPrice?: number
   sortBy?:   'price_asc' | 'price_desc' | 'popular' | 'rating'
   limit?:    number
+}
+
+export const relatedProductFetcher = (productId: string) => {
+  return async (page: number) => {
+    return GetRelatedProducts(productId, { page, limit: 10 })
+  }
 }
 
 export const filteredProductFetcher = (filterParams: ProductFilterParams) => {
