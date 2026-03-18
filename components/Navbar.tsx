@@ -5,6 +5,7 @@ import Logo from './Logo'
 import SearchForm from './SearchForm'
 import Button from './ui/button/Button'
 import CartButton from './ui/button/CartButton'
+import CategoryButton from './ui/button/CategoryButton'
 
 const CartAndLoginLayout = () => {
   const router = useRouter()
@@ -22,7 +23,7 @@ const LogoCategorySearchLayout = () => {
   return (
     <div className="flex items-center gap-3">
       <Logo />
-      <Button label='Kategori' variant='ghost' className='hidden md:block text-gray-600 font-medium text-md hover:bg-gray-200' />
+      <CategoryButton />
       <SearchForm />
     </div>
   )
