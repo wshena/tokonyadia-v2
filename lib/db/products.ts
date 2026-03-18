@@ -44,6 +44,12 @@ export const getProductById = (id: string): Product | null => {
   return products.find(p => p.product_id === id) ?? null
 }
 
+// Ambil products berdasarkan array of product_id (untuk hasil dari category/collection)
+export const getProductsByIds = (ids: string[], page: number = 1, limit: number = 20) => {
+  const filtered = products.filter(p => ids.includes(p.product_id))
+  return paginate(filtered, page, limit)
+}
+
 // Get product by slug
 export const getProductBySlug = (title: string): Product | null => {
   const slug = createSlug(title)

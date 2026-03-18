@@ -45,6 +45,11 @@ const fetcher = async (
   }
 };
 
+// ===== GLOBAL SEARCH =====
+export const GlobalSearch = async (section: 'products' | 'categories' | 'collections', keyword: string, params?: FetcherParams) => {
+  return fetcher('/api/search', { section, keyword, ...params }, 'get')
+}
+
 // ===== PRODUCTS =====
 
 export const GetAllProducts = async (params?: FetcherParams) => {

@@ -11,7 +11,10 @@ const CartProductCard = ({ product }: { product: any }) => {
   const updateQuantity = useCartStore(state => state.updateQuantity)
 
   const image            = product?.productData?.images["800x900"]?.[0]
-  const price            = product?.price
+  const price =
+    product?.productData?.price?.withDiscount && product?.productData?.price?.withDiscount > 0
+      ? product.productData.price.withDiscount
+      : product.productData.price.withoutDiscount
   const product_subtotal = Number((product?.quantity * price).toFixed(2))
 
   const handleIncrease = () => {
@@ -45,7 +48,7 @@ const CartProductCard = ({ product }: { product: any }) => {
           <div className="flex items-center justify-between w-full">
             <h2 className="text-[.9rem] line-clamp-2">{product?.productData?.title}</h2>
             <span className="text-[.8rem] shrink-0 ml-2">
-              {product?.productData?.price?.currency} {product_subtotal}
+              {product?.productData?.price?.currency} {price}
             </span>
           </div>
 
