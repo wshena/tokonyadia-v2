@@ -35,16 +35,16 @@ const CategoryModal = () => {
     if (!selectedCategory) return
 
     setIsLoading(true)
-    const { data } = getProductsByIds(selectedCategory.products, 1, 8)
+    const { data } = getProductsByIds(selectedCategory.products, 1, 100)
     setProducts(data)
     setIsLoading(false)
   }, [selectedCategory])
 
   return (
-    <div className="flex w-[700px] lg:w-[950px] xl:w-[1000px] 2xl:w-[1300px] h-[450px] bg-white shadow-xl border border-gray-200 rounded-xl overflow-hidden p-3">
+    <div className="flex w-175 lg:w-237.5 xl:w-250 2xl:w-325 h-112.5 bg-white shadow-xl border border-gray-200 rounded-xl overflow-hidden p-3">
 
       {/* Side Tabs — daftar kategori */}
-      <div className="w-[180px] shrink-0 border-r border-gray-100 overflow-y-auto">
+      <div className="w-45 shrink-0 border-r border-gray-100 overflow-y-auto">
         {categories.map((category) => (
           <button
             key={category.category_id}
@@ -93,7 +93,7 @@ const CategoryModal = () => {
                   ))
               }
               {!isLoading && products.length === 0 && (
-                <div className="col-span-4 flex items-center justify-center h-[200px]">
+                <div className="col-span-4 flex items-center justify-center h-50">
                   <p className="text-gray-400 text-sm">Tidak ada produk</p>
                 </div>
               )}

@@ -7,7 +7,7 @@ const SmallImage = ({ imageArray, index, handleClick }: { imageArray: any, index
     <div className="flex items-center justify-between flex-wrap w-full">
       {imageArray.map((item: any, idx: number) => (
         <button key={idx} onClick={() => handleClick(idx)}>
-          <div className={`relative w-15 h-15 rounded-[5px] ${idx === index && 'border border-mainGreen'}`}>
+          <div className={`cursor-pointer border border-gray-300 relative w-15 h-15 rounded-[5px] ${idx === index && 'border-green-500'}`}>
             <Image src={item} alt='product-image' fill className='rounded-[5px] object-cover' />
           </div>
         </button>
