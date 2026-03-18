@@ -3,15 +3,16 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const product = getProductById(params.id)
+  const id = (await params).id
+  const product = getProductById(id)
 
   if (!product) {
     return NextResponse.json({ success: false, message: 'Product not found' }, { status: 404 })
   }
 
-  const related = getRelatedProducts(params.id, 10)
+  const related = getRelatedProducts(id, 10)
 
   return NextResponse.json({
     success: true,

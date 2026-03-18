@@ -1,14 +1,19 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
 import Logo from './Logo'
 import SearchForm from './SearchForm'
 import Button from './ui/button/Button'
 import CartButton from './ui/button/CartButton'
 
 const CartAndLoginLayout = () => {
+  const router = useRouter()
+
   return (
     <div className="flex items-center gap-3">
       <CartButton />
-      <Button size='sm' label='Masuk' variant='outline' className='hidden md:block text-green-600 border-green-600' />
-      <Button size='sm' label='Daftar' variant='primary' className='hidden md:block bg-green-600 text-white hover:bg-green-600' />
+      <Button onClick={() => router.push('/auth/login')} size='sm' label='Masuk' variant='outline' className='hidden md:block text-green-600 border-green-600' />
+      <Button onClick={() => router.push('/auth/register')} size='sm' label='Daftar' variant='primary' className='hidden md:block bg-green-600 text-white hover:bg-green-600' />
     </div>
   )
 }
