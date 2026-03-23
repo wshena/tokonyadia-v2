@@ -4,9 +4,7 @@ import ContentContainer from '@/components/ui/layouts/ContentContainer'
 import ProductLoadMore from '@/components/ProductLoadMore'
 import { getAllCategories, getCategoryById, getCategoryByPath } from '@/lib/db/categories'
 import { getProductsByIds } from '@/lib/db/products'
-import { createSlug } from '@/lib/utils'
 import { notFound } from 'next/navigation'
-import React from 'react'
 import CategoryCardLoadMore from '@/components/CategoryCardLoadMore'
 
 const page = async ({ params }: { params: Promise<{ id: string, slug: string }> }) => {
