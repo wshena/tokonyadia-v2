@@ -14,6 +14,7 @@ import {
   GetCollectionsByProduct,
   GetCollectionById,
   GetRelatedProducts,
+  GetRandomProducts,
 } from '@/lib/function'
 
 // ===== PRODUCTS =====
@@ -64,6 +65,10 @@ export const sortedProductFetcher = (sortBy: string) => {
 
 export const productByIdFetcher = async (id: string) => {
   return GetProductById(id)
+}
+
+export const randomProductFetcher = async (page: number) => {
+  return GetRandomProducts({ page, limit: 20 })
 }
 
 // ===== CATEGORIES =====

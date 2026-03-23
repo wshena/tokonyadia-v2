@@ -55,7 +55,7 @@ const LoginForm = () => {
 
   return (
     <form onSubmit={handleLogin}>
-      <div className="w-[300px] md:w-fit p-4 md:p-[1.3rem] rounded-[10px] border shadow-lg">
+      <div className="w-[300px] md:w-fit p-4 md:p-[1.3rem] rounded-[10px] border border-gray-300 shadow-lg">
         <div className="flex flex-col items-center w-full gap-5">
 
           {/* Heading */}

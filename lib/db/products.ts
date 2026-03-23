@@ -39,6 +39,12 @@ export const getAllProducts = (page: number = 1, limit: number = 20) => {
   return paginate(products, page, limit)
 }
 
+// Get random products dengan pagination
+export const getRandomProducts = (page: number = 1, limit: number = 20) => {
+  const shuffled = [...products].sort(() => Math.random() - 0.5)
+  return paginate(shuffled, page, limit)
+}
+
 // Get product by ID
 export const getProductById = (id: string): Product | null => {
   return products.find(p => p.product_id === id) ?? null

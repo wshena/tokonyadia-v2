@@ -86,6 +86,11 @@ export const GetRelatedProducts = async (id: string, params?: FetcherParams) => 
   return fetcher(`/api/products/${id}/related`, params, 'get');
 };
 
+// GET /api/products?random=true
+export const GetRandomProducts = async (params?: FetcherParams) => {
+  return fetcher('/api/products', { random: true, ...params }, 'get')
+}
+
 // ===== CATEGORIES =====
 
 export const GetAllCategories = async (params?: FetcherParams) => {

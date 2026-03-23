@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import Button from './button/Button'
+import Button from './ui/button/Button'
 
 interface PaginationMeta {
   total: number

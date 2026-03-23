@@ -282,9 +282,7 @@ const page = () => {
     <div className="w-full relative">
       {/* Background Image */}
       <div className="flex items-center justify-center w-full h-screen">
-        <div className="w-[500px] h-[600px]">
-          <Image src="/image/login-bg.png" alt="login-image" fill />
-        </div>
+          <Image src="/image/login-bg.png" alt="login-image" width={700} height={700} />
       </div>
 
       {/* Content — absolute overlay */}

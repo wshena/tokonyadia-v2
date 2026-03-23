@@ -1,6 +1,6 @@
 import CustomBanner from '@/components/CustomBanner';
 import ContentContainer from '@/components/ui/layouts/ContentContainer';
-import RelatedProductLoadMore from '@/components/ui/RelatedProductLoadMore';
+import RelatedProductLoadMore from '@/components/RelatedProductLoadMore';
 import { getRelatedProducts } from '@/lib/db/products';
 import React from 'react'
 

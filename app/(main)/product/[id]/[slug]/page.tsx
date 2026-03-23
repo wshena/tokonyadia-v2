@@ -4,7 +4,7 @@ import Breadcrumb, { BreadcrumbItem } from '@/components/ui/Breadcrumb';
 import AddToCartCard from '@/components/ui/card/AddToCartCard';
 import { ProductCard } from '@/components/ui/card/ProductCard';
 import ContentContainer from '@/components/ui/layouts/ContentContainer';
-import { getAllProducts, getProductById, getRelatedProducts } from '@/lib/db/products';
+import { getAllProducts, getProductById, getRandomProducts, getRelatedProducts } from '@/lib/db/products';
 import { createSlug } from '@/lib/utils';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -25,10 +25,9 @@ const page = async ({params}:{params:{id:string; slug:string}}) => {
     { label: product?.title ?? '' },
   ]
 
-  console.log(product?.category_id)
 
-  // all product
-  const allProduct = getAllProducts(1, 12)
+  // random product
+  const randomProduct = getRandomProducts(12)
 
   return (
     <main className='w-full pt-10 md:pt-20'>
@@ -74,7 +73,7 @@ const page = async ({params}:{params:{id:string; slug:string}}) => {
               </Link>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {allProduct?.data?.map((product) => (
+              {randomProduct?.data?.map((product) => (
                 <ProductCard key={product.product_id} {...product} />
               ))}
             </div>

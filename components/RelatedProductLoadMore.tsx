@@ -2,8 +2,8 @@
 
 import { relatedProductFetcher } from '@/lib/fetcher'   // ← import dari fetcher
 import LoadMoreList from './LoadMoreList'
-import { ProductCard } from './card/ProductCard'
-import { ProductCardSkeleton } from './card/ProductCardSkeleton'
+import { ProductCard } from './ui/card/ProductCard'
+import { ProductCardSkeleton } from './ui/card/ProductCardSkeleton'
 
 interface Props {
   productId: string

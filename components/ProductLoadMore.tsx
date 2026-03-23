@@ -2,8 +2,8 @@
 
 import LoadMoreList from './LoadMoreList'
 import { GetAllProducts } from '@/lib/function'
-import { ProductCard } from './card/ProductCard'
-import { ProductCardSkeleton } from './card/ProductCardSkeleton'
+import { ProductCard } from './ui/card/ProductCard'
+import { ProductCardSkeleton } from './ui/card/ProductCardSkeleton'
 
 const fetcher = async (page: number) => {
   return GetAllProducts({ page, limit: 20 })
@@ -19,7 +19,7 @@ export default function ProductLoadMore({ initialData, initialPagination }: Prop
     <LoadMoreList
       fetcher={fetcher}
       renderItem={(product) => (
-        <ProductCard key={product.product_id} {...product} />
+        <ProductCard key={`${product.product_id} - ${product.title}`} {...product} />
       )}
       renderSkeleton={() => <ProductCardSkeleton />}
       skeletonCount={20}

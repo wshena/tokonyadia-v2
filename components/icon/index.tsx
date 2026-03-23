@@ -22,6 +22,11 @@ import { AiOutlineMenuFold } from "react-icons/ai";
 import { MdOutlineCancel } from "react-icons/md";
 import { GoPersonFill } from "react-icons/go";
 import { FaRegTrashCan, FaHeart } from "react-icons/fa6";
+import { BiSolidCategoryAlt } from "react-icons/bi";
+
+export const CategoryIcon = ({size, color, className}: IconProps) => {
+  return <BiSolidCategoryAlt size={size} color={color} className={className} />
+}
 
 export const AngleLeftIcon = (props: IconProps) => <FaAngleLeft {...props} />;
 export const AngleRightIcon = (props: IconProps) => <FaAngleRight {...props} />;

@@ -1,4 +1,4 @@
-import { getAllProducts, getFilteredProducts } from '@/lib/db/products'
+import { getAllProducts, getFilteredProducts, getRandomProducts } from '@/lib/db/products'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -11,16 +11,16 @@ export async function GET(request: NextRequest) {
   const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined
   const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined
   const sortBy   = searchParams.get('sortBy')   ?? undefined
+  const random   = searchParams.get('random') === 'true'  // ← tambah param random
 
-  // Kalau ada filter, pakai getFilteredProducts
-  // Kalau tidak, pakai getAllProducts biasa
+  if (random) {
+    const result = getRandomProducts(page, limit)
+    return NextResponse.json({ success: true, ...result, message: 'Products fetched successfully' }, { status: 200 })
+  }
+
   const result = (keyword || category || minPrice || maxPrice || sortBy)
     ? getFilteredProducts({ keyword, category, minPrice, maxPrice, sortBy: sortBy as any, page, limit })
     : getAllProducts(page, limit)
 
-  return NextResponse.json({
-    success: true,
-    ...result,
-    message: 'Products fetched successfully'
-  }, { status: 200 })
+  return NextResponse.json({ success: true, ...result, message: 'Products fetched successfully' }, { status: 200 })
 }
