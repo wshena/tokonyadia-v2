@@ -4,6 +4,7 @@ import { useUtilityStore } from '@/lib/zustand/utilityStore'
 import React from 'react'
 import Alert from '../feedback/Alert'
 import ModalContainer from '../modals/ModalContainer'
+import RouteLoadingBar from '../feedback/RouteLoadingBar'
 
 interface MainContainerProps {
   children: React.ReactNode
@@ -18,6 +19,8 @@ const MainContainer = ({ children }: MainContainerProps) => {
 
   return (
     <div className="relative min-h-screen w-full">
+      <RouteLoadingBar />
+
       {/* Alert — tampil di semua halaman */}
       {alert.label && (
         <Alert

@@ -46,7 +46,7 @@ const Alert = ({ label, type, duration = 5000 }: AlertProps) => {
   if (!label) return null    // ← tidak render jika label kosong
 
   return (
-    <div className="fixed w-full flex justify-center top-12.5 left-0 z-50 px-4">
+    <div className="fixed w-full flex justify-center top-12.5 left-0 z-80 px-4">
       <div className={cn(
         'flex items-center gap-3 px-4 py-3 rounded-lg shadow-md w-fit',
         alertStyles[type]
