@@ -1,10 +1,20 @@
+import type { ReactNode } from 'react'
 import { create } from 'zustand'
 
 type AlertType = 'success' | 'error' | 'warning' | 'info'
 
+type ModalOptions = {
+  showOverlay?: boolean
+  closeOnOverlayClick?: boolean
+  overlayClassName?: string
+  contentClassName?: string
+}
+
 interface UtilityStateProps {
   isMenuOpen: boolean
   isModalOpen: boolean
+  modalContent: ReactNode | null
+  modalOptions: ModalOptions
   alert: {
     label: string
     type: AlertType
@@ -15,6 +25,7 @@ interface UtilityStateProps {
 
   toggleMenu: () => void
   closeMenu: () => void
+  openModal: (content: ReactNode, options?: ModalOptions) => void
   toggleModal: () => void
   closeModal: () => void
 
@@ -27,6 +38,13 @@ interface UtilityStateProps {
 export const useUtilityStore = create<UtilityStateProps>((set) => ({
   isMenuOpen: false,
   isModalOpen: false,
+  modalContent: null,
+  modalOptions: {
+    showOverlay: true,
+    closeOnOverlayClick: true,
+    overlayClassName: '',
+    contentClassName: '',
+  },
   alert: {
     label: '',
     type: 'info',
@@ -38,8 +56,30 @@ export const useUtilityStore = create<UtilityStateProps>((set) => ({
   toggleMenu: () => set((state) => ({ isMenuOpen: !state.isMenuOpen })),
   closeMenu: () => set({ isMenuOpen: false }),
   
+  openModal: (content, options = {}) =>
+    set({
+      isModalOpen: true,
+      modalContent: content,
+      modalOptions: {
+        showOverlay: true,
+        closeOnOverlayClick: true,
+        overlayClassName: '',
+        contentClassName: '',
+        ...options,
+      },
+    }),
   toggleModal: () => set((state) => ({ isModalOpen: !state.isModalOpen })),
-  closeModal: () => set({ isModalOpen: false }),
+  closeModal: () =>
+    set({
+      isModalOpen: false,
+      modalContent: null,
+      modalOptions: {
+        showOverlay: true,
+        closeOnOverlayClick: true,
+        overlayClassName: '',
+        contentClassName: '',
+      },
+    }),
 
   setAlert: (alert) => set({ alert }),
   setCartButtonHover: (hover: boolean) => set({ cartButtonHover: hover }),

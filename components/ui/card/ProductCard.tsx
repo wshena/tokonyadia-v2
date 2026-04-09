@@ -20,6 +20,7 @@ export const ProductCard = (product: any) => {
               src={product?.images["800x900"]?.[0]}
               alt={product?.title}
               fill
+              sizes=''
               loading='lazy'
               onError={() => setImgError(true)}
               onLoad={(e) => {

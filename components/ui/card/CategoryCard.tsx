@@ -8,7 +8,7 @@ const CategoryCard = ({category}:{category: any}) => {
   const slug = createSlug(category.title);
 
   return (
-    <Link href={`/categories/${id}/${slug}`} className='p-3 rounded-lg bg-white text-black border border-gray-300 hover:shadow-md transition-shadow'>
+    <Link href={`/categories/${id}/${slug}`} className='w-full inline-flex p-3 rounded-lg bg-white text-black border border-gray-300 hover:shadow-md transition-shadow'>
       <div className="flex items-center gap-2">
         <CategoryIcon size={20} color='black'  />
         <span className='capitalize'>{category.title}</span>

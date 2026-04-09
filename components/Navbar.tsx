@@ -31,12 +31,14 @@ const LogoCategorySearchLayout = () => {
 
 const Navbar = () => {
   return (
-    <nav className='z-10 fixed top-0 left-0 w-full bg-white text-black px-5 py-3 border-b border-gray-100'>
-      <div className="flex items-center justify-between">
-        <LogoCategorySearchLayout />
-        <CartAndLoginLayout />
-      </div>
-    </nav>
+    <header>
+      <nav className='z-10 fixed top-0 left-0 w-full bg-white text-black px-5 py-3 border-b border-gray-100'>
+        <div className="flex items-center justify-between">
+          <LogoCategorySearchLayout />
+          <CartAndLoginLayout />
+        </div>
+      </nav>
+    </header>
   )
 }
 
