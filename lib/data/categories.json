@@ -196,7 +196,7 @@
   },
   {
     "category_id": "CAT-0102",
-    "title": "Home",
+    "title": "Hardware",
     "thumbnail": "https://picsum.photos/seed/3gr9W/400/400?grayscale",
     "path": "/categories/home",
     "products": [
@@ -272,7 +272,7 @@
   },
   {
     "category_id": "CAT-0104",
-    "title": "Home",
+    "title": "Home Living",
     "thumbnail": "https://picsum.photos/seed/8IaXx5/400/400?grayscale",
     "path": "/categories/home",
     "products": [
@@ -424,7 +424,7 @@
   },
   {
     "category_id": "CAT-0108",
-    "title": "Home",
+    "title": "Electronics",
     "thumbnail": "https://picsum.photos/seed/qpufa81W/400/400?grayscale",
     "path": "/categories/home",
     "products": [

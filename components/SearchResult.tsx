@@ -1,9 +1,9 @@
 'use client'
 
 import { GlobalSearch } from '@/lib/function'
-import LoadMoreList from '@/components/ui/LoadMoreList'
 import { ProductCard } from '@/components/ui/card/ProductCard'
 import { ProductCardSkeleton } from '@/components/ui/card/ProductCardSkeleton'
+import LoadMoreList from './LoadMoreList'
 
 interface SearchSection {
   data: any[]
