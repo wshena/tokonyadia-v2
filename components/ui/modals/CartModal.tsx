@@ -37,24 +37,30 @@ const IfEmpty = () => {
 const CartModal = () => {
   const router     = useRouter()
   const { carts }  = useCartStore()
+  const cartProducts = carts?.products ?? []
+  const shouldScrollProductList = cartProducts.length > 3
 
-  const subtotal = carts?.products?.length > 0
-    ? Number(calculateTotalPrice(carts.products).toFixed(2))
+  const subtotal = cartProducts.length > 0
+    ? Number(calculateTotalPrice(cartProducts).toFixed(2))
     : 0
-  const currency = carts?.products[0]?.productData?.price?.currency
+  const currency = cartProducts[0]?.productData?.price?.currency
 
   return (
     <div className="z-50 hidden lg:block p-4 w-87.5 h-fit rounded-[10px] bg-white text-black shadow-xl">
       <div className="flex flex-col items-center gap-5">
-        {carts?.products?.length <= 0 ? (
+        {cartProducts.length <= 0 ? (
           <IfEmpty />
         ) : (
           <>
             <LinkToCart />
 
             {/* Product List */}
-            <div className="flex flex-col items-start gap-3.75 w-full">
-              {carts?.products?.map((item: any) => (
+            <div
+              className={`flex w-full flex-col items-start gap-3.75 ${
+                shouldScrollProductList ? 'max-h-[360px] overflow-y-auto pr-2' : ''
+              }`}
+            >
+              {cartProducts.map((item: any) => (
                 <CartProductCard
                   key={`${item?.productData?.product_id} - ${item?.variant}`}
                   product={item}
