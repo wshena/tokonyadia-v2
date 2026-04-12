@@ -30,7 +30,7 @@ const UserProfileButton = () => {
           contentClassName: 'w-full max-w-md',
         })
       }
-      className="hidden items-center gap-3 rounded-full border border-gray-200 bg-white px-3 py-2 transition-colors hover:border-green-200 hover:bg-green-50 lg:flex"
+      className="cursor-pointer hidden items-center gap-3 rounded-full border border-gray-200 bg-white px-3 py-2 transition-colors hover:border-green-200 hover:bg-green-50 lg:flex"
     >
       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-100 font-semibold text-green-700">
         {initial}

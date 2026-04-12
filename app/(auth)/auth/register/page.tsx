@@ -2,6 +2,7 @@
 
 import { EyeIcon, EyeSlashIcon } from '@/components/icon'
 import Logo from '@/components/Logo'
+import { createUser, type UserProfile } from '@/lib/db/user'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
 import { createClient } from '@/utils/supabase/client'
 import Image from 'next/image'
@@ -11,17 +12,9 @@ import React, { useState } from 'react'
 
 const formStyle = 'w-full rounded-[10px] border border-gray-300 p-2 focus:outline-none'
 
-interface FormData {
+interface FormData extends UserProfile {
   email: string
   password: string
-  username: string
-  firstName: string
-  lastName: string
-  sex: string
-  phoneNumber: string
-  address: string
-  date: string
-  profilePicture: string
 }
 
 const RegisterForm = () => {
@@ -67,7 +60,7 @@ const RegisterForm = () => {
     setError('')
 
     const supabase = createClient()
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
       options: {
@@ -92,6 +85,37 @@ const RegisterForm = () => {
       return
     }
 
+    if (!data.user?.id) {
+      setError('User berhasil dibuat di autentikasi, tetapi id user tidak ditemukan.')
+      setAlert({
+        label: 'User berhasil dibuat di autentikasi, tetapi profil gagal diproses.',
+        type: 'error',
+      })
+      return
+    }
+
+    try {
+      await createUser(data.user.id, {
+        username: formData.username,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        sex: formData.sex,
+        phoneNumber: formData.phoneNumber,
+        address: formData.address,
+        date: formData.date,
+        profilePicture: formData.profilePicture,
+      })
+    } catch (profileError) {
+      const message =
+        profileError instanceof Error
+          ? profileError.message
+          : 'Profil user gagal disimpan ke database.'
+
+      setError(message)
+      setAlert({ label: message, type: 'error' })
+      return
+    }
+
     setAlert({
       label: 'Pendaftaran berhasil. Silakan cek email atau langsung login jika konfirmasi email dimatikan.',
       type: 'success',
@@ -100,8 +124,8 @@ const RegisterForm = () => {
   }
 
   return (
-    <div className="w-[300px] rounded-[10px] border border-gray-300 bg-white px-[1.4rem] py-[3rem] shadow-lg md:w-[500px]">
-      <div className="mb-[30px] flex flex-col items-start gap-1">
+    <div className="w-75 rounded-[10px] border border-gray-300 bg-white px-[1.4rem] py-12 shadow-lg md:w-125">
+      <div className="mb-7.5 flex flex-col items-start gap-1">
         <h1 className="text-[1rem] font-bold md:text-[1.5rem]">Daftar ke Tokonyadia</h1>
         <h2 className="text-[.9rem]">
           <span>Sudah ada akun? </span>
@@ -113,7 +137,7 @@ const RegisterForm = () => {
 
       <div className="mb-6 flex items-center gap-2">
         <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${step === 1 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>1</div>
-        <div className="h-[2px] flex-1 bg-gray-200" />
+        <div className="h-0.5 flex-1 bg-gray-200" />
         <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${step === 2 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>2</div>
       </div>
 
@@ -130,7 +154,7 @@ const RegisterForm = () => {
               autoComplete="off"
             />
 
-            <div className="flex w-full items-center justify-between gap-[10px]">
+            <div className="flex w-full items-center justify-between gap-2.5">
               <input
                 type="text"
                 placeholder="First Name"
@@ -161,7 +185,7 @@ const RegisterForm = () => {
               autoComplete="off"
             />
 
-            <div className="flex items-center gap-[10px]">
+            <div className="flex items-center gap-2.5">
               <div className="flex items-center gap-2">
                 <label htmlFor="male" className="cursor-pointer text-[1rem]">Laki-laki</label>
                 <input
@@ -284,15 +308,15 @@ const Page = () => {
   return (
     <div className="w-screen">
       <div className="flex min-h-screen w-full items-center justify-center py-10">
-        <div className="flex flex-col items-center gap-[30px]">
+        <div className="flex flex-col items-center gap-7.5">
           <Logo />
-          <div className="flex flex-col items-center gap-x-[40px] md:flex-row">
+          <div className="flex flex-col items-center gap-y-10 xl:gap-y-0 xl:gap-x-10 xl:flex-row">
             <Image
               src="/image/register_icon_new.png"
               alt="register-image"
               width={450}
               height={450}
-              className="hidden lg:block"
+              className="hidden xl:block"
             />
             <RegisterForm />
           </div>

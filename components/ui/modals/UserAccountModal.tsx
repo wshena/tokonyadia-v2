@@ -59,7 +59,7 @@ const UserAccountModal = () => {
   }
 
   return (
-    <div className="w-full max-w-md rounded-[28px] border border-gray-200 bg-white p-5 shadow-2xl">
+    <div className="w-full max-h-[calc(100vh-2rem)] max-w-md rounded-[28px] border border-gray-200 bg-white p-5 shadow-2xl">
       <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-4">
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
@@ -77,14 +77,14 @@ const UserAccountModal = () => {
         <button
           type="button"
           onClick={closeModal}
-          className="rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100"
+          className="cursor-pointer rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100"
           aria-label="Tutup modal akun"
         >
           <CancelIcon size={20} color="black" />
         </button>
       </div>
 
-      <div className="mt-5 space-y-3">
+      <div className="mt-5 space-y-3 max-h-62.5 overflow-y-auto">
         {menuItems.map(item => (
           <Link
             key={item.href}
@@ -111,7 +111,7 @@ const UserAccountModal = () => {
         <button
           type="button"
           onClick={handleLogout}
-          className="mt-4 w-full rounded-xl bg-white px-4 py-3 text-sm font-semibold text-green-700 transition-colors hover:bg-green-100"
+          className="cursor-pointer mt-4 w-full rounded-xl bg-white px-4 py-3 text-sm font-semibold text-green-700 transition-colors hover:bg-green-100"
         >
           Keluar dari Akun
         </button>
