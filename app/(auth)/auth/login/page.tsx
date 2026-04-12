@@ -3,24 +3,29 @@
 import { EyeIcon, EyeSlashIcon, GoogleIcon } from '@/components/icon'
 import Logo from '@/components/Logo'
 import Button from '@/components/ui/button/Button'
+import { useAuthStore } from '@/lib/zustand/authStore'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
+import { createClient } from '@/utils/supabase/client'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
 const LoginForm = () => {
-  const router   = useRouter()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const setAlert = useUtilityStore(state => state.setAlert)
+  const getUser = useAuthStore(state => state.getUser)
+  const getSession = useAuthStore(state => state.getSession)
 
-  const [email, setEmail]       = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passClick, setPassClick] = useState(false)
-  const [error, setError]       = useState<string | null>(null)
-  const [loading, setLoading]   = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  const isValidEmail = (value: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -39,28 +44,35 @@ const LoginForm = () => {
     setError(null)
     setLoading(true)
 
-    // const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    // console.log('Login response:', data)
+    const supabase = createClient()
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
     setLoading(false)
 
-    // if (error) {
-    //   setError(error.message)
-    //   setAlert({ label: error.message, type: 'error' })
-    //   return
-    // }
+    if (loginError) {
+      setError('Email atau password tidak sesuai.')
+      setAlert({ label: loginError.message, type: 'error' })
+      return
+    }
 
-    router.push('/')
+    getSession(data.session)
+    getUser(data.user)
+    setAlert({ label: 'Login berhasil. Selamat datang kembali!', type: 'success' })
+
+    const nextPath = searchParams.get('next')
+    router.push(nextPath || '/')
+    router.refresh()
   }
 
   return (
     <form onSubmit={handleLogin}>
-      <div className="w-[300px] md:w-fit p-4 md:p-[1.3rem] rounded-[10px] border border-gray-300 shadow-lg">
-        <div className="flex flex-col items-center w-full gap-5">
-
-          {/* Heading */}
+      <div className="w-[300px] rounded-[10px] border border-gray-300 p-4 shadow-lg md:w-fit md:p-[1.3rem]">
+        <div className="flex w-full flex-col items-center gap-5">
           <div className="flex flex-col items-center gap-1">
-            <h1 className="font-bold text-[1.6rem]">Masuk ke Akun</h1>
+            <h1 className="text-[1.6rem] font-bold">Masuk ke Akun</h1>
             <p className="text-[1rem]">
               Belum punya akun?{' '}
               <Link href="/auth/register" className="text-green-500">
@@ -69,43 +81,45 @@ const LoginForm = () => {
             </p>
           </div>
 
-          {/* Google Button */}
-          <Button variant={'icon'} color='white' icon={<GoogleIcon size={25} />} className='bg-white w-full border border-gray-300 flex items-center justify-center gap-3' label='Google' />
+          <Button
+            type="button"
+            variant="icon"
+            color="white"
+            icon={<GoogleIcon size={25} />}
+            className="flex w-full items-center justify-center gap-3 border border-gray-300 bg-white"
+            label="Google"
+            disabled
+          />
 
-          {/* Divider */}
-          <div className="flex items-center justify-between gap-[10px] w-full">
+          <div className="flex w-full items-center justify-between gap-[10px]">
             <span className="h-[2px] w-[170px] bg-gray-300" />
             <span className="text-[.8rem]">atau</span>
             <span className="h-[2px] w-[170px] bg-gray-300" />
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <p className="text-red-500 text-[0.9rem]">{error}</p>
-          )}
+          {error && <p className="text-[0.9rem] text-red-500">{error}</p>}
 
-          {/* Email Input */}
           <input
             type="email"
             name="email"
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="p-[.6rem] rounded-[10px] border border-gray-300 focus:outline-none w-full"
-            autoComplete="off"
+            className="w-full rounded-[10px] border border-gray-300 p-[.6rem] focus:outline-none"
+            autoComplete="email"
             required
             placeholder="Masukkan email Anda"
           />
 
-          {/* Password Input */}
-          <div className="flex items-center justify-between w-full p-[.6rem] rounded-[10px] border border-gray-300">
+          <div className="flex w-full items-center justify-between rounded-[10px] border border-gray-300 p-[.6rem]">
             <input
               type={passClick ? 'text' : 'password'}
               name="password"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="border-none focus:outline-none w-full"
+              className="w-full border-none focus:outline-none"
+              autoComplete="current-password"
               required
               placeholder="Masukkan password"
             />
@@ -114,39 +128,32 @@ const LoginForm = () => {
               onClick={() => setPassClick(!passClick)}
               className="p-1"
             >
-              {passClick
-                ? <EyeSlashIcon size={20} color="black" />
-                : <EyeIcon size={20} color="black" />
-              }
+              {passClick ? <EyeSlashIcon size={20} color="black" /> : <EyeIcon size={20} color="black" />}
             </button>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className={`w-full h-[50px] rounded-[10px] text-center border-2 font-bold transition-colors ${
-              loading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-green-500 text-white'
+            className={`h-[50px] w-full rounded-[10px] border-2 text-center font-bold transition-colors ${
+              loading ? 'cursor-not-allowed bg-gray-400' : 'bg-green-500 text-white'
             }`}
           >
-            {loading ? 'Loading...' : 'Masuk'}
+            {loading ? 'Memproses...' : 'Masuk'}
           </button>
-
         </div>
       </div>
     </form>
   )
 }
 
-const page = () => {
+const Page = () => {
   return (
     <div className="w-screen">
-      <div className="flex items-center justify-center w-full h-screen">
+      <div className="flex h-screen w-full items-center justify-center">
         <div className="flex flex-col items-center gap-[30px]">
           <Logo />
-          <div className="flex flex-col md:flex-row items-center gap-x-[40px]">
+          <div className="flex flex-col items-center gap-x-[40px] md:flex-row">
             <Image
               src="/image/register_icon_new.png"
               alt="login-image"
@@ -162,4 +169,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

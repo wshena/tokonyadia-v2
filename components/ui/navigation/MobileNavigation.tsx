@@ -3,8 +3,10 @@
 import Link from 'next/link'
 import { type FormEvent, useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { AvatarIcon, CancelIcon, CartIcon, CategoryIcon, SearchIcon } from '@/components/icon'
+import { AvatarIcon, CancelIcon, CartIcon, CategoryIcon, PenIcon, SearchIcon } from '@/components/icon'
+import { useAuthStore } from '@/lib/zustand/authStore'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
+import { createClient } from '@/utils/supabase/client'
 import Button from '../button/Button'
 import { cn } from '@/lib/utils'
 
@@ -29,16 +31,24 @@ const featuredLinks = [
   },
 ]
 
-const accountLinks = [
+const guestLinks = [
   { label: 'Masuk', href: '/auth/login' },
   { label: 'Daftar', href: '/auth/register' },
+]
+
+const userLinks = [
+  { label: 'Pesanan Saya', href: '/order' },
+  { label: 'Pengaturan Akun', href: '/user/settings' },
 ]
 
 const MobileNavigation = () => {
   const pathname = usePathname()
   const router = useRouter()
+  const user = useAuthStore(state => state.user)
+  const logoutUser = useAuthStore(state => state.logoutUser)
   const isMenuOpen = useUtilityStore((state) => state.isMenuOpen)
   const closeMenu = useUtilityStore((state) => state.closeMenu)
+  const setAlert = useUtilityStore((state) => state.setAlert)
   const [searchInput, setSearchInput] = useState('')
 
   useEffect(() => {
@@ -72,6 +82,27 @@ const MobileNavigation = () => {
     closeMenu()
     router.push(`/search?keyword=${encodeURIComponent(searchInput.trim())}`)
   }
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    const { error } = await supabase.auth.signOut()
+
+    if (error) {
+      setAlert({ label: error.message, type: 'error' })
+      return
+    }
+
+    logoutUser()
+    closeMenu()
+    setAlert({ label: 'Berhasil keluar dari akun.', type: 'success' })
+    router.push('/')
+    router.refresh()
+  }
+
+  const fullName = [user?.user_metadata?.first_name, user?.user_metadata?.last_name]
+    .filter(Boolean)
+    .join(' ')
+  const displayName = fullName || user?.user_metadata?.username || user?.email || 'Akun Tokonyadia'
 
   return (
     <div
@@ -131,7 +162,7 @@ const MobileNavigation = () => {
           <div className="mb-6 rounded-3xl bg-green-600 p-5 text-white shadow-lg">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-green-100">Tokonyadia Mobile</p>
             <h3 className="mb-2 text-2xl font-bold leading-tight">Semua kebutuhan belanja dalam satu menu.</h3>
-            <p className="text-sm text-green-50">Mulai dari cari produk, cek kategori, sampai masuk ke akun kamu dengan lebih cepat.</p>
+            <p className="text-sm text-green-50">Mulai dari cari produk, cek kategori, sampai mengelola akunmu dengan lebih cepat.</p>
           </div>
 
           <section className="mb-6">
@@ -166,23 +197,53 @@ const MobileNavigation = () => {
                 <AvatarIcon size={20} color="black" />
               </div>
               <div>
-                <p className="font-semibold text-gray-900">Akun Tokonyadia</p>
-                <p className="text-sm text-gray-500">Masuk untuk menyimpan wishlist dan melacak pesanan.</p>
+                <p className="font-semibold text-gray-900">
+                  {user?.id ? displayName : 'Akun Tokonyadia'}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {user?.id
+                    ? 'Kelola pesanan dan pengaturan akunmu langsung dari sini.'
+                    : 'Masuk untuk menyimpan wishlist dan melacak pesanan.'}
+                </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {accountLinks.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={closeMenu}
-                  className="rounded-xl border border-green-200 px-4 py-3 text-center text-sm font-semibold text-green-700 transition-colors hover:bg-green-50"
+            {user?.id ? (
+              <div className="space-y-3">
+                {userLinks.map(item => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={closeMenu}
+                    className="flex items-center gap-3 rounded-xl border border-green-100 px-4 py-3 text-sm font-semibold text-green-700 transition-colors hover:bg-green-50"
+                  >
+                    <PenIcon size={14} color="#15803d" />
+                    {item.label}
+                  </Link>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-black"
                 >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
+                  Keluar
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {guestLinks.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={closeMenu}
+                    className="rounded-xl border border-green-200 px-4 py-3 text-center text-sm font-semibold text-green-700 transition-colors hover:bg-green-50"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            )}
           </section>
 
           <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">

@@ -2,12 +2,14 @@
 
 import { EyeIcon, EyeSlashIcon } from '@/components/icon'
 import Logo from '@/components/Logo'
+import { useUtilityStore } from '@/lib/zustand/utilityStore'
+import { createClient } from '@/utils/supabase/client'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 
-const formStyle = 'border border-gray-300 p-2 w-full focus:outline-none rounded-[10px]'
+const formStyle = 'w-full rounded-[10px] border border-gray-300 p-2 focus:outline-none'
 
 interface FormData {
   email: string
@@ -24,6 +26,7 @@ interface FormData {
 
 const RegisterForm = () => {
   const router = useRouter()
+  const setAlert = useUtilityStore(state => state.setAlert)
 
   const [step, setStep] = useState(1)
   const [passClick, setPassClick] = useState(false)
@@ -63,65 +66,76 @@ const RegisterForm = () => {
     setLoading(true)
     setError('')
 
-    // const { data, error } = await supabase.auth.signUp({
-    //   email: formData.email,
-    //   password: formData.password,
-    // })
-
-    // if (error) {
-    //   setError(error.message)
-    //   setLoading(false)
-    //   return
-    // }
-
-    // if (data?.user?.id) {
-    //   await createUser(data.user.id, { ...formData })
-    // }
+    const supabase = createClient()
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        data: {
+          username: formData.username,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          sex: formData.sex,
+          phone_number: formData.phoneNumber,
+          address: formData.address,
+          birth_date: formData.date,
+          profile_picture: formData.profilePicture,
+        },
+      },
+    })
 
     setLoading(false)
+
+    if (signUpError) {
+      setError(signUpError.message)
+      setAlert({ label: signUpError.message, type: 'error' })
+      return
+    }
+
+    setAlert({
+      label: 'Pendaftaran berhasil. Silakan cek email atau langsung login jika konfirmasi email dimatikan.',
+      type: 'success',
+    })
     router.push('/auth/login')
   }
 
   return (
-    <div className="w-[300px] md:w-[500px] px-[1.4rem] py-[3rem] bg-white rounded-[10px] border border-gray-300 shadow-lg">
-
-      {/* Header */}
-      <div className="flex flex-col items-start gap-1 mb-[30px]">
-        <h1 className="font-bold text-[1rem] md:text-[1.5rem]">Daftar ke Tokonyadia</h1>
+    <div className="w-[300px] rounded-[10px] border border-gray-300 bg-white px-[1.4rem] py-[3rem] shadow-lg md:w-[500px]">
+      <div className="mb-[30px] flex flex-col items-start gap-1">
+        <h1 className="text-[1rem] font-bold md:text-[1.5rem]">Daftar ke Tokonyadia</h1>
         <h2 className="text-[.9rem]">
           <span>Sudah ada akun? </span>
-          <Link href="/auth/login" className="text-mainGreen">Masuk ke Tokonyadia</Link>
+          <Link href="/auth/login" className="text-mainGreen">
+            Masuk ke Tokonyadia
+          </Link>
         </h2>
       </div>
 
-      {/* Step Indicator */}
-      <div className="flex items-center gap-2 mb-6">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step === 1 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>1</div>
+      <div className="mb-6 flex items-center gap-2">
+        <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${step === 1 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>1</div>
         <div className="h-[2px] flex-1 bg-gray-200" />
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step === 2 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>2</div>
+        <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${step === 2 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>2</div>
       </div>
 
-      {/* ===== STEP 1 ===== */}
       {step === 1 && (
         <form onSubmit={handleStep1Submit}>
-          <div className="flex flex-col items-start gap-5 w-full">
-
-            {/* Username */}
+          <div className="flex w-full flex-col items-start gap-5">
             <input
               type="text"
               placeholder="Username"
               required
+              value={formData.username}
               onChange={(e) => updateFormData({ username: e.target.value })}
               className={formStyle}
               autoComplete="off"
             />
 
-            {/* First & Last Name */}
-            <div className="flex items-center justify-between gap-[10px] w-full">
+            <div className="flex w-full items-center justify-between gap-[10px]">
               <input
                 type="text"
                 placeholder="First Name"
                 required
+                value={formData.firstName}
                 onChange={(e) => updateFormData({ firstName: e.target.value })}
                 className={formStyle}
                 autoComplete="off"
@@ -130,26 +144,26 @@ const RegisterForm = () => {
                 type="text"
                 placeholder="Last Name"
                 required
+                value={formData.lastName}
                 onChange={(e) => updateFormData({ lastName: e.target.value })}
                 className={formStyle}
                 autoComplete="off"
               />
             </div>
 
-            {/* Phone Number */}
             <input
               type="text"
               placeholder="Nomor Handphone"
               required
+              value={formData.phoneNumber}
               onChange={(e) => updateFormData({ phoneNumber: e.target.value })}
               className={formStyle}
               autoComplete="off"
             />
 
-            {/* Jenis Kelamin */}
             <div className="flex items-center gap-[10px]">
               <div className="flex items-center gap-2">
-                <label htmlFor="male" className="text-[1rem] cursor-pointer">Laki-laki</label>
+                <label htmlFor="male" className="cursor-pointer text-[1rem]">Laki-laki</label>
                 <input
                   type="radio"
                   name="sex"
@@ -161,7 +175,7 @@ const RegisterForm = () => {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <label htmlFor="female" className="text-[1rem] cursor-pointer">Perempuan</label>
+                <label htmlFor="female" className="cursor-pointer text-[1rem]">Perempuan</label>
                 <input
                   type="radio"
                   name="sex"
@@ -174,17 +188,16 @@ const RegisterForm = () => {
               </div>
             </div>
 
-            {/* Alamat */}
             <textarea
               placeholder="Alamat"
               required
+              value={formData.address}
               onChange={(e) => updateFormData({ address: e.target.value })}
               className={formStyle}
               autoComplete="off"
               rows={5}
             />
 
-            {/* Tanggal Lahir */}
             <div className="flex items-center gap-5">
               <label htmlFor="date" className="text-sm">Tanggal Lahir:</label>
               <input
@@ -192,49 +205,47 @@ const RegisterForm = () => {
                 name="date"
                 id="date"
                 required
+                value={formData.date}
                 onChange={(e) => updateFormData({ date: e.target.value })}
-                className="border border-gray-300 p-1 rounded-[10px] focus:outline-none"
+                className="rounded-[10px] border border-gray-300 p-1 focus:outline-none"
               />
             </div>
-
           </div>
 
           <button
             type="submit"
-            className="cursor-pointer mt-6 w-full bg-green-500 text-white px-4 py-2 rounded-[10px]"
+            className="mt-6 w-full cursor-pointer rounded-[10px] bg-green-500 px-4 py-2 text-white"
           >
             Selanjutnya
           </button>
         </form>
       )}
 
-      {/* ===== STEP 2 ===== */}
       {step === 2 && (
         <form onSubmit={handleStep2Submit}>
-          <div className="flex flex-col items-start gap-5 w-full">
+          <div className="flex w-full flex-col items-start gap-5">
+            {error && <p className="text-sm text-red-500">{error}</p>}
 
-            {/* Error */}
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-
-            {/* Email */}
             <input
               type="email"
               placeholder="Alamat Email"
               required
+              value={formData.email}
               onChange={(e) => updateFormData({ email: e.target.value })}
               className={formStyle}
-              autoComplete="off"
+              autoComplete="email"
             />
 
-            {/* Password */}
-            <div className="flex items-center justify-between w-full p-[.6rem] rounded-[10px] border border-gray-300">
+            <div className="flex w-full items-center justify-between rounded-[10px] border border-gray-300 p-[.6rem]">
               <input
                 type={passClick ? 'text' : 'password'}
                 name="password"
                 id="password"
+                value={formData.password}
                 onChange={(e) => updateFormData({ password: e.target.value })}
-                className="border-none focus:outline-none w-full"
+                className="w-full border-none focus:outline-none"
                 required
+                autoComplete="new-password"
                 placeholder="Masukkan password"
               />
               <button
@@ -242,58 +253,53 @@ const RegisterForm = () => {
                 onClick={() => setPassClick(!passClick)}
                 className="p-1"
               >
-                {passClick
-                  ? <EyeSlashIcon size={20} color="black" />
-                  : <EyeIcon size={20} color="black" />
-                }
+                {passClick ? <EyeSlashIcon size={20} color="black" /> : <EyeIcon size={20} color="black" />}
               </button>
             </div>
-
           </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between mt-5">
+          <div className="mt-5 flex justify-between">
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="cursor-pointer bg-gray-500 text-white px-4 py-2 rounded-[10px]"
+              className="cursor-pointer rounded-[10px] bg-gray-500 px-4 py-2 text-white"
             >
               Kembali
             </button>
             <button
               type="submit"
               disabled={loading}
-              className={`cursor-pointer px-4 py-2 rounded-[10px] text-white transition-colors ${
-                loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500'
-              }`}
+              className="cursor-pointer rounded-[10px] bg-green-500 px-4 py-2 text-white disabled:cursor-not-allowed disabled:bg-gray-400"
             >
-              {loading ? 'Loading...' : 'Daftar'}
+              {loading ? 'Mendaftarkan...' : 'Daftar'}
             </button>
           </div>
         </form>
       )}
-
     </div>
   )
 }
 
-const page = () => {
+const Page = () => {
   return (
-    <div className="w-full relative">
-      {/* Background Image */}
-      <div className="flex items-center justify-center w-full h-screen">
-          <Image src="/image/login-bg.png" alt="login-image" width={700} height={700} />
-      </div>
-
-      {/* Content — absolute overlay */}
-      <div className="absolute top-0 left-0 w-full h-fit 2xl:h-screen flex items-center justify-center py-[100px]">
-        <div className="flex flex-col items-center gap-[40px]">
+    <div className="w-screen">
+      <div className="flex min-h-screen w-full items-center justify-center py-10">
+        <div className="flex flex-col items-center gap-[30px]">
           <Logo />
-          <RegisterForm />
+          <div className="flex flex-col items-center gap-x-[40px] md:flex-row">
+            <Image
+              src="/image/register_icon_new.png"
+              alt="register-image"
+              width={450}
+              height={450}
+              className="hidden lg:block"
+            />
+            <RegisterForm />
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-export default page
+export default Page
