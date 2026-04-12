@@ -1,0 +1,195 @@
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useCartStore } from '@/lib/zustand/CartStore'
+import { useUtilityStore } from '@/lib/zustand/utilityStore'
+import { calculateTotal } from '@/lib/db/order'
+import ContentContainer from '@/components/ui/layouts/ContentContainer'
+import axios from 'axios'
+
+interface Props {
+  user: any
+  profile: any
+}
+
+const CheckoutClient = ({ user, profile }: Props) => {
+  const router  = useRouter()
+  const { carts, setCart } = useCartStore()
+  const setAlert = useUtilityStore(state => state.setAlert)
+
+  const defaultAddress = profile?.address ?? ''
+
+  const [shippingAddress, setShippingAddress] = useState(defaultAddress)
+  const [notes, setNotes]                     = useState('')
+  const [isLoading, setIsLoading]             = useState(false)
+
+  const products  = carts.products
+  const total     = calculateTotal(products)
+  const currency  = products[0]?.productData?.price?.currency ?? 'USD'
+
+  // Redirect kalau cart kosong
+  useEffect(() => {
+    if (products.length === 0) {
+      router.replace('/order')
+    }
+  }, [products.length, router])
+
+  const handleCheckout = async () => {
+    if (!shippingAddress.trim()) {
+      setAlert({ label: 'Alamat pengiriman wajib diisi', type: 'error' })
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const { data } = await axios.post('/api/orders', {
+        products,
+        shippingAddress,
+        notes,
+      })
+
+      // Kosongkan cart setelah order berhasil
+      setCart({ id: '', date: '', products: [] })
+
+      setAlert({ label: 'Pesanan berhasil dibuat!', type: 'success' })
+      router.push(`/order`)
+
+    } catch (err: any) {
+      setAlert({
+        label: err?.response?.data?.message ?? 'Gagal membuat pesanan',
+        type: 'error'
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (products.length === 0) return null
+
+  return (
+    <main className="w-full pt-10 md:pt-20">
+      <ContentContainer>
+        <div className="flex flex-col gap-6">
+          <h1 className="text-2xl font-bold">Checkout</h1>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
+
+            {/* Kiri — detail order */}
+            <div className="flex flex-col gap-5">
+
+              {/* Produk */}
+              <section className="rounded-2xl border border-gray-200 bg-white p-5 space-y-4">
+                <h2 className="font-semibold text-lg">Produk yang dipesan</h2>
+                <div className="flex flex-col gap-4 divide-y">
+                  {products.map((item, idx) => {
+                    const image    = item.productData?.images?.["800x900"]?.[0]
+                    const subtotal = Number((item.price * item.quantity).toFixed(2))
+                    return (
+                      <div key={idx} className="flex items-start gap-4 pt-4 first:pt-0">
+                        <div className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden">
+                          <Image src={image} alt={item.productData?.title} fill className="object-cover" />
+                        </div>
+                        <div className="flex flex-col gap-1 flex-1">
+                          <p className="font-medium line-clamp-2">{item.productData?.title}</p>
+                          <p className="text-sm text-gray-500">Variant: {item.variant}</p>
+                          <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                        </div>
+                        <p className="font-semibold shrink-0">{currency} {subtotal}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+
+              {/* Alamat pengiriman */}
+              <section className="rounded-2xl border border-gray-200 bg-white p-5 space-y-3">
+                <h2 className="font-semibold text-lg">Alamat pengiriman</h2>
+                <textarea
+                  value={shippingAddress}
+                  onChange={e => setShippingAddress(e.target.value)}
+                  rows={4}
+                  placeholder="Masukkan alamat pengiriman lengkap..."
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500 transition-colors resize-none"
+                />
+              </section>
+
+              {/* Catatan */}
+              <section className="rounded-2xl border border-gray-200 bg-white p-5 space-y-3">
+                <h2 className="font-semibold text-lg">Catatan <span className="text-gray-400 font-normal text-sm">(opsional)</span></h2>
+                <textarea
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  rows={3}
+                  placeholder="Catatan untuk penjual..."
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500 transition-colors resize-none"
+                />
+              </section>
+
+            </div>
+
+            {/* Kanan — ringkasan order */}
+            <div className="h-fit rounded-2xl border border-gray-200 bg-white p-5 space-y-4 lg:sticky lg:top-24">
+              <h2 className="font-semibold text-lg">Ringkasan pesanan</h2>
+
+              <div className="flex flex-col gap-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Total produk</span>
+                  <span>{products.length} item</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Total qty</span>
+                  <span>{products.reduce((acc, p) => acc + p.quantity, 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Pengiriman</span>
+                  <span className="text-green-600">Gratis</span>
+                </div>
+              </div>
+
+              <div className="border-t pt-4 flex justify-between items-center">
+                <span className="font-semibold">Total</span>
+                <span className="font-bold text-xl text-green-600">{currency} {total}</span>
+              </div>
+
+              {/* Info pembeli */}
+              <div className="rounded-xl bg-gray-50 p-3 text-sm space-y-1">
+                <p className="text-gray-500">Pembeli</p>
+                <p className="font-medium">{user?.user_metadata?.username ?? user?.email}</p>
+                <p className="text-gray-400 text-xs">{user?.email}</p>
+              </div>
+
+              <button
+                onClick={handleCheckout}
+                disabled={isLoading || products.length === 0}
+                className="cursor-pointer w-full py-3 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                    Memproses...
+                  </span>
+                ) : 'Buat Pesanan'}
+              </button>
+
+              <button
+                onClick={() => router.back()}
+                className="cursor-pointer w-full py-3 rounded-xl border border-gray-200 text-gray-600 text-sm hover:bg-gray-50 transition-colors"
+              >
+                Kembali ke cart
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </ContentContainer>
+    </main>
+  )
+}
+
+export default CheckoutClient

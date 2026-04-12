@@ -1,8 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
-import ordersData from '@/lib/data/orders.json'
 import { cn, createSlug } from '@/lib/utils'
+import { getOrdersByUser } from '@/lib/db/order'
+import { createClient } from '@/utils/supabase/server'
 
 type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
 
@@ -28,16 +29,20 @@ type Order = {
   id: number
   products: OrderProduct[]
   status: OrderStatus
-  createdAt: string
-  totalAmount: number
+  created_at: string
+  total_price: number
   currency: string
-  address: string
+  shipping_address: string
   paymentMethod: string
   deliveryMethod: string
   notes: string
 }
 
-const orders = ordersData as Order[]
+const supabase = await createClient()
+const { data: { user } } = await supabase.auth.getUser()
+const orders = user ? await getOrdersByUser(supabase, user.id) : []
+
+console.log(orders)
 
 const statusConfig: Record<
   OrderStatus,
@@ -79,12 +84,17 @@ const formatCurrency = (currency: string, amount: number) => {
   }).format(amount)
 }
 
-const formatDate = (date: string) => {
+const formatDate = (date: string | undefined) => {
+  if (!date) return '-'
+
+  const parsedDate = new Date(date)
+  if (Number.isNaN(parsedDate.getTime())) return '-'
+
   return new Intl.DateTimeFormat('id-ID', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
-  }).format(new Date(date))
+  }).format(parsedDate)
 }
 
 const formatDeliveryMethod = (value: string) => {
@@ -109,15 +119,15 @@ const formatPaymentMethod = (value: string) => {
   }
 }
 
-const totalOrders = orders.length
-const totalItems = orders.reduce((sum, order) => {
-  return sum + order.products.reduce((itemSum, product) => itemSum + product.quantity, 0)
+const totalOrders = orders?.length
+const totalItems = orders?.reduce((sum, order) => {
+  return sum + order?.order_items?.reduce((itemSum:number, product:OrderProduct) => itemSum + product.quantity, 0)
 }, 0)
-const totalSpent = orders.reduce((sum, order) => sum + order.totalAmount, 0)
-const pendingOrders = orders.filter(order => order.status === 'pending').length
+const totalSpent = orders?.reduce((sum, order) => sum + order.total_price, 0)
+const pendingOrders = orders?.filter(order => order.status === 'pending').length
 const sortedOrders = orders
   .slice()
-  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
 const getMostFrequentValue = <T extends string>(values: T[]) => {
   const counter = values.reduce(
@@ -246,9 +256,9 @@ const OrderPage = () => {
           <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="space-y-5">
               {sortedOrders.map(order => {
-                  const orderStatus = statusConfig[order.status] ?? statusConfig.pending
-                  const totalProductQuantity = order.products.reduce(
-                    (sum, product) => sum + product.quantity,
+                  const orderStatus = statusConfig[order.status as OrderStatus] ?? statusConfig.pending
+                  const totalProductQuantity = order?.products?.reduce(
+                    (sum:number, product:OrderProduct) => sum + product.quantity,
                     0
                   )
 
@@ -274,7 +284,7 @@ const OrderPage = () => {
                           </div>
                           <div>
                             <h2 className="text-xl font-semibold text-gray-900">
-                              Pesanan dibuat pada {formatDate(order.createdAt)}
+                              Pesanan dibuat pada {formatDate(order?.created_at)}
                             </h2>
                             <p className="mt-1 text-sm text-gray-600">{orderStatus.description}</p>
                           </div>
@@ -283,7 +293,7 @@ const OrderPage = () => {
                         <div className="rounded-2xl bg-gray-50 px-4 py-3 md:min-w-56">
                           <p className="text-sm text-gray-500">Total pembayaran</p>
                           <p className="mt-1 text-xl font-bold text-green-600">
-                            {formatCurrency(order.currency, order.totalAmount)}
+                            {formatCurrency(order.currency, order.total_price)}
                           </p>
                           <p className="mt-1 text-xs text-gray-500">
                             {totalProductQuantity} item dalam pesanan ini
@@ -292,15 +302,15 @@ const OrderPage = () => {
                       </div>
 
                       <div className="space-y-4 py-5">
-                        {order.products.map(product => (
+                        {order?.order_items?.map((product:any) => (
                           <div
-                            key={`${order.id}-${product.productData.product_id}-${product.variant}`}
+                            key={`${order.id}-${product.product_id}-${product.variant}`}
                             className="flex flex-col gap-4 rounded-2xl border border-gray-200 p-4 md:flex-row"
                           >
                             <div className="relative h-28 w-full overflow-hidden rounded-xl bg-gray-100 md:w-28">
                               <Image
-                                src={product.productData.images['800x900']?.[0]}
-                                alt={product.productData.title}
+                                src={product.image}
+                                alt={product.product_title}
                                 fill
                                 className="object-cover"
                               />
@@ -309,10 +319,10 @@ const OrderPage = () => {
                             <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-start md:justify-between">
                               <div className="space-y-1">
                                 <p className="text-xs font-medium tracking-[0.2em] text-gray-400 uppercase">
-                                  {product.productData.category}
+                                  {product.category}
                                 </p>
                                 <h3 className="text-base font-semibold text-gray-900">
-                                  {product.productData.title}
+                                  {product.title}
                                 </h3>
                                 <div className="flex flex-wrap gap-2 text-sm text-gray-500">
                                   <span>Varian {product.variant}</span>
@@ -323,10 +333,10 @@ const OrderPage = () => {
                               <div className="space-y-2 md:text-right">
                                 <p className="text-sm text-gray-500">Harga produk</p>
                                 <p className="text-lg font-semibold text-gray-900">
-                                  {formatCurrency(product.productData.price.currency, product.price)}
+                                  {formatCurrency(product.price.currency, product.price)}
                                 </p>
                                 <Link
-                                  href={`/product/${product.productData.product_id}/${createSlug(product.productData.title)}`}
+                                  href={`/product/${product.product_id}/${createSlug(product.product_title)}`}
                                   className="inline-flex text-sm font-medium text-green-600 transition-colors hover:text-green-700"
                                 >
                                   Lihat produk
@@ -340,7 +350,7 @@ const OrderPage = () => {
                       <div className="grid gap-4 border-t border-gray-100 pt-5 md:grid-cols-3">
                         <div className="rounded-2xl bg-gray-50 p-4">
                           <p className="text-sm text-gray-500">Alamat pengiriman</p>
-                          <p className="mt-2 text-sm leading-6 text-gray-800">{order.address}</p>
+                          <p className="mt-2 text-sm leading-6 text-gray-800">{order.shipping_address}</p>
                         </div>
                         <div className="rounded-2xl bg-gray-50 p-4">
                           <p className="text-sm text-gray-500">Pembayaran & pengiriman</p>
@@ -371,13 +381,13 @@ const OrderPage = () => {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500">Pesanan terbaru</span>
                     <span className="font-medium text-gray-900">
-                      {formatDate(sortedOrders[0].createdAt)}
+                      {formatDate(sortedOrders[0]?.created_at)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500">Status dominan</span>
                     <span className="font-medium text-amber-600">
-                      {statusConfig[dominantStatus].label}
+                      {statusConfig[dominantStatus as OrderStatus].label}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">

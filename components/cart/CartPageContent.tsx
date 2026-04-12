@@ -123,12 +123,12 @@ const CartPageContent = () => {
             </div>
 
             <Link
-              href="/order"
+              href="/checkout"
               className={cn(
                 'block w-full rounded-lg bg-green-600 px-4 py-2 text-center font-medium text-white transition-colors hover:bg-green-700'
               )}
             >
-              Lanjut ke Order
+              Lanjut checkout
             </Link>
           </div>
         </aside>

@@ -52,7 +52,8 @@ export const getUserById = async (userId: string) => {
 }
 
 export const updateUser = async (userId: string, updates: Partial<UserProfile>) => {
-  const { data, error } = await supabase
+  
+  const { error: profileError } = await supabase
     .from('profiles')
     .update({
       username:        updates.username,
@@ -66,6 +67,21 @@ export const updateUser = async (userId: string, updates: Partial<UserProfile>) 
     })
     .eq('id', userId)
 
-  if (error) throw new Error(error.message)
-  return data
+  if (profileError) throw new Error(profileError.message)
+
+  const { data: authData, error: authError } = await supabase.auth.updateUser({
+    data: {
+      username:     updates.username,
+      first_name:   updates.firstName,
+      last_name:    updates.lastName,
+      sex:          updates.sex,
+      phone_number: updates.phoneNumber,
+      address:      updates.address,
+      birth_date:   updates.date,
+    }
+  })
+
+  if (authError) throw new Error(authError.message)
+
+  return authData
 }

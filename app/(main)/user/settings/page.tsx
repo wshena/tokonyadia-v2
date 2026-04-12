@@ -1,22 +1,27 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
 import { useAuthStore } from '@/lib/zustand/authStore'
+import EditProfileModal from '@/components/ui/modals/EditProfileModal'
 
 const formatDate = (date: string | undefined) => {
   if (!date) return '-'
+
+  const parsedDate = new Date(date)
+  if (Number.isNaN(parsedDate.getTime())) return '-'
 
   return new Intl.DateTimeFormat('id-ID', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
-  }).format(new Date(date))
+  }).format(parsedDate)
 }
 
 const UserSettingsPage = () => {
   const user = useAuthStore(state => state.user)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   const profile = useMemo(() => {
     const metadata = user?.user_metadata ?? {}
@@ -125,7 +130,7 @@ const UserSettingsPage = () => {
                 </div>
 
                 <div className="w-full flex items-center justify-end pt-6">
-                  <button className="cursor-pointer rounded-xl px-4 py-2 text-sm font-semibold text-red-700 bg-red-50 transition-colors hover:bg-red-100">
+                  <button onClick={() => setIsEditModalOpen(true)} className="cursor-pointer rounded-xl px-4 py-2 text-sm font-semibold text-red-700 bg-red-50 transition-colors hover:bg-red-100">
                     Ubah
                   </button>
                 </div>
@@ -215,6 +220,20 @@ const UserSettingsPage = () => {
           </section>
         </div>
       </ContentContainer>
+
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        initialData={{
+          username:    profile.username,
+          firstName:   profile.firstName,
+          lastName:    profile.lastName,
+          gender:      profile.gender,
+          phoneNumber: profile.phoneNumber,
+          address:     profile.address,
+          birthDate:   profile.birthDate,
+        }}
+      />
     </main>
   )
 }
