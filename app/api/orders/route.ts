@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { products, shippingAddress, notes } = body
+  const { products, shippingAddress, notes, paymentMethod, deliveryMethod } = body
 
   if (!products?.length) {
     return NextResponse.json({ success: false, message: 'Cart kosong' }, { status: 400 })
@@ -35,7 +35,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, message: 'Alamat pengiriman wajib diisi' }, { status: 400 })
   }
 
-  const order = await createOrder(supabase, { userId: user.id, products, shippingAddress, notes })
+  const order = await createOrder(supabase, { 
+    userId: user.id, 
+    products, 
+    shippingAddress, 
+    notes,
+    paymentMethod,
+    deliveryMethod
+  })
 
   return NextResponse.json({ success: true, data: order }, { status: 201 })
 }

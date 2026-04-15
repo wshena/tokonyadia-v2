@@ -23,6 +23,8 @@ const CheckoutClient = ({ user, profile }: Props) => {
 
   const [shippingAddress, setShippingAddress] = useState(defaultAddress)
   const [notes, setNotes]                     = useState('')
+  const [paymentMethod, setPaymentMethod]     = useState('brivia')
+  const [deliveryMethod, setDeliveryMethod]   = useState('standard')
   const [isLoading, setIsLoading]             = useState(false)
 
   const products  = carts.products
@@ -49,6 +51,8 @@ const CheckoutClient = ({ user, profile }: Props) => {
         products,
         shippingAddress,
         notes,
+        paymentMethod,
+        deliveryMethod,
       })
 
       // Kosongkan cart setelah order berhasil
@@ -116,16 +120,73 @@ const CheckoutClient = ({ user, profile }: Props) => {
                 />
               </section>
 
-              {/* Catatan */}
+              {/* Metode Pembayaran */}
               <section className="rounded-2xl border border-gray-200 bg-white p-5 space-y-3">
-                <h2 className="font-semibold text-lg">Catatan <span className="text-gray-400 font-normal text-sm">(opsional)</span></h2>
-                <textarea
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
-                  rows={3}
-                  placeholder="Catatan untuk penjual..."
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500 transition-colors resize-none"
-                />
+                <h2 className="font-semibold text-lg">Metode Pembayaran</h2>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="brivia"
+                      checked={paymentMethod === 'brivia'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm">BRI Virtual Account</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="cod"
+                      checked={paymentMethod === 'cod'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm">Cash on Delivery (COD)</span>
+                  </label>
+                </div>
+              </section>
+
+              {/* Metode Pengiriman */}
+              <section className="rounded-2xl border border-gray-200 bg-white p-5 space-y-3">
+                <h2 className="font-semibold text-lg">Metode Pengiriman</h2>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="delivery"
+                      value="standard"
+                      checked={deliveryMethod === 'standard'}
+                      onChange={(e) => setDeliveryMethod(e.target.value)}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm">Standard Delivery (2-3 hari)</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="delivery"
+                      value="instant"
+                      checked={deliveryMethod === 'instant'}
+                      onChange={(e) => setDeliveryMethod(e.target.value)}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm">Instant Courier (1 hari)</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="delivery"
+                      value="same-day"
+                      checked={deliveryMethod === 'same-day'}
+                      onChange={(e) => setDeliveryMethod(e.target.value)}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm">Same Day Delivery</span>
+                  </label>
+                </div>
               </section>
 
             </div>

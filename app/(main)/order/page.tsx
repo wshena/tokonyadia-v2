@@ -1,9 +1,14 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
 import { cn, createSlug } from '@/lib/utils'
 import { getOrdersByUser } from '@/lib/db/order'
-import { createClient } from '@/utils/supabase/server'
+import { useUtilityStore } from '@/lib/zustand/utilityStore'
+import axios from 'axios'
+import { createClient } from '@/utils/supabase/client'
 
 type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
 
@@ -38,7 +43,7 @@ type Order = {
   notes: string
 }
 
-const supabase = await createClient()
+const supabase = createClient()
 const { data: { user } } = await supabase.auth.getUser()
 const orders = user ? await getOrdersByUser(supabase, user.id) : []
 
@@ -146,6 +151,113 @@ const favoritePaymentMethod =
   getMostFrequentValue(orders.map(order => order.paymentMethod)) ?? 'brivia'
 
 const OrderPage = () => {
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
+  const [modalType, setModalType] = useState<'cancel' | 'delete' | null>(null)
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const setAlert = useUtilityStore(state => state.setAlert)
+
+  useEffect(() => {
+    const init = async () => {
+      await fetchOrders()
+    }
+
+    init()
+
+    const channel = supabase
+      .channel('orders-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+        },
+        () => {
+          fetchOrders()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
+  const fetchOrders = async () => {
+    try {
+      const { data } = await axios.get('/api/orders')
+      setOrders(data.data || [])
+    } catch (error) {
+      console.error('Failed to fetch orders:', error)
+      setAlert({ label: 'Gagal memuat pesanan', type: 'error' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const openCancelModal = (orderId: number) => {
+    setModalType('cancel')
+    setSelectedOrderId(orderId)
+  }
+
+  const openDeleteModal = (orderId: number) => {
+    setModalType('delete')
+    setSelectedOrderId(orderId)
+  }
+
+  const closeModal = () => {
+    setModalType(null)
+    setSelectedOrderId(null)
+    setIsProcessing(false)
+  }
+
+  const executeCancel = async () => {
+    if (selectedOrderId === null) return
+    
+    setIsProcessing(true)
+    try {
+      await axios.patch(`/api/orders/${selectedOrderId}`)
+      setAlert({ label: 'Pesanan berhasil dibatalkan', type: 'success' })
+      closeModal()
+      fetchOrders()
+    } catch (error: any) {
+      setAlert({ label: error?.response?.data?.message || 'Gagal membatalkan pesanan', type: 'error' })
+      setIsProcessing(false)
+    }
+  }
+
+  const executeDelete = async () => {
+    if (selectedOrderId === null) return
+    
+    setIsProcessing(true)
+    try {
+      await axios.delete(`/api/orders/${selectedOrderId}`)
+      setAlert({ label: 'Pesanan berhasil dihapus', type: 'success' })
+      closeModal()
+      fetchOrders()
+    } catch (error: any) {
+      setAlert({ label: error?.response?.data?.message || 'Gagal menghapus pesanan', type: 'error' })
+      setIsProcessing(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <main className="w-full pt-10 md:pt-20">
+        <ContentContainer>
+          <div className="flex justify-center items-center min-h-100">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Memuat pesanan...</p>
+            </div>
+          </div>
+        </ContentContainer>
+      </main>
+    )
+  }
+
   if (orders.length <= 0) {
     return (
       <main className="w-full pt-10 md:pt-20">
@@ -298,6 +410,31 @@ const OrderPage = () => {
                           <p className="mt-1 text-xs text-gray-500">
                             {totalProductQuantity} item dalam pesanan ini
                           </p>
+                          {order.status === 'pending' ? (
+                            <div className="mt-3 flex gap-2">
+                              <button
+                                onClick={() => openCancelModal(order.id)}
+                                className="cursor-pointer px-3 py-1 text-xs bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
+                              >
+                                Batalkan
+                              </button>
+                              <button
+                                onClick={() => openDeleteModal(order.id)}
+                                className="cursor-pointer px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                              >
+                                Hapus
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="mt-3 flex gap-2">
+                              <button
+                                onClick={() => openDeleteModal(order.id)}
+                                className="cursor-pointer px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                              >
+                                Hapus
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -409,7 +546,7 @@ const OrderPage = () => {
                       href="/cart"
                       className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 font-medium text-white transition-colors hover:bg-green-700"
                     >
-                      Lanjut Checkout
+                      Lanjut Pembayaran
                     </Link>
                     <Link
                       href="/"
@@ -424,6 +561,81 @@ const OrderPage = () => {
           </section>
         </div>
       </ContentContainer>
+
+      {/* Confirmation Modal */}
+      {modalType && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-lg">
+            {modalType === 'cancel' ? (
+              <>
+                <h2 className="text-lg font-bold text-gray-900">Batalkan Pesanan?</h2>
+                <p className="mt-2 text-sm text-gray-600">
+                  Pesanan yang dibatalkan akan berubah status menjadi "Dibatalkan" dan tidak bisa diproses lagi.
+                </p>
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={closeModal}
+                    disabled={isProcessing}
+                    className="cursor-pointer flex-1 rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={executeCancel}
+                    disabled={isProcessing}
+                    className="cursor-pointer flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                        Memproses...
+                      </>
+                    ) : (
+                      'Batalkan'
+                    )}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-lg font-bold text-gray-900">Hapus Pesanan?</h2>
+                <p className="mt-2 text-sm text-gray-600">
+                  Pesanan akan dihapus secara permanen dan tidak bisa dipulihkan. Apakah Anda yakin?
+                </p>
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={closeModal}
+                    disabled={isProcessing}
+                    className="cursor-pointer flex-1 rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={executeDelete}
+                    disabled={isProcessing}
+                    className="cursor-pointer flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                        Memproses...
+                      </>
+                    ) : (
+                      'Hapus'
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   )
 }
