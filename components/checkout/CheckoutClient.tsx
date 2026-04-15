@@ -7,7 +7,6 @@ import { useCartStore } from '@/lib/zustand/CartStore'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
 import { calculateTotal } from '@/lib/db/order'
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
-import axios from 'axios'
 
 interface Props {
   user: any
@@ -47,13 +46,20 @@ const CheckoutClient = ({ user, profile }: Props) => {
     setIsLoading(true)
 
     try {
-      const { data } = await axios.post('/api/orders', {
-        products,
-        shippingAddress,
-        notes,
-        paymentMethod,
-        deliveryMethod,
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          products,
+          shippingAddress,
+          notes,
+          paymentMethod,
+          deliveryMethod,
+        }),
       })
+      const data = await response.json()
 
       // Kosongkan cart setelah order berhasil
       setCart({ id: '', date: '', products: [] })

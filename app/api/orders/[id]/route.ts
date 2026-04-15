@@ -1,4 +1,4 @@
-import { getOrderById, cancelOrder, deleteOrder } from '@/lib/db/order'
+import { getOrderById, cancelOrder, deleteOrder, updateOrderStatus } from '@/lib/db/order'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -41,12 +41,29 @@ export async function PATCH(
     return NextResponse.json({ success: false, message: 'Order tidak ditemukan' }, { status: 404 })
   }
 
-  // ← tidak bisa cancel kalau sudah delivered
-  if (['delivered', 'cancelled'].includes(order.status)) {
-    return NextResponse.json({ success: false, message: `Order tidak bisa dibatalkan` }, { status: 400 })
+  const body = await request.json()
+  const { status } = body
+
+  if (!status) {
+    return NextResponse.json({ success: false, message: 'Status wajib diisi' }, { status: 400 })
   }
 
-  const updated = await cancelOrder(supabase, id)
+  // ← validasi status yang diizinkan
+  const allowedStatuses = ['pending', 'paid', 'shipped', 'delivered', 'cancelled']
+  if (!allowedStatuses.includes(status)) {
+    return NextResponse.json({ success: false, message: 'Status tidak valid' }, { status: 400 })
+  }
+
+  // ← tidak bisa update status jika sudah delivered atau cancelled (kecuali untuk cancel)
+  if (order.status === 'delivered' && status !== 'delivered') {
+    return NextResponse.json({ success: false, message: 'Order yang sudah delivered tidak bisa diubah statusnya' }, { status: 400 })
+  }
+
+  if (order.status === 'cancelled' && status !== 'cancelled') {
+    return NextResponse.json({ success: false, message: 'Order yang sudah cancelled tidak bisa diubah statusnya' }, { status: 400 })
+  }
+
+  const updated = await updateOrderStatus(supabase, id, status)
   return NextResponse.json({ success: true, data: updated })
 }
 

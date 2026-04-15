@@ -6,8 +6,9 @@ import { useEffect, useState } from 'react'
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
 import { cn, createSlug } from '@/lib/utils'
 import { getOrdersByUser } from '@/lib/db/order'
+import CancelOrderModal from '@/components/ui/modals/CancelOrderModal'
+import DeleteOrderModal from '@/components/ui/modals/DeleteOrderModal'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
-import axios from 'axios'
 import { createClient } from '@/utils/supabase/client'
 
 type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
@@ -46,8 +47,6 @@ type Order = {
 const supabase = createClient()
 const { data: { user } } = await supabase.auth.getUser()
 const orders = user ? await getOrdersByUser(supabase, user.id) : []
-
-console.log(orders)
 
 const statusConfig: Record<
   OrderStatus,
@@ -153,8 +152,9 @@ const favoritePaymentMethod =
 const OrderPage = () => {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
-  const [modalType, setModalType] = useState<'cancel' | 'delete' | null>(null)
+  const [modalType, setModalType] = useState<'cancel' | 'delete' | 'bulk-cancel' | 'bulk-delete' | null>(null)
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null)
+  const [selectedOrders, setSelectedOrders] = useState<Set<number>>(new Set())
   const [isProcessing, setIsProcessing] = useState(false)
   const setAlert = useUtilityStore(state => state.setAlert)
 
@@ -165,6 +165,7 @@ const OrderPage = () => {
 
     init()
 
+    // Real-time subscription
     const channel = supabase
       .channel('orders-changes')
       .on(
@@ -180,14 +181,20 @@ const OrderPage = () => {
       )
       .subscribe()
 
+    // Polling fallback every 10 seconds
+    const pollInterval = setInterval(fetchOrders, 10000)
+
     return () => {
       supabase.removeChannel(channel)
+      clearInterval(pollInterval)
     }
   }, [])
 
   const fetchOrders = async () => {
     try {
-      const { data } = await axios.get('/api/orders')
+      const response = await fetch('/api/orders')
+      if (!response.ok) throw new Error('Failed to fetch orders')
+      const data = await response.json()
       setOrders(data.data || [])
     } catch (error) {
       console.error('Failed to fetch orders:', error)
@@ -213,34 +220,108 @@ const OrderPage = () => {
     setIsProcessing(false)
   }
 
-  const executeCancel = async () => {
-    if (selectedOrderId === null) return
-    
+  const executeBulkCancel = async () => {
     setIsProcessing(true)
     try {
-      await axios.patch(`/api/orders/${selectedOrderId}`)
-      setAlert({ label: 'Pesanan berhasil dibatalkan', type: 'success' })
+      const promises = Array.from(selectedOrders).map(orderId =>
+        fetch(`/api/orders/${orderId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).then(res => {
+          if (!res.ok) throw new Error(`Failed to cancel order ${orderId}`)
+          return res
+        })
+      )
+      await Promise.all(promises)
+      setAlert({ label: `${selectedOrders.size} pesanan berhasil dibatalkan`, type: 'success' })
       closeModal()
+      setSelectedOrders(new Set())
       fetchOrders()
     } catch (error: any) {
-      setAlert({ label: error?.response?.data?.message || 'Gagal membatalkan pesanan', type: 'error' })
+      setAlert({ label: 'Gagal membatalkan beberapa pesanan', type: 'error' })
       setIsProcessing(false)
     }
   }
 
-  const executeDelete = async () => {
-    if (selectedOrderId === null) return
-    
+  const executeBulkDelete = async () => {
     setIsProcessing(true)
     try {
-      await axios.delete(`/api/orders/${selectedOrderId}`)
-      setAlert({ label: 'Pesanan berhasil dihapus', type: 'success' })
+      const promises = Array.from(selectedOrders).map(orderId =>
+        fetch(`/api/orders/${orderId}`, {
+          method: 'DELETE',
+        }).then(res => {
+          if (!res.ok) throw new Error(`Failed to delete order ${orderId}`)
+          return res
+        })
+      )
+      await Promise.all(promises)
+      setAlert({ label: `${selectedOrders.size} pesanan berhasil dihapus`, type: 'success' })
       closeModal()
+      setSelectedOrders(new Set())
       fetchOrders()
     } catch (error: any) {
-      setAlert({ label: error?.response?.data?.message || 'Gagal menghapus pesanan', type: 'error' })
+      setAlert({ label: 'Gagal menghapus beberapa pesanan', type: 'error' })
       setIsProcessing(false)
     }
+  }
+
+  const toggleOrderSelection = (orderId: number) => {
+    const order = orders.find(o => o.id === orderId)
+    if (!order || order.status !== 'pending') return
+
+    const newSelected = new Set(selectedOrders)
+    if (newSelected.has(orderId)) {
+      newSelected.delete(orderId)
+    } else {
+      newSelected.add(orderId)
+    }
+    setSelectedOrders(newSelected)
+  }
+
+  const selectAllOrders = () => {
+    const pendingOrderIds = new Set(
+      orders
+        .filter(order => order.status === 'pending')
+        .map(order => order.id)
+    )
+    setSelectedOrders(pendingOrderIds)
+  }
+
+  const deselectAllOrders = () => {
+    setSelectedOrders(new Set())
+  }
+
+  const bulkCancelOrders = () => {
+    if (selectedOrders.size === 0) return
+    setModalType('bulk-cancel')
+    setSelectedOrderId(null)
+  }
+
+  const bulkDeleteOrders = () => {
+    if (selectedOrders.size === 0) return
+    setModalType('bulk-delete')
+    setSelectedOrderId(null)
+  }
+
+  const proceedToPayment = () => {
+    if (selectedOrders.size === 0) return
+
+    // Filter hanya order dengan status 'pending'
+    const pendingOrderIds = Array.from(selectedOrders)
+      .filter(orderId => {
+        const order = orders.find(o => o.id === orderId)
+        return order && order.status === 'pending'
+      })
+
+    if (pendingOrderIds.length === 0) {
+      setAlert({ label: 'Tidak ada pesanan pending yang dapat diproses pembayaran', type: 'error' })
+      return
+    }
+
+    const orderIds = pendingOrderIds.join(',')
+    window.location.href = `/payment?orders=${orderIds}`
   }
 
   if (loading) {
@@ -366,149 +447,399 @@ const OrderPage = () => {
           </section>
 
           <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="space-y-5">
-              {sortedOrders.map(order => {
-                  const orderStatus = statusConfig[order.status as OrderStatus] ?? statusConfig.pending
-                  const totalProductQuantity = order?.products?.reduce(
-                    (sum:number, product:OrderProduct) => sum + product.quantity,
-                    0
-                  )
-
-                  return (
-                    <article
-                      key={order.id}
-                      className="rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm md:p-6"
+            {/* Bulk Actions */}
+            {selectedOrders.size > 0 ? (
+              <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 mb-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-blue-900">
+                    {selectedOrders.size} pesanan dipilih
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={proceedToPayment}
+                      className="cursor-pointer px-3 py-1 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                     >
-                      <div className="flex flex-col gap-4 border-b border-gray-100 pb-5 md:flex-row md:items-start md:justify-between">
-                        <div className="space-y-2">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span
+                      Bayar ({selectedOrders.size})
+                    </button>
+                    <button
+                      onClick={bulkCancelOrders}
+                      className="cursor-pointer px-3 py-1 text-xs bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
+                    >
+                      Batalkan
+                    </button>
+                    <button
+                      onClick={bulkDeleteOrders}
+                      className="cursor-pointer px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                    >
+                      Hapus
+                    </button>
+                    <button
+                      onClick={deselectAllOrders}
+                      className="cursor-pointer px-3 py-1 text-xs bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 transition-colors"
+                    >
+                      Batal Pilih
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-10 space-y-5">
+                  {/* Select All */}
+                  {orders.length > 0 && (
+                    <div className="flex items-center gap-2 p-4 bg-gray-50 rounded-lg">
+                      <input
+                        type="checkbox"
+                        checked={
+                          orders.filter(order => order.status === 'pending').length > 0 &&
+                          selectedOrders.size === orders.filter(order => order.status === 'pending').length &&
+                          selectedOrders.size > 0
+                        }
+                        onChange={() => {
+                          const pendingOrders = orders.filter(order => order.status === 'pending')
+                          const allPendingSelected = pendingOrders.every(order => selectedOrders.has(order.id))
+
+                          if (allPendingSelected) {
+                            deselectAllOrders()
+                          } else {
+                            selectAllOrders()
+                          }
+                        }}
+                        className="w-4 h-4 text-green-600 focus:ring-green-500"
+                      />
+                      <span className="text-sm text-gray-700">
+                        Pilih Semua Pending ({orders.filter(order => order.status === 'pending').length})
+                      </span>
+                    </div>
+                  )}
+                  {sortedOrders.map(order => {
+                      const orderStatus = statusConfig[order.status as OrderStatus] ?? statusConfig.pending
+                      const totalProductQuantity = order?.products?.reduce(
+                        (sum:number, product:OrderProduct) => sum + product.quantity,
+                        0
+                      )
+
+                      return (
+                        <article
+                          key={order.id}
+                          className="rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm md:p-6"
+                        >
+                          {/* Order Header with Checkbox */}
+                          <div className="flex items-start gap-3 mb-4">
+                            <input
+                              type="checkbox"
+                              checked={selectedOrders.has(order.id)}
+                              onChange={() => toggleOrderSelection(order.id)}
+                              disabled={order.status !== 'pending'}
                               className={cn(
-                                'inline-flex rounded-full border px-3 py-1 text-xs font-semibold',
-                                orderStatus.className
+                                "w-4 h-4 mt-1 text-green-600 focus:ring-green-500",
+                                order.status !== 'pending' && "cursor-not-allowed opacity-50"
                               )}
-                            >
-                              {orderStatus.label}
-                            </span>
-                            <span className="text-sm text-gray-500">
-                              #{String(order.id).slice(-8)}
-                            </span>
-                          </div>
-                          <div>
-                            <h2 className="text-xl font-semibold text-gray-900">
-                              Pesanan dibuat pada {formatDate(order?.created_at)}
-                            </h2>
-                            <p className="mt-1 text-sm text-gray-600">{orderStatus.description}</p>
-                          </div>
-                        </div>
-
-                        <div className="rounded-2xl bg-gray-50 px-4 py-3 md:min-w-56">
-                          <p className="text-sm text-gray-500">Total pembayaran</p>
-                          <p className="mt-1 text-xl font-bold text-green-600">
-                            {formatCurrency(order.currency, order.total_price)}
-                          </p>
-                          <p className="mt-1 text-xs text-gray-500">
-                            {totalProductQuantity} item dalam pesanan ini
-                          </p>
-                          {order.status === 'pending' ? (
-                            <div className="mt-3 flex gap-2">
-                              <button
-                                onClick={() => openCancelModal(order.id)}
-                                className="cursor-pointer px-3 py-1 text-xs bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
-                              >
-                                Batalkan
-                              </button>
-                              <button
-                                onClick={() => openDeleteModal(order.id)}
-                                className="cursor-pointer px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                              >
-                                Hapus
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="mt-3 flex gap-2">
-                              <button
-                                onClick={() => openDeleteModal(order.id)}
-                                className="cursor-pointer px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                              >
-                                Hapus
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-4 py-5">
-                        {order?.order_items?.map((product:any) => (
-                          <div
-                            key={`${order.id}-${product.product_id}-${product.variant}`}
-                            className="flex flex-col gap-4 rounded-2xl border border-gray-200 p-4 md:flex-row"
-                          >
-                            <div className="relative h-28 w-full overflow-hidden rounded-xl bg-gray-100 md:w-28">
-                              <Image
-                                src={product.image}
-                                alt={product.product_title}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-
-                            <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                              <div className="space-y-1">
-                                <p className="text-xs font-medium tracking-[0.2em] text-gray-400 uppercase">
-                                  {product.category}
-                                </p>
-                                <h3 className="text-base font-semibold text-gray-900">
-                                  {product.title}
-                                </h3>
-                                <div className="flex flex-wrap gap-2 text-sm text-gray-500">
-                                  <span>Varian {product.variant}</span>
-                                  <span>Qty {product.quantity}</span>
+                            />
+                            <div className="flex-1">
+                              <div className="space-y-2">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span
+                                    className={cn(
+                                      'inline-flex rounded-full border px-3 py-1 text-xs font-semibold',
+                                      orderStatus.className
+                                    )}
+                                  >
+                                    {orderStatus.label}
+                                  </span>
+                                  <span className="text-sm text-gray-500">
+                                    #{String(order.id).slice(-8)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <h2 className="text-xl font-semibold text-gray-900">
+                                    Pesanan dibuat pada {formatDate(order?.created_at)}
+                                  </h2>
+                                  <p className="mt-1 text-sm text-gray-600">{orderStatus.description}</p>
                                 </div>
                               </div>
 
-                              <div className="space-y-2 md:text-right">
-                                <p className="text-sm text-gray-500">Harga produk</p>
-                                <p className="text-lg font-semibold text-gray-900">
-                                  {formatCurrency(product.price.currency, product.price)}
+                              <div className="rounded-2xl bg-gray-50 px-4 py-3 md:min-w-56">
+                                <p className="text-sm text-gray-500">Total pembayaran</p>
+                                <p className="mt-1 text-xl font-bold text-green-600">
+                                  {formatCurrency(order.currency, order.total_price)}
                                 </p>
-                                <Link
-                                  href={`/product/${product.product_id}/${createSlug(product.product_title)}`}
-                                  className="inline-flex text-sm font-medium text-green-600 transition-colors hover:text-green-700"
-                                >
-                                  Lihat produk
-                                </Link>
+                                <p className="mt-1 text-xs text-gray-500">
+                                  {totalProductQuantity} item dalam pesanan ini
+                                </p>
+                                {order.status === 'pending' ? (
+                                  <div className="mt-3 flex gap-2">
+                                    <button
+                                      onClick={() => openCancelModal(order.id)}
+                                      className="cursor-pointer px-3 py-1 text-xs bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
+                                    >
+                                      Batalkan
+                                    </button>
+                                    <button
+                                      onClick={() => openDeleteModal(order.id)}
+                                      className="cursor-pointer px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                                    >
+                                      Hapus
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="mt-3 flex gap-2">
+                                    <button
+                                      onClick={() => openDeleteModal(order.id)}
+                                      className="cursor-pointer px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                                    >
+                                      Hapus
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
-                        ))}
-                      </div>
 
-                      <div className="grid gap-4 border-t border-gray-100 pt-5 md:grid-cols-3">
-                        <div className="rounded-2xl bg-gray-50 p-4">
-                          <p className="text-sm text-gray-500">Alamat pengiriman</p>
-                          <p className="mt-2 text-sm leading-6 text-gray-800">{order.shipping_address}</p>
+                          <div className="space-y-4 py-5">
+                            {order?.order_items?.map((product:any) => (
+                              <div
+                                key={`${order.id}-${product.product_id}-${product.variant}`}
+                                className="flex flex-col gap-4 rounded-2xl border border-gray-200 p-4 md:flex-row"
+                              >
+                                <div className="relative h-28 w-full overflow-hidden rounded-xl bg-gray-100 md:w-28">
+                                  <Image
+                                    src={product.image}
+                                    alt={product.product_title}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+
+                                <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                                  <div className="space-y-1">
+                                    <p className="text-xs font-medium tracking-[0.2em] text-gray-400 uppercase">
+                                      {product.category}
+                                    </p>
+                                    <h3 className="text-base font-semibold text-gray-900">
+                                      {product.title}
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+                                      <span>Varian {product.variant}</span>
+                                      <span>Qty {product.quantity}</span>
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-2 md:text-right">
+                                    <p className="text-sm text-gray-500">Harga produk</p>
+                                    <p className="text-lg font-semibold text-gray-900">
+                                      {formatCurrency(product.price.currency, product.price)}
+                                    </p>
+                                    <Link
+                                      href={`/product/${product.product_id}/${createSlug(product.product_title)}`}
+                                      className="inline-flex text-sm font-medium text-green-600 transition-colors hover:text-green-700"
+                                    >
+                                      Lihat produk
+                                    </Link>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="grid gap-4 border-t border-gray-100 pt-5 md:grid-cols-3">
+                            <div className="rounded-2xl bg-gray-50 p-4">
+                              <p className="text-sm text-gray-500">Alamat pengiriman</p>
+                              <p className="mt-2 text-sm leading-6 text-gray-800">{order.shipping_address}</p>
+                            </div>
+                            <div className="rounded-2xl bg-gray-50 p-4">
+                              <p className="text-sm text-gray-500">Pembayaran & pengiriman</p>
+                              <p className="mt-2 text-sm font-medium text-gray-800">
+                                {formatPaymentMethod(order.paymentMethod)}
+                              </p>
+                              <p className="mt-1 text-sm text-gray-600">
+                                {formatDeliveryMethod(order.deliveryMethod)}
+                              </p>
+                            </div>
+                            <div className="rounded-2xl bg-gray-50 p-4">
+                              <p className="text-sm text-gray-500">Catatan pembeli</p>
+                              <p className="mt-2 text-sm leading-6 text-gray-800">
+                                {order.notes?.trim() || 'Tidak ada catatan tambahan untuk pesanan ini.'}
+                              </p>
+                            </div>
+                          </div>
+                        </article>
+                      )
+                    })}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {/* Select All */}
+                {orders.length > 0 && (
+                  <div className="flex items-center gap-2 p-4 bg-gray-50 rounded-lg">
+                    <input
+                      type="checkbox"
+                      checked={selectedOrders.size === orders.length && orders.length > 0}
+                      onChange={() => {
+                        if (selectedOrders.size === orders.length) {
+                          deselectAllOrders()
+                        } else {
+                          selectAllOrders()
+                        }
+                      }}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm text-gray-700">Pilih Semua ({orders.length})</span>
+                  </div>
+                )}
+
+                {sortedOrders.map(order => {
+                    const orderStatus = statusConfig[order.status as OrderStatus] ?? statusConfig.pending
+                    const totalProductQuantity = order?.products?.reduce(
+                      (sum:number, product:OrderProduct) => sum + product.quantity,
+                      0
+                    )
+
+                    return (
+                      <article
+                        key={order.id}
+                        className="rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm md:p-6"
+                      >
+                        {/* Order Header with Checkbox */}
+                        <div className="flex items-start gap-3 mb-4">
+                          <input
+                            type="checkbox"
+                            checked={selectedOrders.has(order.id)}
+                            onChange={() => toggleOrderSelection(order.id)}
+                            className="w-4 h-4 mt-1 text-green-600 focus:ring-green-500"
+                          />
+                          <div className="flex-1">
+                            <div className="space-y-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span
+                                  className={cn(
+                                    'inline-flex rounded-full border px-3 py-1 text-xs font-semibold',
+                                    orderStatus.className
+                                  )}
+                                >
+                                  {orderStatus.label}
+                                </span>
+                                <span className="text-sm text-gray-500">
+                                  #{String(order.id).slice(-8)}
+                                </span>
+                              </div>
+                              <div>
+                                <h2 className="text-xl font-semibold text-gray-900">
+                                  Pesanan dibuat pada {formatDate(order?.created_at)}
+                                </h2>
+                                <p className="mt-1 text-sm text-gray-600">{orderStatus.description}</p>
+                              </div>
+                            </div>
+
+                            <div className="rounded-2xl bg-gray-50 px-4 py-3 md:min-w-56">
+                              <p className="text-sm text-gray-500">Total pembayaran</p>
+                              <p className="mt-1 text-xl font-bold text-green-600">
+                                {formatCurrency(order.currency, order.total_price)}
+                              </p>
+                              <p className="mt-1 text-xs text-gray-500">
+                                {totalProductQuantity} item dalam pesanan ini
+                              </p>
+                              {order.status === 'pending' ? (
+                                <div className="mt-3 flex gap-2">
+                                  <button
+                                    onClick={() => openCancelModal(order.id)}
+                                    className="cursor-pointer px-3 py-1 text-xs bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
+                                  >
+                                    Batalkan
+                                  </button>
+                                  <button
+                                    onClick={() => openDeleteModal(order.id)}
+                                    className="cursor-pointer px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                                  >
+                                    Hapus
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="mt-3 flex gap-2">
+                                  <button
+                                    onClick={() => openDeleteModal(order.id)}
+                                    className="cursor-pointer px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                                  >
+                                    Hapus
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div className="rounded-2xl bg-gray-50 p-4">
-                          <p className="text-sm text-gray-500">Pembayaran & pengiriman</p>
-                          <p className="mt-2 text-sm font-medium text-gray-800">
-                            {formatPaymentMethod(order.paymentMethod)}
-                          </p>
-                          <p className="mt-1 text-sm text-gray-600">
-                            {formatDeliveryMethod(order.deliveryMethod)}
-                          </p>
+                        
+                        {/* order items */}
+                        <div className="space-y-4 py-5">
+                          {order?.order_items?.map((product:any) => (
+                            <div
+                              key={`${order.id}-${product.product_id}-${product.variant}`}
+                              className="flex flex-col gap-4 rounded-2xl border border-gray-200 p-4 md:flex-row"
+                            >
+                              <div className="relative h-28 w-full overflow-hidden rounded-xl bg-gray-100 md:w-28">
+                                <Image
+                                  src={product.image}
+                                  alt={product.product_title}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+
+                              <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                                <div className="space-y-1">
+                                  <p className="text-xs font-medium tracking-[0.2em] text-gray-400 uppercase">
+                                    {product.category}
+                                  </p>
+                                  <h3 className="text-base font-semibold text-gray-900">
+                                    {product.title}
+                                  </h3>
+                                  <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+                                    <span>Varian {product.variant}</span>
+                                    <span>Qty {product.quantity}</span>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2 md:text-right">
+                                  <p className="text-sm text-gray-500">Harga produk</p>
+                                  <p className="text-lg font-semibold text-gray-900">
+                                    {formatCurrency(product.price.currency, product.price)}
+                                  </p>
+                                  <Link
+                                    href={`/product/${product.product_id}/${createSlug(product.product_title)}`}
+                                    className="inline-flex text-sm font-medium text-green-600 transition-colors hover:text-green-700"
+                                  >
+                                    Lihat produk
+                                  </Link>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                        <div className="rounded-2xl bg-gray-50 p-4">
-                          <p className="text-sm text-gray-500">Catatan pembeli</p>
-                          <p className="mt-2 text-sm leading-6 text-gray-800">
-                            {order.notes?.trim() || 'Tidak ada catatan tambahan untuk pesanan ini.'}
-                          </p>
+
+                        <div className="grid gap-4 border-t border-gray-100 pt-5 md:grid-cols-3">
+                          <div className="rounded-2xl bg-gray-50 p-4">
+                            <p className="text-sm text-gray-500">Alamat pengiriman</p>
+                            <p className="mt-2 text-sm leading-6 text-gray-800">{order.shipping_address}</p>
+                          </div>
+                          <div className="rounded-2xl bg-gray-50 p-4">
+                            <p className="text-sm text-gray-500">Pembayaran & pengiriman</p>
+                            <p className="mt-2 text-sm font-medium text-gray-800">
+                              {formatPaymentMethod(order.paymentMethod)}
+                            </p>
+                            <p className="mt-1 text-sm text-gray-600">
+                              {formatDeliveryMethod(order.deliveryMethod)}
+                            </p>
+                          </div>
+                          <div className="rounded-2xl bg-gray-50 p-4">
+                            <p className="text-sm text-gray-500">Catatan pembeli</p>
+                            <p className="mt-2 text-sm leading-6 text-gray-800">
+                              {order.notes?.trim() || 'Tidak ada catatan tambahan untuk pesanan ini.'}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </article>
-                  )
-                })}
-            </div>
+                      </article>
+                    )
+                  })}
+              </div>
+            )}
 
             <aside className="h-fit rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm xl:sticky xl:top-28">
               <div className="space-y-5">
@@ -542,12 +873,16 @@ const OrderPage = () => {
                     untuk ditambahkan ke belanjaanmu.
                   </p>
                   <div className="mt-4 flex flex-col gap-3">
-                    <Link
-                      href="/cart"
-                      className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 font-medium text-white transition-colors hover:bg-green-700"
+                    <button
+                      onClick={proceedToPayment}
+                      disabled={selectedOrders.size === 0}
+                      className={cn(
+                        "cursor-pointer inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 font-medium text-white transition-colors hover:bg-green-700",
+                        selectedOrders.size === 0 && "cursor-not-allowed bg-green-300 hover:bg-green-300"
+                      )}
                     >
-                      Lanjut Pembayaran
-                    </Link>
+                      Lanjut Pembayaran ({selectedOrders.size})
+                    </button>
                     <Link
                       href="/"
                       className="inline-flex items-center justify-center rounded-lg border border-green-500 px-4 py-2 font-medium text-green-700 transition-colors hover:bg-green-100"
@@ -562,80 +897,37 @@ const OrderPage = () => {
         </div>
       </ContentContainer>
 
-      {/* Confirmation Modal */}
-      {modalType && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-lg">
-            {modalType === 'cancel' ? (
-              <>
-                <h2 className="text-lg font-bold text-gray-900">Batalkan Pesanan?</h2>
-                <p className="mt-2 text-sm text-gray-600">
-                  Pesanan yang dibatalkan akan berubah status menjadi "Dibatalkan" dan tidak bisa diproses lagi.
-                </p>
-                <div className="mt-6 flex gap-3">
-                  <button
-                    onClick={closeModal}
-                    disabled={isProcessing}
-                    className="cursor-pointer flex-1 rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    onClick={executeCancel}
-                    disabled={isProcessing}
-                    className="cursor-pointer flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                        </svg>
-                        Memproses...
-                      </>
-                    ) : (
-                      'Batalkan'
-                    )}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="text-lg font-bold text-gray-900">Hapus Pesanan?</h2>
-                <p className="mt-2 text-sm text-gray-600">
-                  Pesanan akan dihapus secara permanen dan tidak bisa dipulihkan. Apakah Anda yakin?
-                </p>
-                <div className="mt-6 flex gap-3">
-                  <button
-                    onClick={closeModal}
-                    disabled={isProcessing}
-                    className="cursor-pointer flex-1 rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    onClick={executeDelete}
-                    disabled={isProcessing}
-                    className="cursor-pointer flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                        </svg>
-                        Memproses...
-                      </>
-                    ) : (
-                      'Hapus'
-                    )}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Confirmation Modals */}
+      <CancelOrderModal
+        isOpen={modalType === 'cancel'}
+        onClose={closeModal}
+        onConfirm={executeBulkCancel}
+        isProcessing={isProcessing}
+        isBulk={false}
+      />
+      <CancelOrderModal
+        isOpen={modalType === 'bulk-cancel'}
+        onClose={closeModal}
+        onConfirm={executeBulkCancel}
+        isProcessing={isProcessing}
+        isBulk={true}
+        selectedCount={selectedOrders.size}
+      />
+      <DeleteOrderModal
+        isOpen={modalType === 'delete'}
+        onClose={closeModal}
+        onConfirm={executeBulkDelete}
+        isProcessing={isProcessing}
+        isBulk={false}
+      />
+      <DeleteOrderModal
+        isOpen={modalType === 'bulk-delete'}
+        onClose={closeModal}
+        onConfirm={executeBulkDelete}
+        isProcessing={isProcessing}
+        isBulk={true}
+        selectedCount={selectedOrders.size}
+      />
     </main>
   )
 }
