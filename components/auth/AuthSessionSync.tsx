@@ -10,6 +10,8 @@ const AuthSessionSync = () => {
   const getSession = useAuthStore(state => state.getSession)
   const logoutUser = useAuthStore(state => state.logoutUser)
   const initWishlist = useWishlistStore(state => state.initWishlist)
+  const fetchWishlist = useWishlistStore(state => state.fetchWishlist)
+  const clearWishlistState = useWishlistStore(state => state.clearWishlistState)
 
   useEffect(() => {
     const supabase = createClient()
@@ -21,12 +23,14 @@ const AuthSessionSync = () => {
 
       if (!session?.user) {
         logoutUser()
+        clearWishlistState()
         return
       }
 
       getSession(session)
       getUser(session.user)
       initWishlist(session.user.id)
+      await fetchWishlist(session.user.id).catch(() => null)
     }
 
     syncSession()
@@ -36,16 +40,18 @@ const AuthSessionSync = () => {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session?.user) {
         logoutUser()
+        clearWishlistState()
         return
       }
 
       getSession(session)
       getUser(session.user)
       initWishlist(session.user.id)
+      fetchWishlist(session.user.id).catch(() => null)
     })
 
     return () => subscription.unsubscribe()
-  }, [getSession, getUser, initWishlist, logoutUser])
+  }, [clearWishlistState, fetchWishlist, getSession, getUser, initWishlist, logoutUser])
 
   return null
 }

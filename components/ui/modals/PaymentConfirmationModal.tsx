@@ -12,6 +12,7 @@ interface PaymentConfirmationModalProps {
   totalAmount: number
   currency: string
   formatCurrency: (currency: string, amount: number) => string
+  selectedPaymentLabel: string
 }
 
 const PaymentConfirmationModal: React.FC<PaymentConfirmationModalProps> = ({
@@ -23,10 +24,8 @@ const PaymentConfirmationModal: React.FC<PaymentConfirmationModalProps> = ({
   totalAmount,
   currency,
   formatCurrency,
+  selectedPaymentLabel,
 }) => {
-  // Get unique payment methods
-  const paymentMethods = [...new Set(orders.map(order => order.payment_method))]
-
   return (
     <ModalContainer isOpen={isOpen} onClose={onClose}>
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
@@ -40,11 +39,7 @@ const PaymentConfirmationModal: React.FC<PaymentConfirmationModalProps> = ({
 
           <div>
             <p className="text-sm text-gray-600 mb-2">Metode Pembayaran</p>
-            <div className="space-y-1">
-              {paymentMethods.map((method, index) => (
-                <p key={index} className="font-medium text-gray-900">{method}</p>
-              ))}
-            </div>
+            <p className="font-medium text-gray-900">{selectedPaymentLabel}</p>
           </div>
 
           <div className="border-t pt-4">
@@ -65,14 +60,14 @@ const PaymentConfirmationModal: React.FC<PaymentConfirmationModalProps> = ({
           <button
             onClick={onClose}
             disabled={isProcessing}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="cursor-pointer flex-1 rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             Batal
           </button>
           <button
             onClick={onConfirm}
             disabled={isProcessing}
-            className="flex-1 rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="cursor-pointer flex-1 rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isProcessing ? (
               <>

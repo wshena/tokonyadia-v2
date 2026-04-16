@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { AvatarIcon, CancelIcon, CartIcon, CategoryIcon, PenIcon } from '@/components/icon'
+import { AvatarIcon, CancelIcon, CartIcon, CategoryIcon, FullHeartIcon, PenIcon } from '@/components/icon'
 import { useAuthStore } from '@/lib/zustand/authStore'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
 import { createClient } from '@/utils/supabase/client'
@@ -19,6 +19,12 @@ const menuItems = [
     href: '/user/settings',
     description: 'Kelola profil, kontak, alamat, dan preferensi akun kamu.',
     icon: <PenIcon size={16} color="black" />,
+  },
+  {
+    label: 'Wishlist Saya',
+    href: '/wishlist',
+    description: 'Simpan produk favorit untuk dibeli nanti dan mudah ditemukan kembali.',
+    icon: <FullHeartIcon size={16} color="black" />,
   },
   {
     label: 'Jelajahi Kategori',

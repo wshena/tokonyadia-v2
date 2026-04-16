@@ -1,45 +1,96 @@
 'use client'
+
 import { useState } from 'react'
+import type { MouseEvent } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { FullHeartIcon, HeartIcon } from '@/components/icon'
+import { useAuthStore } from '@/lib/zustand/authStore'
+import { useUtilityStore } from '@/lib/zustand/utilityStore'
+import { useWishlistStore } from '@/lib/zustand/wishlistStore'
 import { createSlug } from '@/lib/utils'
 
 export const ProductCard = (product: any) => {
   const [imgError, setImgError] = useState(false)
-
+  const user = useAuthStore(state => state.user)
+  const setAlert = useUtilityStore(state => state.setAlert)
+  const addToWishlist = useWishlistStore(state => state.addToWishlist)
+  const removeFromWishlist = useWishlistStore(state => state.removeFromWishlist)
+  const isInWishlist = useWishlistStore(state => state.isInWishlist)
   const slug = createSlug(product.title)
+  const inWishlist = isInWishlist(user?.id, product.product_id)
+
+  const price = product?.price?.withDiscount && product.price.withDiscount > 0
+    ? product.price.withDiscount
+    : product?.price?.withoutDiscount
+
+  const handleToggleWishlist = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    if (!user?.id) {
+      setAlert({ label: 'Login untuk menyimpan produk ke wishlist.', type: 'warning' })
+      return
+    }
+
+    try {
+      if (inWishlist) {
+        await removeFromWishlist({ userId: user.id, productId: product.product_id })
+        setAlert({ label: 'Produk dihapus dari wishlist.', type: 'success' })
+        return
+      }
+
+      await addToWishlist({ userId: user.id, product })
+      setAlert({ label: 'Produk ditambahkan ke wishlist.', type: 'success' })
+    } catch (error: any) {
+      setAlert({ label: error?.message ?? 'Gagal memperbarui wishlist.', type: 'error' })
+    }
+  }
 
   return (
-    <Link href={`/product/${product?.product_id}/${slug}`}>
-      <div className="w-33 md:w-40 lg:w-45 items-start bg-white space-y-5 transition">
+    <Link href={`/product/${product?.product_id}/${slug}`} className="group block">
+      <div className="relative w-33 space-y-5 bg-white transition md:w-40 lg:w-45">
+        <button
+          type="button"
+          onClick={handleToggleWishlist}
+          className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition hover:scale-105"
+          aria-label={inWishlist ? 'Hapus dari wishlist' : 'Tambah ke wishlist'}
+        >
+          {inWishlist ? <FullHeartIcon size={16} color="#dc2626" /> : <HeartIcon size={16} color="#111827" />}
+        </button>
+
         {imgError ? (
-          <div className='w-full h-35 md:h-45 bg-gray-400 rounded-md' />
+          <div className="h-35 w-full rounded-md bg-gray-200 md:h-45" />
         ) : (
-          <div className="w-full h-35 md:h-45 relative rounded-t-[5px] rounded-md">
+          <div className="relative h-35 w-full overflow-hidden rounded-md md:h-45">
             <Image
-              src={product?.images["800x900"]?.[0]}
+              src={product?.images?.['800x900']?.[0]}
               alt={product?.title}
               fill
-              sizes=''
-              loading='lazy'
+              loading="lazy"
               onError={() => setImgError(true)}
-              onLoad={(e) => {
-                if ((e.currentTarget as HTMLImageElement).naturalWidth === 0) {
+              onLoad={(event) => {
+                if ((event.currentTarget as HTMLImageElement).naturalWidth === 0) {
                   setImgError(true)
                 }
               }}
+              className="object-cover transition duration-300 group-hover:scale-[1.03]"
             />
           </div>
         )}
 
-        <div className='space-y-1'>
-          <p className="mt-2 text-[.8rem] md:text-[1rem] font-medium line-clamp-2">{product.title}</p>
-          <p className="text-[.8rem] md:text-[1rem] font-bold">{product.price.currency}{product.price.withDiscount}</p>
-          <div className="flex items-center text-[.7rem] gap-1">
-            <span className='line-through text-gray-400'>{product?.price?.currency}{product?.price?.withoutDiscount}</span>
-            <span className='text-red-400'>{product?.price?.discountPercentage}%</span>
+        <div className="space-y-1">
+          <p className="mt-2 line-clamp-2 text-[.8rem] font-medium md:text-[1rem]">{product.title}</p>
+          <p className="text-[.8rem] font-bold md:text-[1rem]">
+            {product?.price?.currency}{price}
+          </p>
+          <div className="flex items-center gap-1 text-[.7rem]">
+            <span className="text-gray-400 line-through">
+              {product?.price?.currency}{product?.price?.withoutDiscount}
+            </span>
+            <span className="text-red-400">{product?.price?.discountPercentage}%</span>
           </div>
-          <p className="text-xs text-gray-400">{product.performance.sales} terjual</p>
+          <p className="text-xs text-gray-400">{product?.performance?.sales} terjual</p>
         </div>
       </div>
     </Link>

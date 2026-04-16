@@ -61,6 +61,10 @@ const CheckoutClient = ({ user, profile }: Props) => {
       })
       const data = await response.json()
 
+      if (!response.ok) {
+        throw new Error(data?.message ?? 'Gagal membuat pesanan')
+      }
+
       // Kosongkan cart setelah order berhasil
       setCart({ id: '', date: '', products: [] })
 
@@ -69,7 +73,7 @@ const CheckoutClient = ({ user, profile }: Props) => {
 
     } catch (err: any) {
       setAlert({
-        label: err?.response?.data?.message ?? 'Gagal membuat pesanan',
+        label: err?.message ?? 'Gagal membuat pesanan',
         type: 'error'
       })
     } finally {
@@ -140,6 +144,72 @@ const CheckoutClient = ({ user, profile }: Props) => {
                       className="w-4 h-4 text-green-600 focus:ring-green-500"
                     />
                     <span className="text-sm">BRI Virtual Account</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="bcava"
+                      checked={paymentMethod === 'bcava'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm">BCA Virtual Account</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="mandiriva"
+                      checked={paymentMethod === 'mandiriva'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm">Mandiri Virtual Account</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="qris"
+                      checked={paymentMethod === 'qris'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm">QRIS</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="gopay"
+                      checked={paymentMethod === 'gopay'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm">GoPay</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="shopeepay"
+                      checked={paymentMethod === 'shopeepay'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm">ShopeePay</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="bank_transfer"
+                      checked={paymentMethod === 'bank_transfer'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm">Transfer Bank</span>
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input

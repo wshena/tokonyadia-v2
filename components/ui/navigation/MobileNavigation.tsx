@@ -38,6 +38,7 @@ const guestLinks = [
 
 const userLinks = [
   { label: 'Pesanan Saya', href: '/order' },
+  { label: 'Wishlist Saya', href: '/wishlist' },
   { label: 'Pengaturan Akun', href: '/user/settings' },
 ]
 

@@ -21,7 +21,11 @@ export interface Order {
   notes?: string
   created_at: string
   updated_at: string
+  payment_method?: string
+  delivery_method?: string
   order_items?: OrderItem[]
+  paymentMethod?: string
+  deliveryMethod?: string
 }
 
 export interface OrderItem {
@@ -118,20 +122,37 @@ export const getOrderById = async (supabase: SupabaseClient, orderId: string) =>
     .single()
 
   if (error) throw new Error(error.message)
-  return data
+  return {
+    ...data,
+    paymentMethod: data.payment_method,
+    deliveryMethod: data.delivery_method,
+  }
 }
 
-// Update status order
-export const updateOrderStatus = async (supabase: SupabaseClient, orderId: string, status: string) => {
+// Update field order
+export const updateOrder = async (
+  supabase: SupabaseClient,
+  orderId: string,
+  payload: Partial<Pick<Order, 'status' | 'payment_method' | 'delivery_method'>>
+) => {
   const { data, error } = await supabase
     .from('orders')
-    .update({ status })
+    .update(payload)
     .eq('id', orderId)
     .select()
     .single()
 
   if (error) throw new Error(error.message)
-  return data
+  return {
+    ...data,
+    paymentMethod: data.payment_method,
+    deliveryMethod: data.delivery_method,
+  }
+}
+
+// Update status order
+export const updateOrderStatus = async (supabase: SupabaseClient, orderId: string, status: string) => {
+  return updateOrder(supabase, orderId, { status })
 }
 
 // Cancel order

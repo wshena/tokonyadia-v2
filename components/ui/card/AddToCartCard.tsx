@@ -18,13 +18,10 @@ const AddToCartCard = ({ productData }: { productData: any }) => {
   const stock    = useProductStore(state => state.stock)
   const { carts, tryAddToCart } = useCartStore()
   const { setAlert } = useUtilityStore()
-  const { wishlist, addToWishlist, removeFromWishlist } = useWishlistStore()
-
-  // Cek wishlist
-  const userWishlist     = wishlist?.find((item: any) => item.userId === user?.id)
-  const checkIfOnWishlist = userWishlist?.products?.find(
-    (item: any) => item.product_id === productData?.product_id
-  )
+  const addToWishlist = useWishlistStore(state => state.addToWishlist)
+  const removeFromWishlist = useWishlistStore(state => state.removeFromWishlist)
+  const isInWishlist = useWishlistStore(state => state.isInWishlist)
+  const checkIfOnWishlist = isInWishlist(user?.id, productData?.product_id)
 
   const [quantity, setQuantity] = useState(1)
 
@@ -63,18 +60,22 @@ const AddToCartCard = ({ productData }: { productData: any }) => {
     router.push('/checkout')
   }
 
-  const handleToggleWishlist = () => {
+  const handleToggleWishlist = async () => {
     if (!user?.id) {
       setAlert({ label: 'Login untuk menambahkan produk ke wishlist anda', type: 'error' })
       return
     }
 
-    if (checkIfOnWishlist) {
-      removeFromWishlist({ userId: user.id, productId: productData?.product_id })
-      setAlert({ label: 'Berhasil menghapus produk dari wishlist anda', type: 'success' })
-    } else {
-      addToWishlist({ userId: user.id, product: productData })
-      setAlert({ label: 'Berhasil menambahkan produk ke wishlist anda', type: 'success' })
+    try {
+      if (checkIfOnWishlist) {
+        await removeFromWishlist({ userId: user.id, productId: productData?.product_id })
+        setAlert({ label: 'Berhasil menghapus produk dari wishlist anda', type: 'success' })
+      } else {
+        await addToWishlist({ userId: user.id, product: productData })
+        setAlert({ label: 'Berhasil menambahkan produk ke wishlist anda', type: 'success' })
+      }
+    } catch (error: any) {
+      setAlert({ label: error?.message ?? 'Gagal menyimpan wishlist', type: 'error' })
     }
   }
 
