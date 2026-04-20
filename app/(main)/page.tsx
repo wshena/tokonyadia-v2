@@ -7,6 +7,7 @@ import ProductLoadMore from "@/components/ProductLoadMore";
 import CategoryCard from "@/components/ui/card/CategoryCard";
 import { CategoryIcon } from "@/components/icon";
 import CategoryModalButton from "@/components/ui/button/CategoryModalButton";
+import DigitalProductTabs from "@/components/digital/DigitalProductTabs";
 
 const HomeBannerImages = [
   '/homeCarousel/item.jpg.webp',
@@ -25,6 +26,7 @@ export default async function Home() {
       <ContentContainer>
         <div className='space-y-10 md:space-y-20'>
           <BannerCarousel images={HomeBannerImages} />
+          <DigitalProductTabs />
 
           {/* categories */}
           <div className="w-full space-y-5">

@@ -23,9 +23,14 @@ import { MdOutlineCancel } from "react-icons/md";
 import { GoPersonFill } from "react-icons/go";
 import { FaRegTrashCan, FaHeart } from "react-icons/fa6";
 import { BiSolidCategoryAlt } from "react-icons/bi";
+import { HiOutlineEllipsisHorizontal } from "react-icons/hi2";
 
 export const CategoryIcon = ({size, color, className}: IconProps) => {
   return <BiSolidCategoryAlt size={size} color={color} className={className} />
+}
+
+export const OptionIcon = ({size, color, className}: IconProps) => {
+  return <HiOutlineEllipsisHorizontal size={size} color={color} className={className} />
 }
 
 export const AngleLeftIcon = (props: IconProps) => <FaAngleLeft {...props} />;

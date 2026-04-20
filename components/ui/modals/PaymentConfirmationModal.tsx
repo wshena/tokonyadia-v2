@@ -13,6 +13,8 @@ interface PaymentConfirmationModalProps {
   currency: string
   formatCurrency: (currency: string, amount: number) => string
   selectedPaymentLabel: string
+  itemLabel?: string
+  agreementText?: string
 }
 
 const PaymentConfirmationModal: React.FC<PaymentConfirmationModalProps> = ({
@@ -25,6 +27,8 @@ const PaymentConfirmationModal: React.FC<PaymentConfirmationModalProps> = ({
   currency,
   formatCurrency,
   selectedPaymentLabel,
+  itemLabel = 'pesanan',
+  agreementText = 'Dengan melanjutkan, Anda menyetujui pembayaran untuk pesanan yang dipilih menggunakan metode pembayaran yang telah dipilih.',
 }) => {
   return (
     <ModalContainer isOpen={isOpen} onClose={onClose}>
@@ -34,7 +38,7 @@ const PaymentConfirmationModal: React.FC<PaymentConfirmationModalProps> = ({
         <div className="space-y-4 mb-6">
           <div>
             <p className="text-sm text-gray-600 mb-2">Jumlah Pesanan</p>
-            <p className="font-semibold">{orders.length} pesanan</p>
+            <p className="font-semibold">{orders.length} {itemLabel}</p>
           </div>
 
           <div>
@@ -52,9 +56,7 @@ const PaymentConfirmationModal: React.FC<PaymentConfirmationModalProps> = ({
           </div>
         </div>
 
-        <div className="text-sm text-gray-600 mb-6">
-          Dengan melanjutkan, Anda menyetujui pembayaran untuk pesanan yang dipilih menggunakan metode pembayaran yang telah dipilih.
-        </div>
+        <div className="text-sm text-gray-600 mb-6">{agreementText}</div>
 
         <div className="flex gap-3">
           <button

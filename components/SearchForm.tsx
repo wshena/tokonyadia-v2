@@ -123,10 +123,13 @@ const SearchForm = () => {
           }}
         />
         {searchInput.trim() && (
-          <button onClick={() => {
-            setSearchInput('')
-            setIsModalOpen(false)
-          }}>
+          <button
+            type="button"
+            onClick={() => {
+              setSearchInput('')
+              setIsModalOpen(false)
+            }}
+          >
             <CancelIcon size={20} color="black" />
           </button>
         )}

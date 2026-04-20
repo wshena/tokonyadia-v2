@@ -15,6 +15,12 @@ const menuItems = [
     icon: <CartIcon size={18} color="black" />,
   },
   {
+    label: 'History Top Up & Tagihan',
+    href: '/user/history',
+    description: 'Lihat riwayat semua pembayaran top up dan pembayaran tagihan digital.',
+    icon: <CartIcon size={18} color="black" />,
+  },
+  {
     label: 'Pengaturan Akun',
     href: '/user/settings',
     description: 'Kelola profil, kontak, alamat, dan preferensi akun kamu.',
