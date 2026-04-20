@@ -139,9 +139,7 @@ const DigitalPaymentPage = () => {
         <div className="mx-auto max-w-6xl space-y-6">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-gray-900">Konfirmasi Pembayaran Digital</h1>
-            <p className="mt-2 text-gray-600">
-              Simulasi pembayaran untuk layanan {payload.category === 'topup' ? 'top up' : 'tagihan'} mengikuti alur halaman payment produk.
-            </p>
+            <p className="mt-2 text-gray-600">Pastikan detail transaksi sudah benar sebelum melanjutkan ke pembayaran.</p>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">

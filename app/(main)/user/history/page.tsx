@@ -178,15 +178,15 @@ const DigitalTransactionHistory = () => {
 
             {/* Stats */}
             <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-2xl bg-gradient-to-br from-green-50 to-green-100 p-4">
+              <div className="rounded-2xl bg-linear-to-br from-green-50 to-green-100 p-4">
                 <p className="text-sm font-semibold text-green-700">Total Pengeluaran</p>
                 <p className="mt-2 text-2xl font-bold text-green-900">{formatCurrency(stats.totalSpent)}</p>
               </div>
-              <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+              <div className="rounded-2xl bg-linear-to-br from-blue-50 to-blue-100 p-4">
                 <p className="text-sm font-semibold text-blue-700">Total Top Up</p>
                 <p className="mt-2 text-2xl font-bold text-blue-900">{stats.topupCount}</p>
               </div>
-              <div className="rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 p-4">
+              <div className="rounded-2xl bg-linear-to-br from-purple-50 to-purple-100 p-4">
                 <p className="text-sm font-semibold text-purple-700">Total Pembayaran Tagihan</p>
                 <p className="mt-2 text-2xl font-bold text-purple-900">{stats.tagihanCount}</p>
               </div>
