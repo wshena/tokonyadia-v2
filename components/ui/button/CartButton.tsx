@@ -1,7 +1,8 @@
 'use client'
 
-import { useRef } from 'react'
-import { useCartStore } from '@/lib/zustand/CartStore'
+import { useEffect, useRef } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { useCartStore, type Product as CartStoreProduct } from '@/lib/zustand/CartStore'
 import CartModal from '../modals/CartModal'
 import Button from './Button'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
@@ -16,10 +17,17 @@ const CartButton = ({ withBackground = true }: CartButtonProps) => {
   const cartButtonHover    = useUtilityStore(state => state.cartButtonHover)
   const setCartButtonHover = useUtilityStore(state => state.setCartButtonHover)
   const setModalBackground = useUtilityStore(state => state.setModalBackground)
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const searchQueryString = searchParams.toString()
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)  // ← delay close
 
-  const total = carts?.products?.reduce((acc, item: any) => acc + item.quantity, 0)
+  const total = carts?.products?.reduce((acc, item: CartStoreProduct) => acc + item.quantity, 0)
+  const closeCartHover = () => {
+    setCartButtonHover(false)
+    if (withBackground) setModalBackground(false)
+  }
 
   const handleMouseEnter = () => {
     // Cancel close jika sedang pending
@@ -31,10 +39,14 @@ const CartButton = ({ withBackground = true }: CartButtonProps) => {
   const handleMouseLeave = () => {
     // Delay close — beri waktu mouse pindah ke CartModal
     timeoutRef.current = setTimeout(() => {
-      setCartButtonHover(false)
-      if (withBackground) setModalBackground(false)
+      closeCartHover()
     }, 100)
   }
+
+  useEffect(() => {
+    setCartButtonHover(false)
+    if (withBackground) setModalBackground(false)
+  }, [pathname, searchQueryString, setCartButtonHover, setModalBackground, withBackground])
 
   return (
     <>
@@ -43,6 +55,7 @@ const CartButton = ({ withBackground = true }: CartButtonProps) => {
         <div
           className="fixed top-20 left-0 w-full h-screen bg-black/50 z-40"
           onMouseEnter={handleMouseLeave}  // ← mouse masuk overlay = tutup
+          onClick={closeCartHover}
         />
       )}
 

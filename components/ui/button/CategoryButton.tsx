@@ -1,11 +1,9 @@
 'use client'
 
-import { useRef } from 'react'
-import { useCartStore } from '@/lib/zustand/CartStore'
-import CartModal from '../modals/CartModal'
+import { useEffect, useRef } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
 import Button from './Button'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
-import { CartIcon } from '@/components/icon'
 import CategoryModal from '../modals/CategoryModal'
 
 interface CategoryButtonProps {
@@ -16,8 +14,15 @@ const CategoryButton = ({ withBackground = true }: CategoryButtonProps) => {
   const categoryButtonHover    = useUtilityStore(state => state.categoryButtonHover)
   const setCategoryButtonHover = useUtilityStore(state => state.setCategoryButtonHover)
   const setModalBackground = useUtilityStore(state => state.setModalBackground)
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const searchQueryString = searchParams.toString()
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)  // ← delay close
+  const closeCategoryHover = () => {
+    setCategoryButtonHover(false)
+    if (withBackground) setModalBackground(false)
+  }
 
   const handleMouseEnter = () => {
     // Cancel close jika sedang pending
@@ -29,10 +34,14 @@ const CategoryButton = ({ withBackground = true }: CategoryButtonProps) => {
   const handleMouseLeave = () => {
     // Delay close — beri waktu mouse pindah ke CartModal
     timeoutRef.current = setTimeout(() => {
-      setCategoryButtonHover(false)
-      if (withBackground) setModalBackground(false)
+      closeCategoryHover()
     }, 100)
   }
+
+  useEffect(() => {
+    setCategoryButtonHover(false)
+    if (withBackground) setModalBackground(false)
+  }, [pathname, searchQueryString, setCategoryButtonHover, setModalBackground, withBackground])
 
   return (
     <>
@@ -41,6 +50,7 @@ const CategoryButton = ({ withBackground = true }: CategoryButtonProps) => {
         <div
           className="fixed top-20 left-0 w-full h-screen bg-black/50 z-40"
           onMouseEnter={handleMouseLeave}  // ← mouse masuk overlay = tutup
+          onClick={closeCategoryHover}
         />
       )}
 

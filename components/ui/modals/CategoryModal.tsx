@@ -1,11 +1,10 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { getAllCategories } from '@/lib/db/categories'
 import { getProductsByIds } from '@/lib/db/products'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
-import { ProductCard } from '@/components/ui/card/ProductCard'
-import { ProductCardSkeleton } from '@/components/ui/card/ProductCardSkeleton'
+import { ProductCard, type ProductCardData } from '@/components/ui/card/ProductCard'
 import Link from 'next/link'
 import { createSlug } from '@/lib/utils'
 
@@ -18,27 +17,19 @@ type Category = {
 }
 
 const CategoryModal = () => {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
-  const [products, setProducts] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [categories] = useState<Category[]>(() => getAllCategories(1, 100).data as Category[])
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(() => categories[0] ?? null)
+  const setCategoryButtonHover = useUtilityStore(state => state.setCategoryButtonHover)
+  const setModalBackground = useUtilityStore(state => state.setModalBackground)
 
-  // Load semua categories saat mount
-  useEffect(() => {
-    const { data } = getAllCategories(1, 100)
-    setCategories(data as Category[])
-    if (data.length > 0) setSelectedCategory(data[0] as Category)
-  }, [])
-
-  // Load products saat selectedCategory berubah
-  useEffect(() => {
-    if (!selectedCategory) return
-
-    setIsLoading(true)
-    const { data } = getProductsByIds(selectedCategory.products, 1, 100)
-    setProducts(data)
-    setIsLoading(false)
-  }, [selectedCategory])
+  const closeCategoryModal = () => {
+    setCategoryButtonHover(false)
+    setModalBackground(false)
+  }
+  const products = useMemo<ProductCardData[]>(
+    () => (selectedCategory ? getProductsByIds(selectedCategory.products, 1, 100).data : []),
+    [selectedCategory]
+  )
 
   return (
     <div className="flex w-175 lg:w-237.5 xl:w-250 2xl:w-325 h-112.5 bg-white shadow-xl border border-gray-200 rounded-xl overflow-hidden p-3">
@@ -69,6 +60,7 @@ const CategoryModal = () => {
           {selectedCategory && (
             <Link
               href={`/categories/${selectedCategory.category_id}/${createSlug(selectedCategory.title)}`}
+              onClick={closeCategoryModal}
               className="text-green-600 text-sm hover:underline"
             >
               Lihat semua
@@ -77,22 +69,26 @@ const CategoryModal = () => {
         </div>
 
         {/* Products Grid */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div
+          className="flex-1 overflow-y-auto p-4"
+          onClickCapture={(event) => {
+            const target = event.target as HTMLElement
+            if (target.closest('[data-ignore-route-loading="true"]')) return
+            if (target.closest('a[href]')) {
+              closeCategoryModal()
+            }
+          }}
+        >
           {!selectedCategory ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-400 text-sm">Pilih kategori</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
-              {isLoading
-                ? Array.from({ length: 8 }).map((_, i) => (
-                    <ProductCardSkeleton key={i} />
-                  ))
-                : products.map((product) => (
-                    <ProductCard key={product.product_id} {...product} />
-                  ))
-              }
-              {!isLoading && products.length === 0 && (
+              {products.map((product) => (
+                <ProductCard key={product.product_id} {...product} />
+              ))}
+              {products.length === 0 && (
                 <div className="col-span-4 flex items-center justify-center h-50">
                   <p className="text-gray-400 text-sm">Tidak ada produk</p>
                 </div>

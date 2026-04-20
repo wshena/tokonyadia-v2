@@ -10,15 +10,39 @@ import { useUtilityStore } from '@/lib/zustand/utilityStore'
 import { useWishlistStore } from '@/lib/zustand/wishlistStore'
 import { createSlug } from '@/lib/utils'
 
-export const ProductCard = (product: any) => {
+export interface ProductCardData {
+  product_id: string
+  title: string
+  images?: {
+    ['800x900']?: string[]
+  }
+  price?: {
+    currency?: string
+    withDiscount?: number
+    withoutDiscount?: number
+    discountPercentage?: number
+  }
+  performance?: {
+    sales?: number
+  }
+}
+
+export const ProductCard = (product: ProductCardData) => {
   const [imgError, setImgError] = useState(false)
   const user = useAuthStore(state => state.user)
   const setAlert = useUtilityStore(state => state.setAlert)
   const addToWishlist = useWishlistStore(state => state.addToWishlist)
   const removeFromWishlist = useWishlistStore(state => state.removeFromWishlist)
-  const isInWishlist = useWishlistStore(state => state.isInWishlist)
+  const inWishlist = useWishlistStore(state =>
+    Boolean(
+      user?.id &&
+      state.wishlist
+        .find(item => item.userId === user.id)
+        ?.products
+        .some(savedProduct => savedProduct.product_id === product.product_id)
+    )
+  )
   const slug = createSlug(product.title)
-  const inWishlist = isInWishlist(user?.id, product.product_id)
 
   const price = product?.price?.withDiscount && product.price.withDiscount > 0
     ? product.price.withDiscount
@@ -42,8 +66,9 @@ export const ProductCard = (product: any) => {
 
       await addToWishlist({ userId: user.id, product })
       setAlert({ label: 'Produk ditambahkan ke wishlist.', type: 'success' })
-    } catch (error: any) {
-      setAlert({ label: error?.message ?? 'Gagal memperbarui wishlist.', type: 'error' })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Gagal memperbarui wishlist.'
+      setAlert({ label: message, type: 'error' })
     }
   }
 
@@ -53,6 +78,7 @@ export const ProductCard = (product: any) => {
         <button
           type="button"
           onClick={handleToggleWishlist}
+          data-ignore-route-loading="true"
           className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition hover:scale-105"
           aria-label={inWishlist ? 'Hapus dari wishlist' : 'Tambah ke wishlist'}
         >

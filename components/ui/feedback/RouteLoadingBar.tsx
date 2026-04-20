@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useSearchParams } from 'next/navigation'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 
 const RouteLoadingBar = () => {
   const pathname = usePathname()
@@ -17,7 +17,7 @@ const RouteLoadingBar = () => {
   const finishTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastUrlRef = useRef(currentUrl)
 
-  const clearTimers = () => {
+  const clearTimers = useEffectEvent(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
@@ -27,9 +27,9 @@ const RouteLoadingBar = () => {
       clearTimeout(finishTimeoutRef.current)
       finishTimeoutRef.current = null
     }
-  }
+  })
 
-  const startLoading = () => {
+  const startLoading = useEffectEvent(() => {
     clearTimers()
     setIsVisible(true)
     setProgress((prev) => (prev > 0 ? prev : 8))
@@ -40,9 +40,9 @@ const RouteLoadingBar = () => {
         return prev + Math.max(2, (92 - prev) * 0.12)
       })
     }, 120)
-  }
+  })
 
-  const finishLoading = () => {
+  const finishLoading = useEffectEvent(() => {
     clearTimers()
     setProgress(100)
 
@@ -50,12 +50,16 @@ const RouteLoadingBar = () => {
       setIsVisible(false)
       setProgress(0)
     }, 220)
-  }
+  })
 
   useEffect(() => {
     if (lastUrlRef.current !== currentUrl) {
-      finishLoading()
-      lastUrlRef.current = currentUrl
+      const timeoutId = window.setTimeout(() => {
+        finishLoading()
+        lastUrlRef.current = currentUrl
+      }, 0)
+
+      return () => window.clearTimeout(timeoutId)
     }
   }, [currentUrl])
 
@@ -63,12 +67,15 @@ const RouteLoadingBar = () => {
     const handleDocumentClick = (event: MouseEvent) => {
       const target = event.target
       if (!(target instanceof Element)) return
+      if (target.closest('[data-ignore-route-loading="true"]')) return
 
       const anchor = target.closest('a[href]')
       if (!anchor) return
 
       const href = anchor.getAttribute('href')
       if (!href || href.startsWith('#')) return
+      if (anchor.getAttribute('target') === '_blank') return
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
 
       const nextUrl = new URL(href, window.location.href)
       const current = new URL(window.location.href)
@@ -111,7 +118,9 @@ const RouteLoadingBar = () => {
   }, [])
 
   useEffect(() => {
-    return () => clearTimers()
+    return () => {
+      clearTimers()
+    }
   }, [])
 
   return (
