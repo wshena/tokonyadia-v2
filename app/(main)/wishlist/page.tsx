@@ -21,7 +21,7 @@ const WishlistPage = () => {
   const isHydrating = useWishlistStore(state => state.isHydrating)
 
   const handleRemove = async (productId: string) => {
-    if (!user?.id) return
+    if (!user?.id || !productId) return
 
     try {
       await removeFromWishlist({ userId: user.id, productId })
@@ -58,6 +58,8 @@ const WishlistPage = () => {
     )
   }
 
+  console.log(products)
+
   return (
     <main className="w-full pt-10 md:pt-20">
       <ContentContainer>
@@ -84,7 +86,7 @@ const WishlistPage = () => {
                   <Link href="/product/all" className="inline-flex rounded-lg bg-white px-4 py-2 font-medium text-orange-700 transition-colors hover:bg-orange-50">
                     Jelajahi Produk
                   </Link>
-                  {products.length > 0 && (
+                  {products.some(p => p.products && p.products.length > 0) && (
                     <button onClick={handleClear} className="rounded-lg border border-white/40 px-4 py-2 font-medium text-white transition-colors hover:bg-white/10">
                       Kosongkan Wishlist
                     </button>
@@ -99,7 +101,7 @@ const WishlistPage = () => {
               <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-rose-500" />
               <p className="mt-5 text-gray-600">Menyinkronkan wishlist dari Supabase...</p>
             </section>
-          ) : products.length === 0 ? (
+          ) : products.length === 0 || !products.some(p => p.products && p.products.length > 0) ? (
             <section className="rounded-[28px] border border-gray-200 bg-white px-6 py-14 text-center shadow-sm">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 text-rose-500">
                 <FullHeartIcon size={28} color="#f43f5e" />
@@ -119,6 +121,9 @@ const WishlistPage = () => {
                   const price = item?.price?.withDiscount && item.price.withDiscount > 0
                   ? item.price.withDiscount
                   : item?.price?.withoutDiscount
+
+
+                  console.log(item);
 
                   return (
                     <article key={item.product_id} className="rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm">
@@ -149,13 +154,15 @@ const WishlistPage = () => {
                           >
                             Lihat Produk
                           </Link>
-                          <button
-                            onClick={() => handleRemove(item.product_id)}
-                            className="flex items-center justify-center rounded-lg border border-gray-200 px-4 py-3 text-gray-700 transition-colors hover:bg-gray-50"
-                            aria-label={`Hapus ${item.title} dari wishlist`}
-                          >
-                            <TrashIcon size={16} color="#374151" />
-                          </button>
+                          {item?.product_id && (
+                            <button
+                              onClick={() => handleRemove(item.product_id)}
+                              className="flex items-center justify-center rounded-lg border border-gray-200 px-4 py-3 text-gray-700 transition-colors hover:bg-gray-50"
+                              aria-label={`Hapus ${item.title} dari wishlist`}
+                            >
+                              <TrashIcon size={16} color="#374151" />
+                            </button>
+                          )}
                         </div>
                       </div>
                     </article>

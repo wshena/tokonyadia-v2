@@ -13,8 +13,8 @@ import { createSlug } from '@/lib/utils'
 export interface ProductCardData {
   product_id: string
   title: string
-  images?: {
-    ['800x900']?: string[]
+  images: {
+    ['800x900']: string[]
   }
   price?: {
     currency?: string
