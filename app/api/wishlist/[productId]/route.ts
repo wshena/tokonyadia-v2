@@ -1,4 +1,5 @@
 import { removeWishlistItem } from '@/lib/db/wishlist'
+import { noStoreHeaders } from '@/lib/cache'
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -15,10 +16,10 @@ export async function DELETE(
     }
 
     await removeWishlistItem(supabase, { userId: user.id, productId })
-    return NextResponse.json({ success: true, message: 'Produk berhasil dihapus dari wishlist' })
-  } catch (error: any) {
+    return NextResponse.json({ success: true, message: 'Produk berhasil dihapus dari wishlist' }, { headers: noStoreHeaders })
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, message: error?.message ?? 'Gagal menghapus wishlist' },
+      { success: false, message: error instanceof Error ? error.message : 'Gagal menghapus wishlist' },
       { status: 500 }
     )
   }

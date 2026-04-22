@@ -5,6 +5,19 @@ import Link from 'next/link'
 import { FacebookIcon, InstagramIcon, PinterestIcon, TwitterIcon } from './icon';
 import Image from 'next/image';
 
+type FooterLink = {
+  label: string
+  link: string
+}
+
+type FooterLinkGroup = {
+  title: string
+  links: FooterLink[]
+}
+
+const contactFooter = ContactFooter as FooterLink[]
+const footerLinksContent = FooterLinksContent as FooterLinkGroup[]
+
 const iconMap: Record<string, JSX.Element> = {
   facebook: <FacebookIcon size={20} color='black' />,
   instagram: <InstagramIcon size={20} color='black' />,
@@ -21,11 +34,21 @@ const Copyright = () => {
     <div className="flex items-center justify-center">
       <div className="w-[250px] md:w-[300px] xl:w-[460px] h-fit flex flex-col items-center gap-[20px]">
         <div className="bg-center bg-cover relative w-full h-[200px] md:h-[223px]">
-          <Image src={'/image/footer_img.png'} alt='footer-image' fill />
+          <Image
+            src={'/image/footer_img.png'}
+            alt='footer-image'
+            fill
+            sizes="(max-width: 768px) 250px, (max-width: 1280px) 300px, 460px"
+            className="object-cover"
+          />
         </div>
         <div className="flex items-center gap-[15px]">
-          <Link href={'#'}><img src='/svg/icon-playstore.svg' alt='playstore-icon' /></Link>
-          <Link href={'#'}><img src='/svg/icon-appstore.svg' alt='playstore-icon' /></Link>
+          <Link href={'#'}>
+            <Image src='/svg/icon-playstore.svg' alt='playstore-icon' width={135} height={40} loading="lazy" />
+          </Link>
+          <Link href={'#'}>
+            <Image src='/svg/icon-appstore.svg' alt='appstore-icon' width={135} height={40} loading="lazy" />
+          </Link>
         </div>
         <span className='text-[1rem]'>© 2024 - 2025, PT. Tokonyadia.</span>
       </div>
@@ -40,9 +63,9 @@ const ContactAndSecurity = () => {
       <div className="flex flex-col gap-2.5">
         <h1 className="font-bold capitalize text-[1rem]">keamanan & privasi</h1>
         <div className="flex items-center gap-2.5">
-          <Image src={'/image/icon_pci_license.webp'} height={48} width={70} alt='pci-license' />
-          <Image src={'/image/icon_bsi_license_hd.png'} height={48} width={70} alt='bsi-license' />
-          <Image src={'/image/icon_bsi_license_hd.png'} height={48} width={70} alt='bsi-license' />
+          <Image src={'/image/icon_pci_license.webp'} height={48} width={70} alt='pci-license' loading="lazy" />
+          <Image src={'/image/icon_bsi_license_hd.png'} height={48} width={70} alt='bsi-license' loading="lazy" />
+          <Image src={'/image/icon_bsi_license_hd.png'} height={48} width={70} alt='bsi-license' loading="lazy" />
         </div>
       </div>
 
@@ -50,9 +73,9 @@ const ContactAndSecurity = () => {
       <div className="flex flex-col gap-2.5">
         <h1 className="font-bold capitalize text-[1rem]">ikuti kami</h1>
         <div className="flex items-center gap-2.5">
-          {ContactFooter.map((item: any) => (
-            <Link key={item?.label} href={item?.link}>
-              <SocialMediaIcon name={item?.label} />
+          {contactFooter.map((item) => (
+            <Link key={item.label} href={item.link}>
+              <SocialMediaIcon name={item.label} />
             </Link>
           ))}
         </div>
@@ -67,16 +90,16 @@ const FooterLinks = () => {
       {/* Kolom pertama */}
       <div>
         <h1 className="font-bold capitalize text-[1rem]">
-          {FooterLinksContent[0]?.title}
+          {footerLinksContent[0]?.title}
         </h1>
         <div className="flex flex-col gap-2.5 items-start mt-2">
-          {FooterLinksContent[0]?.links.map((item: any) => (
+          {footerLinksContent[0]?.links.map((item) => (
             <Link
-              key={item?.label}
-              href={item?.link}
+              key={item.label}
+              href={item.link}
               className="hover:text-primaryGreen text-[.9rem] text-gray-700"
             >
-              {item?.label}
+              {item.label}
             </Link>
           ))}
         </div>
@@ -84,19 +107,19 @@ const FooterLinks = () => {
 
       {/* Kolom kedua & ketiga */}
       <div className="flex flex-col gap-3.75 items-start">
-        {FooterLinksContent?.slice(1, 3)?.map((item: any) => (
-          <div key={item?.title}>
+        {footerLinksContent.slice(1, 3).map((item) => (
+          <div key={item.title}>
             <h1 className="font-bold capitalize text-[1rem]">
-              {item?.title}
+              {item.title}
             </h1>
             <div className="flex flex-col gap-2.5 items-start mt-2">
-              {item?.links.map((item: any) => (
+              {item.links.map((linkItem) => (
                 <Link
-                  key={item?.label}
-                  href={item?.link}
+                  key={linkItem.label}
+                  href={linkItem.link}
                   className="hover:text-primaryGreen text-[.9rem] text-gray-700"
                 >
-                  {item?.label}
+                  {linkItem.label}
                 </Link>
               ))}
             </div>

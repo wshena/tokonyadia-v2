@@ -1,4 +1,5 @@
-import { getRelatedProductsPaginated } from '@/lib/db/products'
+import { CATALOG_REVALIDATE_SECONDS, publicCacheHeaders } from '@/lib/cache'
+import { getCachedRelatedProducts } from '@/lib/server/catalog'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
@@ -11,11 +12,14 @@ export async function GET(
   const page  = Math.max(1, parseInt(searchParams.get('page')  ?? '1'))
   const limit = Math.max(1, parseInt(searchParams.get('limit') ?? '10'))
 
-  const result = getRelatedProductsPaginated(id, page, limit)
+  const result = await getCachedRelatedProducts(id, page, limit)
 
   return NextResponse.json({
     success: true,
     ...result,
     message: 'Related products fetched successfully'
-  }, { status: 200 })
+  }, {
+    status: 200,
+    headers: publicCacheHeaders(CATALOG_REVALIDATE_SECONDS),
+  })
 }

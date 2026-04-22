@@ -14,6 +14,21 @@ export interface PaginationResult<T> {
   }
 }
 
+const normalizedCollections = collections.map(collection => ({
+  collection,
+  title: collection.title.toLowerCase(),
+}))
+
+const collectionById = new Map(collections.map(collection => [collection.collection_id, collection]))
+const collectionsByProductId = collections.reduce<Map<string, Collection[]>>((result, collection) => {
+  collection.products.forEach(productId => {
+    const list = result.get(productId) ?? []
+    list.push(collection)
+    result.set(productId, list)
+  })
+  return result
+}, new Map())
+
 const paginate = <T>(data: T[], page: number, limit: number): PaginationResult<T> => {
   const offset = (page - 1) * limit
   const total = data.length
@@ -39,7 +54,7 @@ export const getAllCollections = (page: number = 1, limit: number = 20) => {
 
 // Get collection by ID
 export const getCollectionById = (id: string): Collection | null => {
-  return collections.find(c => c.collection_id === id) ?? null
+  return collectionById.get(id) ?? null
 }
 
 // Get collection by path/slug
@@ -49,14 +64,14 @@ export const getCollectionByPath = (path: string): Collection | null => {
 
 // Search collection by title
 export const searchCollections = (keyword: string, page: number = 1, limit: number = 20) => {
-  const filtered = collections.filter(c =>
-    c.title.toLowerCase().includes(keyword.toLowerCase())
-  )
+  const filtered = normalizedCollections
+    .filter(entry => entry.title.includes(keyword.toLowerCase()))
+    .map(entry => entry.collection)
   return paginate(filtered, page, limit)
 }
 
 // Get collections that contain a specific product
 export const getCollectionsByProduct = (productId: string, page: number = 1, limit: number = 20) => {
-  const filtered = collections.filter(c => c.products.includes(productId))
+  const filtered = collectionsByProductId.get(productId) ?? []
   return paginate(filtered, page, limit)
 }

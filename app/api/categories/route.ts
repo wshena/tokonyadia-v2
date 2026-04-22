@@ -1,4 +1,5 @@
-import { getAllCategories, searchCategories, getCategoriesByProduct } from '@/lib/db/categories'
+import { CATALOG_REVALIDATE_SECONDS, publicCacheHeaders, SEARCH_REVALIDATE_SECONDS } from '@/lib/cache'
+import { getCachedCategoryList } from '@/lib/server/catalog'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -9,15 +10,14 @@ export async function GET(request: NextRequest) {
   const keyword   = searchParams.get('keyword')   ?? undefined
   const productId = searchParams.get('productId') ?? undefined
 
-  const result = keyword
-    ? searchCategories(keyword, page, limit)
-    : productId
-      ? getCategoriesByProduct(productId, page, limit)
-      : getAllCategories(page, limit)
+  const result = await getCachedCategoryList({ page, limit, keyword, productId })
 
   return NextResponse.json({
     success: true,
     ...result,
     message: 'Categories fetched successfully'
-  }, { status: 200 })
+  }, {
+    status: 200,
+    headers: publicCacheHeaders(keyword ? SEARCH_REVALIDATE_SECONDS : CATALOG_REVALIDATE_SECONDS),
+  })
 }

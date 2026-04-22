@@ -76,6 +76,8 @@ const DesktopSearchModal = ({
                       src={product?.images?.['800x900']?.[0]}
                       alt={product?.title}
                       fill
+                      sizes="56px"
+                      loading="lazy"
                       className="object-cover"
                     />
                   </div>

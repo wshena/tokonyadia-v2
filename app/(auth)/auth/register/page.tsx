@@ -316,6 +316,7 @@ const Page = () => {
               alt="register-image"
               width={450}
               height={450}
+              sizes="450px"
               className="hidden xl:block"
             />
             <RegisterForm />

@@ -5,7 +5,14 @@ const CustomBanner = ({label}:{label:React.ReactNode}) => {
   return (
     <div className='relative w-full'>
       <div className="w-full h-37.5 md:h-50 lg:h-75">
-        <Image src={'/image/empty-banner.image'} fill loading='lazy' className='w-full h-full object-cover' alt='banner-image' />
+        <Image
+          src={'/image/empty-banner.image'}
+          fill
+          priority={false}
+          sizes="100vw"
+          className='w-full h-full object-cover'
+          alt='banner-image'
+        />
       </div>
 
       {/* title */}

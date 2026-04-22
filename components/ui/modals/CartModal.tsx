@@ -26,7 +26,7 @@ const IfEmpty = ({ onClose }: { onClose: () => void }) => {
       <h1 className="font-bold text-[1.3rem]">Wah belanjaanmu kosong nih</h1>
       <h2 className="text-[.9rem] text-gray-600">Yuk isi dengan barang-barang impianmu!</h2>
       <div className="relative w-1/2 h-32.5">
-        <Image src="/image/empty-cart.png" fill alt="product-empty" />
+        <Image src="/image/empty-cart.png" fill alt="product-empty" sizes="160px" loading="lazy" className="object-contain" />
       </div>
       <Link href="/" onClick={onClose}>
         <Button variant='outline' label='Mulai Belanja' className='border border-green-500 text-green-500' />

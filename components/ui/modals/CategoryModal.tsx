@@ -4,9 +4,12 @@ import React, { useMemo, useState } from 'react'
 import { getAllCategories } from '@/lib/db/categories'
 import { getProductsByIds } from '@/lib/db/products'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
-import { ProductCard, type ProductCardData } from '@/components/ui/card/ProductCard'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { createSlug } from '@/lib/utils'
+
+const ProductCard = dynamic(() => import('@/components/ui/card/ProductCard').then(mod => mod.ProductCard))
+type ProductCardData = import('@/components/ui/card/ProductCard').ProductCardData
 
 type Category = {
   category_id: string

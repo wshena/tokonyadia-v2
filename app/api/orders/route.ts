@@ -1,4 +1,5 @@
 import { createOrder, getOrdersByUser } from '@/lib/db/order'
+import { noStoreHeaders } from '@/lib/cache'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -31,10 +32,10 @@ export async function GET(request: NextRequest) {
       return idMatch && statusMatch
     })
 
-    return NextResponse.json({ success: true, data: filteredOrders })
-  } catch (error: any) {
+    return NextResponse.json({ success: true, data: filteredOrders }, { headers: noStoreHeaders })
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, message: error?.message ?? 'Gagal memuat pesanan' },
+      { success: false, message: error instanceof Error ? error.message : 'Gagal memuat pesanan' },
       { status: 500 }
     )
   }
@@ -70,10 +71,10 @@ export async function POST(request: NextRequest) {
       deliveryMethod
     })
 
-    return NextResponse.json({ success: true, data: order }, { status: 201 })
-  } catch (error: any) {
+    return NextResponse.json({ success: true, data: order }, { status: 201, headers: noStoreHeaders })
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, message: error?.message ?? 'Gagal membuat pesanan' },
+      { success: false, message: error instanceof Error ? error.message : 'Gagal membuat pesanan' },
       { status: 500 }
     )
   }

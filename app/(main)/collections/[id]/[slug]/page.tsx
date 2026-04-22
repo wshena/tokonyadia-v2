@@ -1,22 +1,23 @@
-import CollectionCardLoadMore from '@/components/CollectionCardLoadMore';
 import CustomBanner from '@/components/CustomBanner';
-import ProductLoadMore from '@/components/ProductLoadMore';
 import Breadcrumb, { BreadcrumbItem } from '@/components/ui/Breadcrumb';
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
-import { getAllCollections, getCollectionById } from '@/lib/db/collections';
-import { getProductsByIds } from '@/lib/db/products';
+import dynamic from 'next/dynamic';
+import { getCachedCollectionDetail, getCachedCollectionList, getCachedProductsByIds } from '@/lib/server/catalog';
 import { notFound } from 'next/navigation';
 import React from 'react'
 
-const page = async ({params}:{params:{id:string; slug:string}}) => {
-  const { id: collection_id, slug: collection_slug } = await params
+const CollectionCardLoadMore = dynamic(() => import('@/components/CollectionCardLoadMore'))
+const ProductLoadMore = dynamic(() => import('@/components/ProductLoadMore'))
 
-  const collectionData = getCollectionById(collection_id);
+const page = async ({params}:{params:{id:string; slug:string}}) => {
+  const { id: collection_id } = await params
+
+  const collectionData = await getCachedCollectionDetail(collection_id);
   
   if (!collectionData) notFound()
   
   const productIds = collectionData?.products ?? []
-  const { data: initialData, pagination: initialPagination } = getProductsByIds(productIds, 1, 20);
+  const { data: initialData, pagination: initialPagination } = await getCachedProductsByIds(productIds, 1, 20);
 
   const breadcrumbs: BreadcrumbItem[] = [
     { label: 'Beranda', href: '/' },
@@ -25,7 +26,7 @@ const page = async ({params}:{params:{id:string; slug:string}}) => {
   ]
 
   // koleksi lainnya
-  const { data: initialCollectionData, pagination: collectionPagination } = getAllCollections(1, 10);
+  const { data: initialCollectionData, pagination: collectionPagination } = await getCachedCollectionList({ page: 1, limit: 10 });
 
   return (
     <main className="w-full pt-10 md:pt-20">

@@ -125,8 +125,8 @@ const OrderPage = () => {
       }
 
       setOrders(payload.data ?? [])
-    } catch (error: any) {
-      setAlert({ label: error?.message ?? 'Gagal memuat pesanan', type: 'error' })
+    } catch (error: unknown) {
+      setAlert({ label: error instanceof Error ? error.message : 'Gagal memuat pesanan', type: 'error' })
     } finally {
       setLoading(false)
     }
@@ -288,8 +288,8 @@ const OrderPage = () => {
       closeModal()
       deselectAll()
       fetchOrders(true)
-    } catch (error: any) {
-      setAlert({ label: error?.message ?? 'Terjadi kesalahan saat memproses order', type: 'error' })
+    } catch (error: unknown) {
+      setAlert({ label: error instanceof Error ? error.message : 'Terjadi kesalahan saat memproses order', type: 'error' })
       setIsProcessing(false)
     }
   }
@@ -329,7 +329,7 @@ const OrderPage = () => {
         <ContentContainer>
           <section className="rounded-[28px] border border-gray-200 bg-white px-6 py-10 text-center shadow-sm md:px-10">
             <div className="mx-auto relative h-40 w-40">
-              <Image src="/image/3-emptystate.png" alt="Belum ada pesanan" fill className="object-contain" />
+              <Image src="/image/3-emptystate.png" alt="Belum ada pesanan" fill sizes="220px" className="object-contain" />
             </div>
             <h1 className="mt-6 text-2xl font-bold text-gray-900">Belum ada pesanan</h1>
             <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-gray-600 md:text-base">
@@ -361,9 +361,9 @@ const OrderPage = () => {
                     Pusat Pesanan
                   </span>
                   <div className="space-y-2">
-                    <h1 className="text-3xl font-bold md:text-4xl">Semua order selalu sinkron</h1>
+                    <h1 className="text-3xl font-bold md:text-4xl">Lihat semua pesanan yang anda buat</h1>
                     <p className="max-w-2xl text-sm leading-6 text-white/90 md:text-base">
-                      Perubahan dari database akan langsung dimuat ulang ke halaman ini, termasuk status pembayaran dan pengiriman.
+                      Pantau status pesanan, lacak pengiriman, dan kelola pesanan Anda dengan mudah di sini.
                     </p>
                   </div>
                 </div>
@@ -494,7 +494,7 @@ const OrderPage = () => {
                       {(order.order_items ?? []).map(item => (
                         <div key={item.id} className="flex flex-col gap-4 rounded-2xl border border-gray-100 p-4 md:flex-row">
                           <div className="relative h-24 w-full overflow-hidden rounded-xl bg-gray-100 md:w-24">
-                            <Image src={item.image} alt={item.product_title} fill className="object-cover" />
+                            <Image src={item.image} alt={item.product_title} fill sizes="80px" className="object-cover" />
                           </div>
                           <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-start md:justify-between">
                             <div className="space-y-1">

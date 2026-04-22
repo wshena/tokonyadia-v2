@@ -1,8 +1,10 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { CategoryIcon } from '@/components/icon'
-import CategoryListModal from '../modals/CategoryListModal'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
+
+const CategoryListModal = dynamic(() => import('../modals/CategoryListModal'))
 
 const CategoryModalButton = () => {
   const openModal = useUtilityStore((state) => state.openModal)

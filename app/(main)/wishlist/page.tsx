@@ -8,17 +8,14 @@ import { useAuthStore } from '@/lib/zustand/authStore'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
 import { useWishlistStore } from '@/lib/zustand/wishlistStore'
 import { createSlug } from '@/lib/utils'
-import { useMemo } from 'react'
 
 const WishlistPage = () => {
   const user = useAuthStore(state => state.user)
   const setAlert = useUtilityStore(state => state.setAlert)
-  // const products = useWishlistStore(state => state.getWishlistByUser(user?.id))
   const wishlist = useWishlistStore(state => state.wishlist)
-  const products = useMemo(() => {
-    if (!user?.id) return []
-    return wishlist.filter(item => item.userId === user.id)
-  }, [wishlist, user?.id])
+  const products = user?.id
+    ? wishlist.filter(item => item.userId === user.id)
+    : []
   const removeFromWishlist = useWishlistStore(state => state.removeFromWishlist)
   const clearAllWishlist = useWishlistStore(state => state.clearAllWishlist)
   const isHydrating = useWishlistStore(state => state.isHydrating)
@@ -29,8 +26,8 @@ const WishlistPage = () => {
     try {
       await removeFromWishlist({ userId: user.id, productId })
       setAlert({ label: 'Produk dihapus dari wishlist.', type: 'success' })
-    } catch (error: any) {
-      setAlert({ label: error?.message ?? 'Gagal menghapus wishlist.', type: 'error' })
+    } catch (error: unknown) {
+      setAlert({ label: error instanceof Error ? error.message : 'Gagal menghapus wishlist.', type: 'error' })
     }
   }
 
@@ -40,8 +37,8 @@ const WishlistPage = () => {
     try {
       await clearAllWishlist(user.id)
       setAlert({ label: 'Wishlist berhasil dikosongkan.', type: 'success' })
-    } catch (error: any) {
-      setAlert({ label: error?.message ?? 'Gagal mengosongkan wishlist.', type: 'error' })
+    } catch (error: unknown) {
+      setAlert({ label: error instanceof Error ? error.message : 'Gagal mengosongkan wishlist.', type: 'error' })
     }
   }
 
@@ -68,7 +65,7 @@ const WishlistPage = () => {
           <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
             <div className="relative overflow-hidden bg-linear-to-r from-rose-500 via-orange-400 to-amber-300 px-6 py-8 text-white md:px-8">
               <div className="absolute inset-y-0 right-0 w-1/3 opacity-20">
-                <Image src="/image/wishlist-bg.png" alt="Wishlist background" fill className="object-cover" />
+                <Image src="/image/wishlist-bg.png" alt="Wishlist background" fill sizes="33vw" className="object-cover" />
               </div>
               <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div className="space-y-3">
@@ -130,6 +127,7 @@ const WishlistPage = () => {
                           src={item?.images?.['800x900']?.[0] ?? '/image/1-emptystate.png'}
                           alt={item.title}
                           fill
+                          sizes="(max-width: 1280px) 50vw, 33vw"
                           className="object-cover"
                         />
                       </div>

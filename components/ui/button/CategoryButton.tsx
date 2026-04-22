@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import dynamic from 'next/dynamic'
 import { usePathname, useSearchParams } from 'next/navigation'
 import Button from './Button'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
-import CategoryModal from '../modals/CategoryModal'
+
+const CategoryModal = dynamic(() => import('../modals/CategoryModal'))
 
 interface CategoryButtonProps {
   withBackground?: boolean

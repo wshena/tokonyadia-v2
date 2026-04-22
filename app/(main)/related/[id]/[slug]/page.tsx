@@ -1,13 +1,16 @@
 import CustomBanner from '@/components/CustomBanner';
 import ContentContainer from '@/components/ui/layouts/ContentContainer';
-import RelatedProductLoadMore from '@/components/RelatedProductLoadMore';
-import { getRelatedProducts } from '@/lib/db/products';
+import dynamic from 'next/dynamic';
+import { getCachedProductDetail } from '@/lib/server/catalog';
 import React from 'react'
 
-const page = async ({params}: {params: {id: string; slug: string}}) => {
-  const { id, slug } = await params
+const RelatedProductLoadMore = dynamic(() => import('@/components/RelatedProductLoadMore'))
 
-  const relatedProducts = getRelatedProducts(id);
+const page = async ({params}: {params: {id: string; slug: string}}) => {
+  const { id } = await params
+
+  const product = await getCachedProductDetail(id)
+  const relatedProducts = product?.related ?? []
   const initialData = relatedProducts.slice(0, 10)
   const initialPagination = {
     total:       relatedProducts.length,

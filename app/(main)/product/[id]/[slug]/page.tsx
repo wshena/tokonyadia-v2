@@ -1,22 +1,22 @@
-import ProductDescription from '@/components/ProductDescription';
-import ProductImage from '@/components/ProductImage';
 import Breadcrumb, { BreadcrumbItem } from '@/components/ui/Breadcrumb';
-import AddToCartCard from '@/components/ui/card/AddToCartCard';
 import { ProductCard } from '@/components/ui/card/ProductCard';
 import ContentContainer from '@/components/ui/layouts/ContentContainer';
-import { getAllProducts, getProductById, getRandomProducts, getRelatedProducts } from '@/lib/db/products';
+import { getCachedProductDetail, getCachedProductList } from '@/lib/server/catalog';
 import { createSlug } from '@/lib/utils';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
+
+const ProductDescription = dynamic(() => import('@/components/ProductDescription'))
+const ProductImage = dynamic(() => import('@/components/ProductImage'))
+const AddToCartCard = dynamic(() => import('@/components/ui/card/AddToCartCard'))
 
 const page = async ({params}:{params:{id:string; slug:string}}) => {
   const { id, slug } = await params
   
-  const product = getProductById(id);
+  const product = await getCachedProductDetail(id)
 
   if (!product) notFound();
-
-  const relatedProducts = getRelatedProducts(id);
 
   const breadcrumbs: BreadcrumbItem[] = [
     { label: 'Beranda', href: '/' },
@@ -27,7 +27,7 @@ const page = async ({params}:{params:{id:string; slug:string}}) => {
 
 
   // random product
-  const randomProduct = getRandomProducts(12)
+  const randomProduct = await getCachedProductList({ page: 1, limit: 12, random: true })
 
   return (
     <main className='w-full pt-10 md:pt-20'>
@@ -58,7 +58,7 @@ const page = async ({params}:{params:{id:string; slug:string}}) => {
               </Link>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {relatedProducts.map((product) => (
+              {product.related.map((product) => (
                 <ProductCard key={product.product_id} {...product} />
               ))}
             </div>

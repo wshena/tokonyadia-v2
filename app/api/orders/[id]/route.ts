@@ -1,4 +1,5 @@
 import { deleteOrder, getOrderById, updateOrder } from '@/lib/db/order'
+import { noStoreHeaders } from '@/lib/cache'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -20,7 +21,7 @@ export async function GET(
     return NextResponse.json({ success: false, message: 'Order tidak ditemukan' }, { status: 404 })
   }
 
-  return NextResponse.json({ success: true, data: order })
+  return NextResponse.json({ success: true, data: order }, { headers: noStoreHeaders })
 }
 
 export async function PATCH(
@@ -74,10 +75,10 @@ export async function PATCH(
       ...(nextDeliveryMethod ? { delivery_method: nextDeliveryMethod } : {}),
     })
 
-    return NextResponse.json({ success: true, data: updated })
-  } catch (error: any) {
+    return NextResponse.json({ success: true, data: updated }, { headers: noStoreHeaders })
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, message: error?.message ?? 'Gagal memperbarui order' },
+      { success: false, message: error instanceof Error ? error.message : 'Gagal memperbarui order' },
       { status: 500 }
     )
   }
@@ -102,5 +103,5 @@ export async function DELETE(
   }
 
   await deleteOrder(supabase, id)
-  return NextResponse.json({ success: true, message: 'Order berhasil dihapus' })
+  return NextResponse.json({ success: true, message: 'Order berhasil dihapus' }, { headers: noStoreHeaders })
 }

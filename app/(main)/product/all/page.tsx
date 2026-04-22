@@ -1,15 +1,30 @@
 import React from 'react'
 import CustomBanner from '@/components/CustomBanner'
-import CategoryCard from '@/components/ui/card/CategoryCard'
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
-import ProductLoadMore from '@/components/ProductLoadMore'
-import { getAllCategories } from '@/lib/db/categories'
-import { getAllCollections } from '@/lib/db/collections'
-import { getAllProducts, getRandomProducts } from '@/lib/db/products'
-import CategoryCardLoadMore from '@/components/CategoryCardLoadMore'
-import CollectionCardLoadMore from '@/components/CollectionCardLoadMore'
+import dynamic from 'next/dynamic'
+import {
+  getCachedCategoryList,
+  getCachedCollectionList,
+  getCachedProductList,
+} from '@/lib/server/catalog'
 
-const CategorySection = ({label, initialData, initialPagination}:{label:string, initialData:any[], initialPagination:any}) => {
+const ProductLoadMore = dynamic(() => import('@/components/ProductLoadMore'))
+const CategoryCardLoadMore = dynamic(() => import('@/components/CategoryCardLoadMore'))
+const CollectionCardLoadMore = dynamic(() => import('@/components/CollectionCardLoadMore'))
+
+type CategorySectionProps = {
+  label: string
+  initialData: Awaited<ReturnType<typeof getCachedCategoryList>>['data']
+  initialPagination: Awaited<ReturnType<typeof getCachedCategoryList>>['pagination']
+}
+
+type CollectionSectionProps = {
+  label: string
+  initialData: Awaited<ReturnType<typeof getCachedCollectionList>>['data']
+  initialPagination: Awaited<ReturnType<typeof getCachedCollectionList>>['pagination']
+}
+
+const CategorySection = ({label, initialData, initialPagination}: CategorySectionProps) => {
   return (
     <div className="space-y-5">
       <h2 className='text-xl md:text-2xl font-bold'>{label}</h2>
@@ -18,7 +33,7 @@ const CategorySection = ({label, initialData, initialPagination}:{label:string, 
   )
 }
 
-const CollectionSection = ({label, initialData, initialPagination}:{label:string, initialData:any[], initialPagination:any}) => {
+const CollectionSection = ({label, initialData, initialPagination}: CollectionSectionProps) => {
   return (
     <div className="space-y-5">
       <h2 className='text-xl md:text-2xl font-bold'>{label}</h2>
@@ -27,10 +42,16 @@ const CollectionSection = ({label, initialData, initialPagination}:{label:string
   )
 }
 
-const page = () => {
-  const { data:initialCollectionData, pagination: collectionPagination } = getAllCollections(1, 10);
-  const { data:initialCategoryData, pagination: categoryPagination } = getAllCategories(1, 10);
-  const { data: initialProductData, pagination } = getRandomProducts(1, 20)
+const page = async () => {
+  const [
+    { data: initialCollectionData, pagination: collectionPagination },
+    { data: initialCategoryData, pagination: categoryPagination },
+    { data: initialProductData, pagination },
+  ] = await Promise.all([
+    getCachedCollectionList({ page: 1, limit: 10 }),
+    getCachedCategoryList({ page: 1, limit: 10 }),
+    getCachedProductList({ page: 1, limit: 20, random: true }),
+  ])
   
   return (
     <main className="w-full pt-10 md:pt-20">

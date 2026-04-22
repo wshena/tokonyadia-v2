@@ -1,4 +1,6 @@
-import { getAllProducts, getFilteredProducts, getRandomProducts } from '@/lib/db/products'
+import { publicCacheHeaders, RANDOM_REVALIDATE_SECONDS, CATALOG_REVALIDATE_SECONDS } from '@/lib/cache'
+import { getCachedProductList } from '@/lib/server/catalog'
+import type { FilterParams } from '@/lib/db/products'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -13,14 +15,22 @@ export async function GET(request: NextRequest) {
   const sortBy   = searchParams.get('sortBy')   ?? undefined
   const random   = searchParams.get('random') === 'true'  // ← tambah param random
 
-  if (random) {
-    const result = getRandomProducts(page, limit)
-    return NextResponse.json({ success: true, ...result, message: 'Products fetched successfully' }, { status: 200 })
-  }
+  const result = await getCachedProductList({
+    page,
+    limit,
+    keyword,
+    category,
+    minPrice,
+    maxPrice,
+    sortBy: sortBy as FilterParams['sortBy'],
+    random,
+  })
 
-  const result = (keyword || category || minPrice || maxPrice || sortBy)
-    ? getFilteredProducts({ keyword, category, minPrice, maxPrice, sortBy: sortBy as any, page, limit })
-    : getAllProducts(page, limit)
-
-  return NextResponse.json({ success: true, ...result, message: 'Products fetched successfully' }, { status: 200 })
+  return NextResponse.json(
+    { success: true, ...result, message: 'Products fetched successfully' },
+    {
+      status: 200,
+      headers: publicCacheHeaders(random ? RANDOM_REVALIDATE_SECONDS : CATALOG_REVALIDATE_SECONDS),
+    }
+  )
 }

@@ -1,47 +1,93 @@
-import axios from "axios";
-
 type HttpMethod = 'get' | 'post' | 'put' | 'delete';
-type FetcherParams = Record<string, any>;
+type FetcherValue = string | number | boolean | null | undefined
+type FetcherParams = Record<string, FetcherValue>;
+type CacheStrategy = 'default' | 'force-cache' | 'no-store'
 
-const fetcher = async (
+interface FetcherOptions {
+  cache?: CacheStrategy
+  ttlMs?: number
+}
+
+const DEFAULT_TTL_MS = 5 * 60 * 1000
+const memoryCache = new Map<string, { expiresAt: number; data: unknown }>()
+const inFlightRequests = new Map<string, Promise<unknown>>()
+
+const createRequestUrl = (url: string, params: FetcherParams = {}) => {
+  const searchParams = new URLSearchParams()
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return
+    searchParams.set(key, String(value))
+  })
+
+  const queryString = searchParams.toString()
+  return queryString ? `${url}?${queryString}` : url
+}
+
+const fetcher = async <T = unknown>(
   url: string,
   params: FetcherParams = {},
   method: HttpMethod = 'get',
-  data?: any,
-  headers?: Record<string, string>
-) => {
-  try {
-    const response = await axios.request({
-      method,
-      url,
-      params,
-      data,
-      headers: {
-        "Content-Type": "application/json",
-        ...headers
-      }
-    });
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const statusCode = error.response?.status;
-      const responseData = error.response?.data;
+  data?: unknown,
+  headers?: Record<string, string>,
+  options: FetcherOptions = {}
+): Promise<T> => {
+  const requestUrl = createRequestUrl(url, params)
+  const cacheMode = options.cache ?? (method === 'get' ? 'force-cache' : 'no-store')
+  const ttlMs = options.ttlMs ?? DEFAULT_TTL_MS
+  const cacheKey = `${method}:${requestUrl}`
 
-      console.error('Fetcher error:', {
-        status: statusCode,
-        data: responseData,
-        message: error.message
-      });
+  if (method === 'get' && cacheMode !== 'no-store') {
+    const cached = memoryCache.get(cacheKey)
 
-      throw new Error(
-        responseData?.message ||
-        error.message ||
-        `Request failed with status ${statusCode}`
-      );
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data as T
     }
 
-    console.error('Unexpected fetcher error:', error);
-    throw new Error('Terjadi kesalahan yang tidak terduga');
+    const inFlight = inFlightRequests.get(cacheKey)
+    if (inFlight) return inFlight as Promise<T>
+  }
+
+  const request = (async () => {
+    const response = await fetch(requestUrl, {
+      method: method.toUpperCase(),
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers,
+      },
+      body: data ? JSON.stringify(data) : undefined,
+      cache: cacheMode,
+    })
+
+    const payload = await response.json().catch(() => null) as T | null
+
+    if (!response.ok) {
+      throw new Error(payload?.message || `Request failed with status ${response.status}`)
+    }
+
+    if (method === 'get' && cacheMode !== 'no-store') {
+      memoryCache.set(cacheKey, {
+        expiresAt: Date.now() + ttlMs,
+        data: payload,
+      })
+    }
+
+    return payload as T
+  })() as Promise<T>
+
+  if (method === 'get' && cacheMode !== 'no-store') {
+    inFlightRequests.set(cacheKey, request)
+  }
+
+  try {
+    return await request
+  } catch (error) {
+    console.error('Fetcher error:', error)
+    throw error instanceof Error ? error : new Error('Terjadi kesalahan yang tidak terduga')
+  } finally {
+    if (method === 'get') {
+      inFlightRequests.delete(cacheKey)
+    }
   }
 };
 

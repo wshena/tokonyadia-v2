@@ -2,6 +2,7 @@ import products from '@/lib/data/products.json';
 import { createSlug } from '../utils';
 
 type Product = typeof products[0]
+type SortBy = 'price_asc' | 'price_desc' | 'popular' | 'rating'
 
 export interface PaginationResult<T> {
   data: T[]
@@ -14,6 +15,20 @@ export interface PaginationResult<T> {
     hasPrevPage: boolean
   }
 }
+
+const normalizedProducts = products.map(product => ({
+  product,
+  title: product.title.toLowerCase(),
+  category: product.category.toLowerCase(),
+}))
+
+const productById = new Map(products.map(product => [product.product_id, product]))
+const productsByCategory = normalizedProducts.reduce<Map<string, Product[]>>((result, entry) => {
+  const list = result.get(entry.category) ?? []
+  list.push(entry.product)
+  result.set(entry.category, list)
+  return result
+}, new Map())
 
 // Helper pagination
 const paginate = <T>(data: T[], page: number, limit: number): PaginationResult<T> => {
@@ -34,6 +49,17 @@ const paginate = <T>(data: T[], page: number, limit: number): PaginationResult<T
   }
 }
 
+const shuffle = <T>(items: T[]) => {
+  const clone = [...items]
+
+  for (let index = clone.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1))
+    ;[clone[index], clone[randomIndex]] = [clone[randomIndex], clone[index]]
+  }
+
+  return clone
+}
+
 // Get all products
 export const getAllProducts = (page: number = 1, limit: number = 20) => {
   return paginate(products, page, limit)
@@ -41,18 +67,21 @@ export const getAllProducts = (page: number = 1, limit: number = 20) => {
 
 // Get random products dengan pagination
 export const getRandomProducts = (page: number = 1, limit: number = 20) => {
-  const shuffled = [...products].sort(() => Math.random() - 0.5)
+  const shuffled = shuffle(products)
   return paginate(shuffled, page, limit)
 }
 
 // Get product by ID
 export const getProductById = (id: string): Product | null => {
-  return products.find(p => p.product_id === id) ?? null
+  return productById.get(id) ?? null
 }
 
 // Ambil products berdasarkan array of product_id (untuk hasil dari category/collection)
 export const getProductsByIds = (ids: string[], page: number = 1, limit: number = 20) => {
-  const filtered = products.filter(p => ids.includes(p.product_id))
+  const filtered = ids
+    .map(id => productById.get(id))
+    .filter((product): product is Product => Boolean(product))
+
   return paginate(filtered, page, limit)
 }
 
@@ -65,17 +94,15 @@ export const getProductBySlug = (title: string): Product | null => {
 // Search product by name/keyword
 export const searchProducts = (keyword: string, page: number = 1, limit: number = 20) => {
   const lower = keyword.toLowerCase()
-  const filtered = products.filter(p =>
-    p.title.toLowerCase().includes(lower)
-  )
+  const filtered = normalizedProducts
+    .filter(entry => entry.title.includes(lower))
+    .map(entry => entry.product)
   return paginate(filtered, page, limit)
 }
 
 // Get products by category
 export const getProductsByCategory = (category: string, page: number = 1, limit: number = 20) => {
-  const filtered = products.filter(p =>
-    p.category.toLowerCase() === category.toLowerCase()
-  )
+  const filtered = productsByCategory.get(category.toLowerCase()) ?? []
   return paginate(filtered, page, limit)
 }
 
@@ -86,9 +113,6 @@ export const getProductsByPriceRange = (min: number, max: number, page: number =
   )
   return paginate(filtered, page, limit)
 }
-
-// Get products sorted
-type SortBy = 'price_asc' | 'price_desc' | 'popular' | 'rating'
 
 export const getProductsSorted = (sortBy: SortBy, page: number = 1, limit: number = 20) => {
   const sorted = [...products].sort((a, b) => {
@@ -110,7 +134,7 @@ export const getRelatedProducts = (productId: string, limit: number = 10) => {
 
   return products
     .filter(p => p.category === current.category && p.product_id !== productId)
-    // .slice(0, limit)
+    .slice(0, limit)
 }
 
 // Get related products dengan pagination
@@ -145,15 +169,25 @@ export const getFilteredProducts = ({
   page  = 1,
   limit = 20,
 }: FilterParams) => {
-  let filtered = [...products]
+  let filtered = normalizedProducts
 
-  if (keyword)  filtered = filtered.filter(p => p.title.toLowerCase().includes(keyword.toLowerCase()))
-  if (category) filtered = filtered.filter(p => p.category.toLowerCase() === category.toLowerCase())
-  if (minPrice) filtered = filtered.filter(p => p.price.withDiscount >= minPrice)
-  if (maxPrice) filtered = filtered.filter(p => p.price.withDiscount <= maxPrice)
+  if (keyword) {
+    const lowerKeyword = keyword.toLowerCase()
+    filtered = filtered.filter(entry => entry.title.includes(lowerKeyword))
+  }
+
+  if (category) {
+    const lowerCategory = category.toLowerCase()
+    filtered = filtered.filter(entry => entry.category === lowerCategory)
+  }
+
+  if (minPrice) filtered = filtered.filter(entry => entry.product.price.withDiscount >= minPrice)
+  if (maxPrice) filtered = filtered.filter(entry => entry.product.price.withDiscount <= maxPrice)
+
+  const result = filtered.map(entry => entry.product)
 
   if (sortBy) {
-    filtered.sort((a, b) => {
+    result.sort((a, b) => {
       switch (sortBy) {
         case 'price_asc':  return a.price.withDiscount - b.price.withDiscount
         case 'price_desc': return b.price.withDiscount - a.price.withDiscount
@@ -164,5 +198,5 @@ export const getFilteredProducts = ({
     })
   }
 
-  return paginate(filtered, page, limit)
+  return paginate(result, page, limit)
 }

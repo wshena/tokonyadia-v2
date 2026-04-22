@@ -1,4 +1,5 @@
 import { addWishlistItem, clearWishlistByUser, getWishlistByUser } from '@/lib/db/wishlist'
+import { noStoreHeaders } from '@/lib/cache'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -12,10 +13,10 @@ export async function GET() {
     }
 
     const products = await getWishlistByUser(supabase, user.id)
-    return NextResponse.json({ success: true, data: products })
-  } catch (error: any) {
+    return NextResponse.json({ success: true, data: products }, { headers: noStoreHeaders })
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, message: error?.message ?? 'Gagal memuat wishlist' },
+      { success: false, message: error instanceof Error ? error.message : 'Gagal memuat wishlist' },
       { status: 500 }
     )
   }
@@ -41,10 +42,10 @@ export async function POST(request: NextRequest) {
     }
 
     const item = await addWishlistItem(supabase, { userId: user.id, product })
-    return NextResponse.json({ success: true, data: item }, { status: 201 })
-  } catch (error: any) {
+    return NextResponse.json({ success: true, data: item }, { status: 201, headers: noStoreHeaders })
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, message: error?.message ?? 'Gagal menambahkan wishlist' },
+      { success: false, message: error instanceof Error ? error.message : 'Gagal menambahkan wishlist' },
       { status: 500 }
     )
   }
@@ -60,10 +61,10 @@ export async function DELETE() {
     }
 
     await clearWishlistByUser(supabase, user.id)
-    return NextResponse.json({ success: true, message: 'Wishlist berhasil dikosongkan' })
-  } catch (error: any) {
+    return NextResponse.json({ success: true, message: 'Wishlist berhasil dikosongkan' }, { headers: noStoreHeaders })
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, message: error?.message ?? 'Gagal mengosongkan wishlist' },
+      { success: false, message: error instanceof Error ? error.message : 'Gagal mengosongkan wishlist' },
       { status: 500 }
     )
   }

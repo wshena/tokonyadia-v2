@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import dynamic from 'next/dynamic'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useCartStore, type Product as CartStoreProduct } from '@/lib/zustand/CartStore'
-import CartModal from '../modals/CartModal'
 import Button from './Button'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
 import { CartIcon } from '@/components/icon'
+
+const CartModal = dynamic(() => import('../modals/CartModal'))
 
 interface CartButtonProps {
   withBackground?: boolean

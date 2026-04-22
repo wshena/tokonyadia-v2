@@ -94,6 +94,7 @@ export const ProductCard = (product: ProductCardData) => {
               alt={product?.title}
               fill
               loading="lazy"
+              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 160px, 180px"
               onError={() => setImgError(true)}
               onLoad={(event) => {
                 if ((event.currentTarget as HTMLImageElement).naturalWidth === 0) {

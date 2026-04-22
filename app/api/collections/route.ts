@@ -1,4 +1,5 @@
-import { getAllCollections, searchCollections, getCollectionsByProduct } from '@/lib/db/collections'
+import { CATALOG_REVALIDATE_SECONDS, publicCacheHeaders, SEARCH_REVALIDATE_SECONDS } from '@/lib/cache'
+import { getCachedCollectionList } from '@/lib/server/catalog'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -9,15 +10,14 @@ export async function GET(request: NextRequest) {
   const keyword   = searchParams.get('keyword')   ?? undefined
   const productId = searchParams.get('productId') ?? undefined
 
-  const result = keyword
-    ? searchCollections(keyword, page, limit)
-    : productId
-      ? getCollectionsByProduct(productId, page, limit)
-      : getAllCollections(page, limit)
+  const result = await getCachedCollectionList({ page, limit, keyword, productId })
 
   return NextResponse.json({
     success: true,
     ...result,
     message: 'Collections fetched successfully'
-  }, { status: 200 })
+  }, {
+    status: 200,
+    headers: publicCacheHeaders(keyword ? SEARCH_REVALIDATE_SECONDS : CATALOG_REVALIDATE_SECONDS),
+  })
 }

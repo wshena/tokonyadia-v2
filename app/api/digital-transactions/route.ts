@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { createDigitalTransaction, getUserDigitalTransactions } from '@/lib/db/digitalTransactions'
+import { noStoreHeaders } from '@/lib/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams
     const category = searchParams.get('category') as 'topup' | 'tagihan' | null
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status')
     const limit = parseInt(searchParams.get('limit') ?? '10')
     const offset = parseInt(searchParams.get('offset') ?? '0')
 
@@ -33,11 +34,11 @@ export async function GET(request: NextRequest) {
       data: result.data,
       count: result.count,
       message: 'Digital transactions fetched successfully',
-    })
-  } catch (error: any) {
+    }, { headers: noStoreHeaders })
+  } catch (error: unknown) {
     console.error('GET digital transactions error:', error)
     return NextResponse.json(
-      { message: error?.message || 'Failed to fetch digital transactions' },
+      { message: error instanceof Error ? error.message : 'Failed to fetch digital transactions' },
       { status: 500 }
     )
   }
@@ -76,12 +77,12 @@ export async function POST(request: NextRequest) {
         data: transaction,
         message: 'Digital transaction created successfully',
       },
-      { status: 201 }
+      { status: 201, headers: noStoreHeaders }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('POST digital transaction error:', error)
     return NextResponse.json(
-      { message: error?.message || 'Failed to create digital transaction' },
+      { message: error instanceof Error ? error.message : 'Failed to create digital transaction' },
       { status: 500 }
     )
   }

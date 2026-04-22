@@ -98,8 +98,8 @@ const PaymentPage = () => {
         if (nextOrders.length > 0) {
           setSelectedPaymentMethod(nextOrders[0].payment_method || 'qris')
         }
-      } catch (error: any) {
-        setAlert({ label: error?.message ?? 'Gagal memuat pesanan', type: 'error' })
+      } catch (error: unknown) {
+        setAlert({ label: error instanceof Error ? error.message : 'Gagal memuat pesanan', type: 'error' })
       } finally {
         setLoading(false)
       }
@@ -144,8 +144,8 @@ const PaymentPage = () => {
         type: 'success',
       })
       router.push(`/shipping?orders=${orderIds.join(',')}`)
-    } catch (error: any) {
-      setAlert({ label: error?.message ?? 'Pembayaran gagal. Silakan coba lagi.', type: 'error' })
+    } catch (error: unknown) {
+      setAlert({ label: error instanceof Error ? error.message : 'Pembayaran gagal. Silakan coba lagi.', type: 'error' })
       setIsProcessing(false)
     }
   }
@@ -217,7 +217,7 @@ const PaymentPage = () => {
                         {(order.order_items ?? []).map(item => (
                           <div key={item.id} className="flex gap-4 rounded-2xl border border-gray-100 p-3">
                             <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-gray-100">
-                              <Image src={item.image} alt={item.product_title} fill className="object-cover" />
+                              <Image src={item.image} alt={item.product_title} fill sizes="80px" className="object-cover" />
                             </div>
                             <div className="flex flex-1 items-center justify-between gap-4">
                               <div>

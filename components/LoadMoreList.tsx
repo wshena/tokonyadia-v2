@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { startTransition, useState, useCallback } from 'react'
 import Button from './ui/button/Button'
 
 interface PaginationMeta {
@@ -49,8 +49,10 @@ function LoadMoreList<T>({
 
     try {
       const result = await fetcher(nextPage)
-      setItems(prev => [...prev, ...result.data])
-      setPagination(result.pagination)
+      startTransition(() => {
+        setItems(prev => [...prev, ...result.data])
+        setPagination(result.pagination)
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Gagal memuat data')
     } finally {

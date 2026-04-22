@@ -1,13 +1,12 @@
-import { getAllProducts } from "@/lib/db/products";
-import { getAllCategories } from "@/lib/db/categories";
-import { getAllCollections } from "@/lib/db/collections";
 import ContentContainer from "@/components/ui/layouts/ContentContainer";
-import BannerCarousel from "@/components/ui/carousel/BannerCarousel";
-import ProductLoadMore from "@/components/ProductLoadMore";
 import CategoryCard from "@/components/ui/card/CategoryCard";
-import { CategoryIcon } from "@/components/icon";
-import CategoryModalButton from "@/components/ui/button/CategoryModalButton";
-import DigitalProductTabs from "@/components/digital/DigitalProductTabs";
+import dynamic from "next/dynamic";
+import { getCachedCategoryList, getCachedProductList } from "@/lib/server/catalog";
+
+const BannerCarousel = dynamic(() => import("@/components/ui/carousel/BannerCarousel"))
+const ProductLoadMore = dynamic(() => import("@/components/ProductLoadMore"))
+const CategoryModalButton = dynamic(() => import("@/components/ui/button/CategoryModalButton"))
+const DigitalProductTabs = dynamic(() => import("@/components/digital/DigitalProductTabs"))
 
 const HomeBannerImages = [
   '/homeCarousel/item.jpg.webp',
@@ -17,9 +16,10 @@ const HomeBannerImages = [
 ]
 
 export default async function Home() {
-
-  const { data: initialProductData, pagination } = getAllProducts(1, 20);
-  const { data: categories } = getAllCategories(1, 7);
+  const [{ data: initialProductData, pagination }, { data: categories }] = await Promise.all([
+    getCachedProductList({ page: 1, limit: 20 }),
+    getCachedCategoryList({ page: 1, limit: 7 }),
+  ])
   
   return (
     <main className="w-full pt-10 md:pt-20">

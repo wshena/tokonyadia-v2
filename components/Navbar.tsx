@@ -1,16 +1,18 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import Logo from './Logo'
-import SearchForm from './SearchForm'
 import Button from './ui/button/Button'
-import CartButton from './ui/button/CartButton'
-import CategoryButton from './ui/button/CategoryButton'
-import MobileMenuButton from './ui/button/MobileMenuButton'
-import MobileNavigation from './ui/navigation/MobileNavigation'
 import { useAuthStore } from '@/lib/zustand/authStore'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
-import UserAccountModal from './ui/modals/UserAccountModal'
+
+const SearchForm = dynamic(() => import('./SearchForm'))
+const CartButton = dynamic(() => import('./ui/button/CartButton'))
+const CategoryButton = dynamic(() => import('./ui/button/CategoryButton'))
+const MobileMenuButton = dynamic(() => import('./ui/button/MobileMenuButton'))
+const MobileNavigation = dynamic(() => import('./ui/navigation/MobileNavigation'), { ssr: false })
+const UserAccountModal = dynamic(() => import('./ui/modals/UserAccountModal'))
 
 const UserProfileButton = () => {
   const user = useAuthStore(state => state.user)

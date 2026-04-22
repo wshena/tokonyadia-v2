@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Carousel from './Carousel';
 import CarouselItem from './CarouselItem';
-import React, { useMemo, useState, useRef, useEffect } from 'react' // ← tambah useRef, useEffect
+import React, { useMemo, useState, useRef, useEffect } from 'react'
 import { useCarouselStoreInstance } from '@/hooks/useCarouselStoreInstance';
 import Link from 'next/link';
 import CarouselButton from './CarouselButton';
@@ -14,7 +14,14 @@ import CarouselDots from './CarouselDots';
 const Banner = ({ image }: { image: string }) => {
   return (
     <div className='w-full h-full rounded-[10px] md:rounded-[20px]'>
-      <Image src={image} alt="Banner Image" fill className='rounded-[10px] md:rounded-[20px]' />
+      <Image
+        src={image}
+        alt="Banner Image"
+        fill
+        priority={image === '/homeCarousel/item.jpg.webp'}
+        sizes="100vw"
+        className='rounded-[10px] md:rounded-[20px] object-cover'
+      />
     </div>
   )
 }
@@ -68,7 +75,7 @@ const BannerCarousel = ({images}:{images:string[]}) => {
         </Link>
       </CarouselItem>
     ))
-  ), []);
+  ), [images]);
   
   if (slideWidth === 0) return <div ref={containerRef} className='w-full aspect-1280/600 md:aspect-1208/300 rounded-[10px] md:rounded-[20px] bg-gray-100 animate-pulse' />
 

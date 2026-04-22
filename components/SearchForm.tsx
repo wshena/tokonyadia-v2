@@ -1,10 +1,12 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { CancelIcon, SearchIcon } from '@/components/icon'
-import DesktopSearchModal from './ui/modals/DesktopSearchModal'
 import type { ProductCardData } from './ui/card/ProductCard'
+
+const DesktopSearchModal = dynamic(() => import('./ui/modals/DesktopSearchModal'))
 
 const SearchForm = () => {
   const [searchInput, setSearchInput] = useState('')
@@ -42,7 +44,7 @@ const SearchForm = () => {
       try {
         const response = await fetch(
           `/api/search?section=products&keyword=${encodeURIComponent(keyword)}&page=1&limit=6`,
-          { cache: 'no-store' }
+          { cache: 'force-cache' }
         )
 
         const payload = await response.json()

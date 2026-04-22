@@ -159,6 +159,7 @@ const Page = () => {
               alt="login-image"
               width={450}
               height={450}
+              sizes="450px"
               className="hidden lg:block"
             />
             <LoginForm />

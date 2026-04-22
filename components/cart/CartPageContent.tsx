@@ -15,7 +15,7 @@ const IfEmpty = () => {
         <h1 className="text-[1.3rem] font-bold">Wah belanjaanmu kosong nih</h1>
         <h2 className="text-[.9rem] text-gray-600">Yuk isi dengan barang-barang impianmu!</h2>
         <div className="relative mt-4 h-32.5 w-40">
-          <Image src="/image/empty-cart.png" fill alt="product-empty" className="object-contain" />
+          <Image src="/image/empty-cart.png" fill alt="product-empty" sizes="160px" className="object-contain" />
         </div>
         <Link
           href="/"

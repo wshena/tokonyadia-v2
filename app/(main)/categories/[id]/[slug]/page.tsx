@@ -1,25 +1,26 @@
 import CustomBanner from '@/components/CustomBanner'
 import Breadcrumb, { BreadcrumbItem } from '@/components/ui/Breadcrumb'
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
-import ProductLoadMore from '@/components/ProductLoadMore'
-import { getAllCategories, getCategoryById, getCategoryByPath } from '@/lib/db/categories'
-import { getProductsByIds } from '@/lib/db/products'
 import { notFound } from 'next/navigation'
-import CategoryCardLoadMore from '@/components/CategoryCardLoadMore'
+import dynamic from 'next/dynamic'
+import { getCachedCategoryDetail, getCachedCategoryList, getCachedProductsByIds } from '@/lib/server/catalog'
+
+const ProductLoadMore = dynamic(() => import('@/components/ProductLoadMore'))
+const CategoryCardLoadMore = dynamic(() => import('@/components/CategoryCardLoadMore'))
 
 const page = async ({ params }: { params: Promise<{ id: string, slug: string }> }) => {
-  const { id, slug } = await params
+  const { id } = await params
 
   // ← langsung panggil fungsi, tidak perlu Promise.resolve()
-  const category = getCategoryById(id)
+  const category = await getCachedCategoryDetail(id)
 
   if (!category) notFound()
 
   const productIds = category.products ?? []
-  const { data: initialData, pagination: initialPagination } = getProductsByIds(productIds, 1, 20)
+  const { data: initialData, pagination: initialPagination } = await getCachedProductsByIds(productIds, 1, 20)
 
   // kategori lainnya
-  const { data: initialCategoryData, pagination: categoryPagination } = getAllCategories(1, 10);
+  const { data: initialCategoryData, pagination: categoryPagination } = await getCachedCategoryList({ page: 1, limit: 10 })
 
   const breadcrumbs: BreadcrumbItem[] = [
     { label: 'Beranda', href: '/' },

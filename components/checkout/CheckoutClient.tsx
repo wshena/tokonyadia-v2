@@ -5,12 +5,13 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/lib/zustand/CartStore'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
-import { calculateTotal } from '@/lib/db/order'
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
 
 interface Props {
-  user: any
-  profile: any
+  user: unknown
+  profile: {
+    address?: string | null
+  } | null
 }
 
 const CheckoutClient = ({ user, profile }: Props) => {
@@ -21,13 +22,11 @@ const CheckoutClient = ({ user, profile }: Props) => {
   const defaultAddress = profile?.address ?? ''
 
   const [shippingAddress, setShippingAddress] = useState(defaultAddress)
-  const [notes, setNotes]                     = useState('')
   const [paymentMethod, setPaymentMethod]     = useState('brivia')
   const [deliveryMethod, setDeliveryMethod]   = useState('standard')
   const [isLoading, setIsLoading]             = useState(false)
 
   const products  = carts.products
-  const total     = calculateTotal(products)
   const currency  = products[0]?.productData?.price?.currency ?? 'USD'
 
   // Redirect kalau cart kosong
@@ -54,7 +53,7 @@ const CheckoutClient = ({ user, profile }: Props) => {
         body: JSON.stringify({
           products,
           shippingAddress,
-          notes,
+          notes: '',
           paymentMethod,
           deliveryMethod,
         }),
@@ -71,9 +70,9 @@ const CheckoutClient = ({ user, profile }: Props) => {
       setAlert({ label: 'Pesanan berhasil dibuat!', type: 'success' })
       router.push(`/order`)
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       setAlert({
-        label: err?.message ?? 'Gagal membuat pesanan',
+        label: err instanceof Error ? err.message : 'Gagal membuat pesanan',
         type: 'error'
       })
     } finally {
@@ -104,7 +103,7 @@ const CheckoutClient = ({ user, profile }: Props) => {
                     return (
                       <div key={idx} className="flex items-start gap-4 pt-4 first:pt-0">
                         <div className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden">
-                          <Image src={image} alt={item.productData?.title} fill className="object-cover" />
+                          <Image src={image} alt={item.productData?.title} fill sizes="80px" className="object-cover" />
                         </div>
                         <div className="flex flex-col gap-1 flex-1">
                           <p className="font-medium line-clamp-2">{item.productData?.title}</p>

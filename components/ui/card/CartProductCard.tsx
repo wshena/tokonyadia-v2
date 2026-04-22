@@ -2,11 +2,11 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { useCartStore } from '@/lib/zustand/CartStore'
+import { useCartStore, type Product as CartStoreProduct } from '@/lib/zustand/CartStore'
 import { MinusIcon, PlusIcon, TrashIcon } from '@/components/icon'
 import Button from '../button/Button'
 
-const CartProductCard = ({ product }: { product: any }) => {
+const CartProductCard = ({ product }: { product: CartStoreProduct }) => {
   const removeFromCart = useCartStore(state => state.removeFromCart)
   const updateQuantity = useCartStore(state => state.updateQuantity)
 
@@ -15,7 +15,6 @@ const CartProductCard = ({ product }: { product: any }) => {
     product?.productData?.price?.withDiscount && product?.productData?.price?.withDiscount > 0
       ? product.productData.price.withDiscount
       : product.productData.price.withoutDiscount
-  const product_subtotal = Number((product?.quantity * price).toFixed(2))
 
   const handleIncrease = () => {
     updateQuantity({
@@ -39,7 +38,7 @@ const CartProductCard = ({ product }: { product: any }) => {
       <div className="flex flex-col md:flex-row items-start gap-2.5 w-full">
         {/* Image */}
         <div className="relative w-35 h-25 shrink-0">
-          <Image src={image} alt="product-image" fill className="object-cover rounded" />
+          <Image src={image} alt="product-image" fill sizes="140px" loading="lazy" className="object-cover rounded" />
         </div>
 
         {/* Details */}
