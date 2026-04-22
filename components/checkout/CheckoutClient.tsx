@@ -3,12 +3,13 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import type { User } from '@supabase/supabase-js'
 import { useCartStore } from '@/lib/zustand/CartStore'
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
 
 interface Props {
-  user: unknown
+  user: User
   profile: {
     address?: string | null
   } | null
@@ -28,6 +29,7 @@ const CheckoutClient = ({ user, profile }: Props) => {
 
   const products  = carts.products
   const currency  = products[0]?.productData?.price?.currency ?? 'USD'
+  const total     = Number(products.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2))
 
   // Redirect kalau cart kosong
   useEffect(() => {
@@ -98,7 +100,7 @@ const CheckoutClient = ({ user, profile }: Props) => {
                 <h2 className="font-semibold text-lg">Produk yang dipesan</h2>
                 <div className="flex flex-col gap-4 divide-y">
                   {products.map((item, idx) => {
-                    const image    = item.productData?.images?.["800x900"]?.[0]
+                    const image    = item.productData?.images?.['800x900']?.[0] ?? '/image/1-emptystate.png'
                     const subtotal = Number((item.price * item.quantity).toFixed(2))
                     return (
                       <div key={idx} className="flex items-start gap-4 pt-4 first:pt-0">

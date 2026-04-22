@@ -1,8 +1,11 @@
 import Breadcrumb, { BreadcrumbItem } from '@/components/ui/Breadcrumb';
+import ProductReviewsSection from '@/components/reviews/ProductReviewsSection';
 import { ProductCard } from '@/components/ui/card/ProductCard';
 import ContentContainer from '@/components/ui/layouts/ContentContainer';
+import { getApprovedReviewsByProductId, getProductReviewSummary } from '@/lib/db/reviews';
 import { getCachedProductDetail, getCachedProductList } from '@/lib/server/catalog';
 import { createSlug } from '@/lib/utils';
+import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
@@ -15,8 +18,12 @@ const page = async ({params}:{params:{id:string; slug:string}}) => {
   const { id, slug } = await params
   
   const product = await getCachedProductDetail(id)
+  const supabase = await createClient()
 
   if (!product) notFound();
+
+  const reviews = await getApprovedReviewsByProductId(supabase, id).catch(() => [])
+  const reviewSummary = getProductReviewSummary(reviews)
 
   const breadcrumbs: BreadcrumbItem[] = [
     { label: 'Beranda', href: '/' },
@@ -43,11 +50,13 @@ const page = async ({params}:{params:{id:string; slug:string}}) => {
             <ProductImage imageArray={product?.images?.["800x900"]} />
 
             {/* product description */}
-            <ProductDescription product={product} />
+            <ProductDescription product={product} reviewSummary={reviewSummary} />
 
             {/* add to cart card */}
             <AddToCartCard productData={product} />
           </div>
+
+          <ProductReviewsSection reviews={reviews} summary={reviewSummary} />
           
           {/* related product */}
           <div className="space-y-5">

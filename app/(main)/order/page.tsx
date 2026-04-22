@@ -5,11 +5,13 @@ import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
+import ReviewComposerModal from '@/components/reviews/ReviewComposerModal'
 import CancelOrderModal from '@/components/ui/modals/CancelOrderModal'
 import DeleteOrderModal from '@/components/ui/modals/DeleteOrderModal'
-import { useUtilityStore } from '@/lib/zustand/utilityStore'
+import { useAuthStore } from '@/lib/zustand/authStore'
 import { cn, createSlug } from '@/lib/utils'
 import { createClient } from '@/utils/supabase/client'
+import { useUtilityStore } from '@/lib/zustand/utilityStore'
 
 type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
 
@@ -36,6 +38,17 @@ type Order = {
   delivery_method: string
   notes?: string
   order_items?: OrderItem[]
+}
+
+type ProductReview = {
+  id: string
+  product_id: string
+  order_id: string
+  order_item_id: string
+  status: 'pending' | 'approved' | 'rejected'
+  rate: number
+  comment: string
+  updated_at?: string
 }
 
 const supabase = createClient()
@@ -106,12 +119,15 @@ const formatDate = (date: string) =>
 const OrderPage = () => {
   const router = useRouter()
   const setAlert = useUtilityStore(state => state.setAlert)
+  const user = useAuthStore(state => state.user)
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [isProcessing, setIsProcessing] = useState(false)
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set())
   const [modalType, setModalType] = useState<'cancel' | 'delete' | 'bulk-cancel' | 'bulk-delete' | null>(null)
+  const [reviewMap, setReviewMap] = useState<Record<string, ProductReview>>({})
+  const [reviewDraft, setReviewDraft] = useState<{ orderId: string; item: OrderItem } | null>(null)
 
   const fetchOrders = useCallback(async (keepLoading = false) => {
     if (!keepLoading) setLoading(true)
@@ -142,10 +158,9 @@ const OrderPage = () => {
     let orderItemsChannel: ReturnType<typeof supabase.channel> | undefined
 
     const setupRealtime = async () => {
-      const { data } = await supabase.auth.getUser()
       if (!mounted) return () => undefined
 
-      const userId = data.user?.id
+      const userId = user?.id
       const channelSuffix = `${userId ?? 'guest'}-${Date.now()}`
 
       orderChannel = supabase
@@ -221,7 +236,50 @@ const OrderPage = () => {
       if (orderItemsChannel) supabase.removeChannel(orderItemsChannel)
       cleanup?.()
     }
-  }, [fetchOrders])
+  }, [fetchOrders, user])
+
+  useEffect(() => {
+    const deliveredProductIds = Array.from(
+      new Set(
+        orders
+          .filter(order => order.status === 'delivered')
+          .flatMap(order => order.order_items ?? [])
+          .map(item => item.product_id)
+          .filter(Boolean)
+      )
+    )
+
+    if (!deliveredProductIds.length) {
+      setReviewMap({})
+      return
+    }
+
+    const fetchMyReviews = async () => {
+      try {
+        const params = new URLSearchParams({
+          mine: 'true',
+          productIds: deliveredProductIds.join(','),
+        })
+        const response = await fetch(`/api/reviews?${params.toString()}`, { cache: 'no-store' })
+        const payload = await response.json()
+
+        if (!response.ok) {
+          throw new Error(payload?.message ?? 'Gagal memuat review anda')
+        }
+
+        const nextReviewMap = (payload.data ?? []).reduce((acc: Record<string, ProductReview>, review: ProductReview) => {
+          acc[review.product_id] = review
+          return acc
+        }, {})
+
+        setReviewMap(nextReviewMap)
+      } catch (error: unknown) {
+        setAlert({ label: error instanceof Error ? error.message : 'Gagal memuat review anda', type: 'error' })
+      }
+    }
+
+    fetchMyReviews()
+  }, [orders, setAlert])
 
   const sortedOrders = useMemo(
     () => [...orders].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
@@ -245,6 +303,10 @@ const OrderPage = () => {
     setModalType(null)
     setSelectedOrderId(null)
     setIsProcessing(false)
+  }
+
+  const closeReviewModal = () => {
+    setReviewDraft(null)
   }
 
   const toggleOrderSelection = (orderId: string) => {
@@ -291,6 +353,44 @@ const OrderPage = () => {
     } catch (error: unknown) {
       setAlert({ label: error instanceof Error ? error.message : 'Terjadi kesalahan saat memproses order', type: 'error' })
       setIsProcessing(false)
+    }
+  }
+
+  const submitReview = async ({ rate, comment }: { rate: number; comment: string }) => {
+    if (!reviewDraft) return
+
+    try {
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          product_id: reviewDraft.item.product_id,
+          order_id: reviewDraft.orderId,
+          order_item_id: reviewDraft.item.id,
+          rate,
+          comment,
+        }),
+      })
+
+      const payload = await response.json()
+
+      if (!response.ok) {
+        throw new Error(payload?.message ?? 'Gagal menyimpan review')
+      }
+
+      const review = payload.data as ProductReview
+
+      setReviewMap(current => ({
+        ...current,
+        [review.product_id]: review,
+      }))
+
+      setAlert({ label: payload?.message ?? 'Review berhasil disimpan', type: 'success' })
+      closeReviewModal()
+    } catch (error: unknown) {
+      setAlert({ label: error instanceof Error ? error.message : 'Gagal menyimpan review', type: 'error' })
     }
   }
 
@@ -491,28 +591,47 @@ const OrderPage = () => {
 
                   <div className="grid gap-4 py-5 xl:grid-cols-[minmax(0,1fr)_320px]">
                     <div className="space-y-4">
-                      {(order.order_items ?? []).map(item => (
-                        <div key={item.id} className="flex flex-col gap-4 rounded-2xl border border-gray-100 p-4 md:flex-row">
-                          <div className="relative h-24 w-full overflow-hidden rounded-xl bg-gray-100 md:w-24">
-                            <Image src={item.image} alt={item.product_title} fill sizes="80px" className="object-cover" />
-                          </div>
-                          <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                            <div className="space-y-1">
-                              <h3 className="text-base font-semibold text-gray-900">{item.product_title}</h3>
-                              <div className="flex flex-wrap gap-2 text-sm text-gray-500">
-                                <span>Varian {item.variant}</span>
-                                <span>Qty {item.quantity}</span>
+                      {(order.order_items ?? []).map(item => {
+                        const existingReview = reviewMap[item.product_id]
+
+                        return (
+                          <div key={item.id} className="flex flex-col gap-4 rounded-2xl border border-gray-100 p-4 md:flex-row">
+                            <div className="relative h-24 w-full overflow-hidden rounded-xl bg-gray-100 md:w-24">
+                              <Image src={item.image} alt={item.product_title} fill sizes="80px" className="object-cover" />
+                            </div>
+                            <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                              <div className="space-y-1">
+                                <h3 className="text-base font-semibold text-gray-900">{item.product_title}</h3>
+                                <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+                                  <span>Varian {item.variant}</span>
+                                  <span>Qty {item.quantity}</span>
+                                </div>
+                                {existingReview && (
+                                  <div className="mt-2 inline-flex rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                                    Review kamu: {existingReview.rate}/5
+                                  </div>
+                                )}
+                              </div>
+                              <div className="space-y-2 md:text-right">
+                                <p className="text-lg font-semibold text-gray-900">{formatCurrency(order.currency, item.subtotal)}</p>
+                                <div className="flex flex-wrap items-center gap-3 md:justify-end">
+                                  <Link href={`/product/${item.product_id}/${createSlug(item.product_title)}`} className="inline-flex cursor-pointer text-sm font-medium text-green-600 transition-colors hover:text-green-700">
+                                    Lihat produk
+                                  </Link>
+                                  {order.status === 'delivered' && (
+                                    <button
+                                      onClick={() => setReviewDraft({ orderId: order.id, item })}
+                                      className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100"
+                                    >
+                                      {existingReview ? 'Ubah review' : 'Tulis review'}
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                            <div className="space-y-2 md:text-right">
-                              <p className="text-lg font-semibold text-gray-900">{formatCurrency(order.currency, item.subtotal)}</p>
-                              <Link href={`/product/${item.product_id}/${createSlug(item.product_title)}`} className="inline-flex cursor-pointer text-sm font-medium text-green-600 transition-colors hover:text-green-700">
-                                Lihat produk
-                              </Link>
-                            </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
 
                     <aside className="space-y-4 rounded-2xl border border-gray-100 bg-gray-50 p-4">
@@ -557,6 +676,16 @@ const OrderPage = () => {
         isProcessing={isProcessing}
         isBulk={modalType === 'bulk-delete'}
         selectedCount={selectedOrders.size}
+      />
+
+      <ReviewComposerModal
+        key={reviewDraft ? `${reviewDraft.item.id}-${reviewMap[reviewDraft.item.product_id]?.updated_at ?? 'new'}` : 'review-modal'}
+        isOpen={Boolean(reviewDraft)}
+        onClose={closeReviewModal}
+        productTitle={reviewDraft?.item.product_title ?? ''}
+        initialRate={reviewDraft ? reviewMap[reviewDraft.item.product_id]?.rate ?? 0 : 0}
+        initialComment={reviewDraft ? reviewMap[reviewDraft.item.product_id]?.comment ?? '' : ''}
+        onSubmit={submitReview}
       />
     </main>
   )

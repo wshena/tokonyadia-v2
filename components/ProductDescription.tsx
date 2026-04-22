@@ -1,10 +1,16 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { StarIcon } from './icon'
+import { StartIcon } from './icon'
 import { useProductStore } from '@/lib/zustand/productStore'
 
-const ProductDescription = ({ product }: { product: any }) => {
+const ProductDescription = ({
+  product,
+  reviewSummary,
+}: {
+  product: any
+  reviewSummary?: { averageRating: number; reviewCount: number }
+}) => {
   const { setStock, addToProductHistory } = useProductStore()
 
   const [index, setIndex] = useState(0)
@@ -37,6 +43,12 @@ const ProductDescription = ({ product }: { product: any }) => {
     addToProductHistory(product)
   }, [])
 
+  const averageRating = reviewSummary?.reviewCount
+    ? reviewSummary.averageRating
+    : Number(product?.performance?.ratingAverage ?? 0)
+
+  const ratingCount = reviewSummary?.reviewCount ?? Number(product?.performance?.ratingCount ?? 0)
+
   return (
     <div className="flex flex-col gap-3 items-start w-full lg:w-[30%] order-2 md:order-3 lg:order-2 mt-0 md:mt-10 lg:mt-0">
       {/* Title & Rating */}
@@ -48,9 +60,9 @@ const ProductDescription = ({ product }: { product: any }) => {
           <span>Terjual {product?.performance?.sales}+ produk</span>
           <span className="block w-1.25 h-1.25 rounded-full bg-gray-400" />
           <div className="flex items-center gap-0.75">
-            <StarIcon size={20} color="black" />
-            <span>{Math.ceil(product?.performance?.ratingAverage)}</span>
-            <span>({product?.performance?.ratingCount} rating)</span>
+            <StartIcon size={18} className="text-amber-400" />
+            <span>{ratingCount > 0 ? averageRating.toFixed(1) : '0.0'}</span>
+            <span>({ratingCount} review)</span>
           </div>
         </div>
       </div>
