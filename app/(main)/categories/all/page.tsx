@@ -1,36 +1,42 @@
-import CategoryCard from '@/components/ui/card/CategoryCard'
-import ContentContainer from '@/components/ui/layouts/ContentContainer'
-import { getAllCategories } from '@/lib/db/categories'
-import React from 'react'
+import CategoryCard from "@/components/ui/card/CategoryCard";
+import ContentContainer from "@/components/ui/layouts/ContentContainer";
+import { getAllCategories, type Category } from "@/lib/db/categories";
+import React from "react";
 
 // Get categories grouped by alphabet
-export const getCategoriesGroupedByAlphabet = (categories:any[]) => {
-  const grouped = categories.reduce((acc, category) => {
-    const firstLetter = category.title[0].toUpperCase()
+export const getCategoriesGroupedByAlphabet = (categories: Category[]) => {
+  const grouped = categories.reduce(
+    (acc, category) => {
+      const firstLetter = category.title[0].toUpperCase();
 
-    if (!acc[firstLetter]) {
-      acc[firstLetter] = []
-    }
+      if (!acc[firstLetter]) {
+        acc[firstLetter] = [];
+      }
 
-    acc[firstLetter].push(category)
-    return acc
-  }, {} as Record<string, typeof categories>)
+      acc[firstLetter].push(category);
+      return acc;
+    },
+    {} as Record<string, typeof categories>,
+  );
 
   // Sort key by alphabet (A, B, C, ...)
   const sorted = Object.keys(grouped)
     .sort()
-    .reduce((acc, key) => {
-      acc[key] = grouped[key]
-      return acc
-    }, {} as Record<string, typeof categories>)
+    .reduce(
+      (acc, key) => {
+        acc[key] = grouped[key];
+        return acc;
+      },
+      {} as Record<string, typeof categories>,
+    );
 
-  return sorted
-}
+  return sorted;
+};
 
-const page = () => {
-  const { data: categories } = getAllCategories();
+const page = async () => {
+  const { data: categories } = await getAllCategories();
   const groupedCategories = getCategoriesGroupedByAlphabet(categories);
-  
+
   return (
     <main className="w-full pt-10 md:pt-20">
       <ContentContainer>
@@ -45,8 +51,8 @@ const page = () => {
 
               {/* Categories */}
               <ul className="flex flex-col md:flex-row flex-wrap gap-3">
-                {categories.map(category => (
-                  <li key={category.category_id} >
+                {categories.map((category) => (
+                  <li key={category.category_id}>
                     <CategoryCard category={category} />
                   </li>
                 ))}
@@ -56,7 +62,7 @@ const page = () => {
         </div>
       </ContentContainer>
     </main>
-  )
-}
+  );
+};
 
-export default page
+export default page;

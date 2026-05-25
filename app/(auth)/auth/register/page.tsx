@@ -1,65 +1,66 @@
-'use client'
+"use client";
 
-import { EyeIcon, EyeSlashIcon } from '@/components/icon'
-import Logo from '@/components/Logo'
-import { createUser, type UserProfile } from '@/lib/db/user'
-import { useUtilityStore } from '@/lib/zustand/utilityStore'
-import { createClient } from '@/utils/supabase/client'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import { EyeIcon, EyeSlashIcon } from "@/components/icon";
+import Logo from "@/components/Logo";
+import { createUser, type UserProfile } from "@/lib/db/user";
+import { useUtilityStore } from "@/lib/zustand/utilityStore";
+import { createClient } from "@/utils/supabase/client";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React, { Suspense, useState } from "react";
 
-const formStyle = 'w-full rounded-[10px] border border-gray-300 p-2 focus:outline-none'
+const formStyle =
+  "w-full rounded-[10px] border border-gray-300 p-2 focus:outline-none";
 
 interface FormData extends UserProfile {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 const RegisterForm = () => {
-  const router = useRouter()
-  const setAlert = useUtilityStore(state => state.setAlert)
+  const router = useRouter();
+  const setAlert = useUtilityStore((state) => state.setAlert);
 
-  const [step, setStep] = useState(1)
-  const [passClick, setPassClick] = useState(false)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [selectedGender, setSelectedGender] = useState('')
+  const [step, setStep] = useState(1);
+  const [passClick, setPassClick] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [selectedGender, setSelectedGender] = useState("");
 
   const [formData, setFormData] = useState<FormData>({
-    email: '',
-    password: '',
-    username: '',
-    firstName: '',
-    lastName: '',
-    sex: '',
-    phoneNumber: '',
-    address: '',
-    date: '',
-    profilePicture: '',
-  })
+    email: "",
+    password: "",
+    username: "",
+    firstName: "",
+    lastName: "",
+    sex: "",
+    phoneNumber: "",
+    address: "",
+    date: "",
+    profilePicture: "",
+  });
 
   const updateFormData = (data: Partial<FormData>) => {
-    setFormData(prev => ({ ...prev, ...data }))
-  }
+    setFormData((prev) => ({ ...prev, ...data }));
+  };
 
   const handleGenderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedGender(e.target.value)
-    updateFormData({ sex: e.target.value })
-  }
+    setSelectedGender(e.target.value);
+    updateFormData({ sex: e.target.value });
+  };
 
   const handleStep1Submit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setStep(2)
-  }
+    e.preventDefault();
+    setStep(2);
+  };
 
   const handleStep2Submit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-    const supabase = createClient()
+    const supabase = createClient();
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
@@ -75,23 +76,26 @@ const RegisterForm = () => {
           profile_picture: formData.profilePicture,
         },
       },
-    })
+    });
 
-    setLoading(false)
+    setLoading(false);
 
     if (signUpError) {
-      setError(signUpError.message)
-      setAlert({ label: signUpError.message, type: 'error' })
-      return
+      setError(signUpError.message);
+      setAlert({ label: signUpError.message, type: "error" });
+      return;
     }
 
     if (!data.user?.id) {
-      setError('User berhasil dibuat di autentikasi, tetapi id user tidak ditemukan.')
+      setError(
+        "User berhasil dibuat di autentikasi, tetapi id user tidak ditemukan.",
+      );
       setAlert({
-        label: 'User berhasil dibuat di autentikasi, tetapi profil gagal diproses.',
-        type: 'error',
-      })
-      return
+        label:
+          "User berhasil dibuat di autentikasi, tetapi profil gagal diproses.",
+        type: "error",
+      });
+      return;
     }
 
     try {
@@ -104,29 +108,32 @@ const RegisterForm = () => {
         address: formData.address,
         date: formData.date,
         profilePicture: formData.profilePicture,
-      })
+      });
     } catch (profileError) {
       const message =
         profileError instanceof Error
           ? profileError.message
-          : 'Profil user gagal disimpan ke database.'
+          : "Profil user gagal disimpan ke database.";
 
-      setError(message)
-      setAlert({ label: message, type: 'error' })
-      return
+      setError(message);
+      setAlert({ label: message, type: "error" });
+      return;
     }
 
     setAlert({
-      label: 'Pendaftaran berhasil. Silakan cek email atau langsung login jika konfirmasi email dimatikan.',
-      type: 'success',
-    })
-    router.push('/auth/login')
-  }
+      label:
+        "Pendaftaran berhasil. Silakan cek email atau langsung login jika konfirmasi email dimatikan.",
+      type: "success",
+    });
+    router.push("/auth/login");
+  };
 
   return (
     <div className="w-75 rounded-[10px] border border-gray-300 bg-white px-[1.4rem] py-12 shadow-lg md:w-125">
       <div className="mb-7.5 flex flex-col items-start gap-1">
-        <h1 className="text-[1rem] font-bold md:text-[1.5rem]">Daftar ke Tokonyadia</h1>
+        <h1 className="text-[1rem] font-bold md:text-[1.5rem]">
+          Daftar ke Tokonyadia
+        </h1>
         <h2 className="text-[.9rem]">
           <span>Sudah ada akun? </span>
           <Link href="/auth/login" className="text-mainGreen">
@@ -136,9 +143,17 @@ const RegisterForm = () => {
       </div>
 
       <div className="mb-6 flex items-center gap-2">
-        <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${step === 1 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>1</div>
+        <div
+          className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${step === 1 ? "bg-green-500 text-white" : "bg-gray-200 text-gray-600"}`}
+        >
+          1
+        </div>
         <div className="h-0.5 flex-1 bg-gray-200" />
-        <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${step === 2 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>2</div>
+        <div
+          className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${step === 2 ? "bg-green-500 text-white" : "bg-gray-200 text-gray-600"}`}
+        >
+          2
+        </div>
       </div>
 
       {step === 1 && (
@@ -187,25 +202,29 @@ const RegisterForm = () => {
 
             <div className="flex items-center gap-2.5">
               <div className="flex items-center gap-2">
-                <label htmlFor="male" className="cursor-pointer text-[1rem]">Laki-laki</label>
+                <label htmlFor="male" className="cursor-pointer text-[1rem]">
+                  Laki-laki
+                </label>
                 <input
                   type="radio"
                   name="sex"
                   id="male"
                   value="laki-laki"
-                  checked={selectedGender === 'laki-laki'}
+                  checked={selectedGender === "laki-laki"}
                   onChange={handleGenderChange}
                   required
                 />
               </div>
               <div className="flex items-center gap-2">
-                <label htmlFor="female" className="cursor-pointer text-[1rem]">Perempuan</label>
+                <label htmlFor="female" className="cursor-pointer text-[1rem]">
+                  Perempuan
+                </label>
                 <input
                   type="radio"
                   name="sex"
                   id="female"
                   value="perempuan"
-                  checked={selectedGender === 'perempuan'}
+                  checked={selectedGender === "perempuan"}
                   onChange={handleGenderChange}
                   required
                 />
@@ -223,7 +242,9 @@ const RegisterForm = () => {
             />
 
             <div className="flex items-center gap-5">
-              <label htmlFor="date" className="text-sm">Tanggal Lahir:</label>
+              <label htmlFor="date" className="text-sm">
+                Tanggal Lahir:
+              </label>
               <input
                 type="date"
                 name="date"
@@ -262,7 +283,7 @@ const RegisterForm = () => {
 
             <div className="flex w-full items-center justify-between rounded-[10px] border border-gray-300 p-[.6rem]">
               <input
-                type={passClick ? 'text' : 'password'}
+                type={passClick ? "text" : "password"}
                 name="password"
                 id="password"
                 value={formData.password}
@@ -277,7 +298,11 @@ const RegisterForm = () => {
                 onClick={() => setPassClick(!passClick)}
                 className="p-1"
               >
-                {passClick ? <EyeSlashIcon size={20} color="black" /> : <EyeIcon size={20} color="black" />}
+                {passClick ? (
+                  <EyeSlashIcon size={20} color="black" />
+                ) : (
+                  <EyeIcon size={20} color="black" />
+                )}
               </button>
             </div>
           </div>
@@ -295,14 +320,14 @@ const RegisterForm = () => {
               disabled={loading}
               className="cursor-pointer rounded-[10px] bg-green-500 px-4 py-2 text-white disabled:cursor-not-allowed disabled:bg-gray-400"
             >
-              {loading ? 'Mendaftarkan...' : 'Daftar'}
+              {loading ? "Mendaftarkan..." : "Daftar"}
             </button>
           </div>
         </form>
       )}
     </div>
-  )
-}
+  );
+};
 
 const Page = () => {
   return (
@@ -319,12 +344,18 @@ const Page = () => {
               sizes="450px"
               className="hidden xl:block"
             />
-            <RegisterForm />
+            <Suspense
+              fallback={
+                <div className="w-75 h-100 animate-pulse rounded-[10px] bg-gray-100" />
+              }
+            >
+              <RegisterForm />
+            </Suspense>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Page
+export default Page;

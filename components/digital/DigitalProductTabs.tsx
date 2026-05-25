@@ -26,13 +26,25 @@ const formatCurrency = (amount: number) =>
 
 const visibleOptionLimit = 5
 
+const getInitialFieldValues = (service: DigitalService) =>
+  service.fields.reduce<Record<string, string>>((result, field) => {
+    result[field.id] = field.type === 'select' ? field.options?.[0] ?? '' : ''
+    return result
+  }, {})
+
+const getInitialService = (category: DigitalServiceCategory) =>
+  getDigitalServicesByCategory(category)[0]
+
 const DigitalProductTabs = () => {
   const router = useRouter()
   const setAlert = useUtilityStore((state) => state.setAlert)
+  const initialService = getInitialService('topup')
   const [activeCategory, setActiveCategory] = useState<DigitalServiceCategory>('topup')
-  const [activeServiceId, setActiveServiceId] = useState(getDigitalServicesByCategory('topup')[0]?.id ?? '')
-  const [fieldValues, setFieldValues] = useState<Record<string, string>>({})
-  const [selectedNominal, setSelectedNominal] = useState('')
+  const [activeServiceId, setActiveServiceId] = useState(initialService?.id ?? '')
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>(
+    initialService ? getInitialFieldValues(initialService) : {}
+  )
+  const [selectedNominal, setSelectedNominal] = useState(initialService?.nominalOptions[0]?.value ?? '')
   const [isMoreOptionsOpen, setIsMoreOptionsOpen] = useState(false)
   const moreOptionsRef = useRef<HTMLDivElement | null>(null)
 
@@ -46,20 +58,6 @@ const DigitalProductTabs = () => {
   const hiddenServices = services.slice(visibleOptionLimit)
 
   useEffect(() => {
-    if (!activeService) return
-
-    setActiveServiceId(activeService.id)
-    setSelectedNominal(activeService.nominalOptions[0]?.value ?? '')
-    setFieldValues(
-      activeService.fields.reduce<Record<string, string>>((result, field) => {
-        result[field.id] = field.type === 'select' ? field.options?.[0] ?? '' : ''
-        return result
-      }, {})
-    )
-    setIsMoreOptionsOpen(false)
-  }, [activeService?.id, activeCategory])
-
-  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!moreOptionsRef.current?.contains(event.target as Node)) {
         setIsMoreOptionsOpen(false)
@@ -71,6 +69,19 @@ const DigitalProductTabs = () => {
   }, [])
 
   if (!activeService) return null
+
+  const selectService = (service: DigitalService) => {
+    setActiveServiceId(service.id)
+    setSelectedNominal(service.nominalOptions[0]?.value ?? '')
+    setFieldValues(getInitialFieldValues(service))
+    setIsMoreOptionsOpen(false)
+  }
+
+  const selectCategory = (category: DigitalServiceCategory) => {
+    const nextService = getInitialService(category)
+    setActiveCategory(category)
+    if (nextService) selectService(nextService)
+  }
 
   const handleFieldChange = (fieldId: string, value: string) => {
     setFieldValues((current) => ({
@@ -130,7 +141,7 @@ const DigitalProductTabs = () => {
             <button
               key={category}
               type="button"
-              onClick={() => setActiveCategory(category)}
+              onClick={() => selectCategory(category)}
               className={`flex-1 rounded-2xl px-4 py-3 text-left transition-colors ${
                 isActive ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
               }`}
@@ -150,7 +161,7 @@ const DigitalProductTabs = () => {
             <button
               key={service.id}
               type="button"
-              onClick={() => setActiveServiceId(service.id)}
+              onClick={() => selectService(service)}
               className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                 isActive
                   ? 'border-green-600 bg-green-600 text-white'
@@ -179,10 +190,7 @@ const DigitalProductTabs = () => {
                   <button
                     key={service.id}
                     type="button"
-                    onClick={() => {
-                      setActiveServiceId(service.id)
-                      setIsMoreOptionsOpen(false)
-                    }}
+                    onClick={() => selectService(service)}
                     className="flex w-full flex-col rounded-xl px-3 py-3 text-left transition-colors hover:bg-gray-50"
                   >
                     <span className="font-semibold text-gray-900">{service.label}</span>

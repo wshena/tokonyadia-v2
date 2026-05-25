@@ -1,7 +1,7 @@
 'use client'
 
 import { useUtilityStore } from '@/lib/zustand/utilityStore'
-import React from 'react'
+import React, { Suspense } from 'react'
 import Alert from '../feedback/Alert'
 import ModalContainer from '../modals/ModalContainer'
 import RouteLoadingBar from '../feedback/RouteLoadingBar'
@@ -19,7 +19,9 @@ const MainContainer = ({ children }: MainContainerProps) => {
 
   return (
     <div className="relative min-h-screen w-full">
-      <RouteLoadingBar />
+      <Suspense fallback={null}>
+        <RouteLoadingBar />
+      </Suspense>
 
       {/* Alert — tampil di semua halaman */}
       {alert.label && (

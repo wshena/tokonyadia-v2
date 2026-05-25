@@ -1,9 +1,10 @@
 import { CategoryIcon } from '@/components/icon';
+import type { Category } from '@/lib/db/categories';
 import { createSlug } from '@/lib/utils';
 import Link from 'next/link'
 import React from 'react'
 
-const CategoryCard = ({category}:{category: any}) => {
+const CategoryCard = ({category}:{category: Category}) => {
   const id = category.category_id;
   const slug = createSlug(category.title);
 

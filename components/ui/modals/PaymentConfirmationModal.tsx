@@ -8,7 +8,7 @@ interface PaymentConfirmationModalProps {
   onClose: () => void
   onConfirm: () => void
   isProcessing: boolean
-  orders: any[]
+  orders: unknown[]
   totalAmount: number
   currency: string
   formatCurrency: (currency: string, amount: number) => string

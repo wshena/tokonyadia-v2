@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
 import PaymentConfirmationModal from '@/components/ui/modals/PaymentConfirmationModal'
@@ -108,9 +108,9 @@ const DigitalPaymentPage = () => {
         type: 'success',
       })
       router.push('/')
-    } catch (error: any) {
+    } catch (error: unknown) {
       setAlert({
-        label: error?.message ?? 'Terjadi kesalahan saat memproses pembayaran',
+        label: error instanceof Error ? error.message : 'Terjadi kesalahan saat memproses pembayaran',
         type: 'error',
       })
       setIsProcessing(false)
@@ -277,4 +277,10 @@ const DigitalPaymentPage = () => {
   )
 }
 
-export default DigitalPaymentPage
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <DigitalPaymentPage />
+    </Suspense>
+  )
+}

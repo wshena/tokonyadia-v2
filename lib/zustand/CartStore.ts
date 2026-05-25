@@ -1,24 +1,25 @@
 import { create } from 'zustand'
 import { useUtilityStore } from './utilityStore'
+import type { Product as ProductData } from '@/lib/db/products'
 
 export type Product = {
-  productData: any
+  productData: ProductData
   variant: string
   stock: number
   price: number
   quantity: number
-  timeAddToCart: any
+  timeAddToCart: number
 }
 
 interface Cart {
   id: string
-  date: any
+  date: string | number
   products: Product[]
 }
 
 interface CartState {
   carts: Cart
-  setCart: (cart: { id: string; date: any; products: Product[] }) => void
+  setCart: (cart: { id: string; date: string | number; products: Product[] }) => void
   addToCart: (product: Product) => void
   removeFromCart: (payload: { id: string; variant: string }) => void
   tryAddToCart: (product: Product) => void

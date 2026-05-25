@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { CarouselStore } from "@/lib/zustand/CarouselStore";
 
 interface CarouselProps {
@@ -27,30 +27,24 @@ const Carousel: React.FC<CarouselProps> = ({
   autoPlay = false,
   autoPlayInterval = 5000,
   infinite = true,
-  showDots = true,
-  showButtons = true,
   className = "",
   store, // Store instance dari prop
 }) => {
-  const [items, setItems] = useState<React.ReactNode[]>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+  const items = useMemo(() => {
+    if (children.length === 0) return [];
+    if (!infinite) return children;
+
+    const startItems = children.slice(-itemsPerView);
+    const endItems = children.slice(0, itemsPerView);
+    return [...startItems, ...children, ...endItems];
+  }, [children, infinite, itemsPerView]);
 
   // Subscribe ke state dari store
   const currentIndex = store((state) => state.currentIndex);
   const isTransitioning = store((state) => state.isTransitioning);
-  // Try to read a dedicated setter from the state; if it doesn't exist, fall back to using the store's setState
-  const rawSetCurrentIndex = (store as any)(
-    (state: any) => state.setCurrentIndex,
-  );
-  const setCurrentIndex: (index: number) => void =
-    typeof rawSetCurrentIndex === "function"
-      ? rawSetCurrentIndex
-      : (index: number) => {
-          if (typeof (store as any).setState === "function") {
-            (store as any).setState({ currentIndex: index });
-          }
-        };
+  const setCurrentIndex = (index: number) => store.setState({ currentIndex: index });
   const setItemsPerView = store((state) => state.setItemsPerView);
   const setScrollBy = store((state) => state.setScrollBy);
   const setInfinite = store((state) => state.setInfinite);
@@ -79,20 +73,6 @@ const Carousel: React.FC<CarouselProps> = ({
     setTotalItems,
     setChildrenLength,
   ]);
-
-  // Setup items untuk infinite effect
-  useEffect(() => {
-    if (children.length === 0) return;
-
-    if (infinite && children.length > 0) {
-      const startItems = children.slice(-itemsPerView);
-      const endItems = children.slice(0, itemsPerView);
-      const duplicatedItems = [...startItems, ...children, ...endItems];
-      setItems(duplicatedItems);
-    } else {
-      setItems(children);
-    }
-  }, [children, infinite, itemsPerView]);
 
   // Auto play
   useEffect(() => {

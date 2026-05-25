@@ -1,47 +1,36 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { StartIcon } from './icon'
 import { useProductStore } from '@/lib/zustand/productStore'
+import type { Product } from '@/lib/db/products'
+
+type ProductStock = Product['stock'][number]
 
 const ProductDescription = ({
   product,
   reviewSummary,
 }: {
-  product: any
+  product: Product
   reviewSummary?: { averageRating: number; reviewCount: number }
 }) => {
   const { setStock, addToProductHistory } = useProductStore()
 
   const [index, setIndex] = useState(0)
-  const [productStock, setProductStock] = useState<any | null>(() => {
-    if (product?.stock && product.stock.length > 0) {
-      return {
-        type: product.stock[0].type,
-        quantity: product.stock[0].quantity
-      }
-    }
-    return null
-  })
+  const productStock = useMemo<ProductStock | null>(
+    () => product?.stock?.[index] ?? product?.stock?.[0] ?? null,
+    [index, product]
+  )
 
   const handleIndex = (idx: number) => setIndex(idx)
 
   useEffect(() => {
-    if (product?.stock && product.stock.length > 0) {
-      setProductStock({
-        type: product.stock[index]?.type,
-        quantity: product.stock[index]?.quantity
-      })
-    }
-  }, [index, product])
-
-  useEffect(() => {
-    setStock(productStock)
-  }, [productStock])
+    if (productStock) setStock(productStock)
+  }, [productStock, setStock])
 
   useEffect(() => {
     addToProductHistory(product)
-  }, [])
+  }, [addToProductHistory, product])
 
   const averageRating = reviewSummary?.reviewCount
     ? reviewSummary.averageRating
@@ -82,7 +71,7 @@ const ProductDescription = ({
       <div className="flex flex-col items-start gap-2">
         <h3 className="font-bold text-[1rem]">Pilih variant: <span className='font-light text-gray-500'>{productStock?.type}</span> </h3>
         <div className="flex items-center flex-wrap gap-2.5">
-          {product?.stock?.map((item: any, idx: number) => (
+          {product?.stock?.map((item, idx: number) => (
             <button
               key={idx}
               onClick={() => handleIndex(idx)}
