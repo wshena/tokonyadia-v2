@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState, useRef } from 'react';
-import { CarouselStore } from '@/lib/zustand/utilityStore';
+import React, { useEffect, useState, useRef } from "react";
+import { CarouselStore } from "@/lib/zustand/CarouselStore";
 
 interface CarouselProps {
   children: React.ReactNode[];
@@ -29,23 +29,25 @@ const Carousel: React.FC<CarouselProps> = ({
   infinite = true,
   showDots = true,
   showButtons = true,
-  className = '',
+  className = "",
   store, // Store instance dari prop
 }) => {
   const [items, setItems] = useState<React.ReactNode[]>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Subscribe ke state dari store
   const currentIndex = store((state) => state.currentIndex);
   const isTransitioning = store((state) => state.isTransitioning);
   // Try to read a dedicated setter from the state; if it doesn't exist, fall back to using the store's setState
-  const rawSetCurrentIndex = (store as any)((state: any) => state.setCurrentIndex);
+  const rawSetCurrentIndex = (store as any)(
+    (state: any) => state.setCurrentIndex,
+  );
   const setCurrentIndex: (index: number) => void =
-    typeof rawSetCurrentIndex === 'function'
+    typeof rawSetCurrentIndex === "function"
       ? rawSetCurrentIndex
       : (index: number) => {
-          if (typeof (store as any).setState === 'function') {
+          if (typeof (store as any).setState === "function") {
             (store as any).setState({ currentIndex: index });
           }
         };
@@ -109,27 +111,27 @@ const Carousel: React.FC<CarouselProps> = ({
 
   const handleTransitionEnd = () => {
     setIsTransitioning(false);
-    
+
     // Reset ke posisi asli untuk infinite scroll
     if (infinite && items.length > 0 && children.length > 0) {
       if (currentIndex >= children.length + itemsPerView) {
         if (carouselRef.current) {
-          carouselRef.current.style.transition = 'none';
+          carouselRef.current.style.transition = "none";
         }
         setCurrentIndex(itemsPerView);
         setTimeout(() => {
           if (carouselRef.current) {
-            carouselRef.current.style.transition = '';
+            carouselRef.current.style.transition = "";
           }
         }, 50);
       } else if (currentIndex < itemsPerView) {
         if (carouselRef.current) {
-          carouselRef.current.style.transition = 'none';
+          carouselRef.current.style.transition = "none";
         }
         setCurrentIndex(children.length);
         setTimeout(() => {
           if (carouselRef.current) {
-            carouselRef.current.style.transition = '';
+            carouselRef.current.style.transition = "";
           }
         }, 50);
       }
