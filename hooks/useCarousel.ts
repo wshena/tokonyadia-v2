@@ -1,5 +1,8 @@
-import { useRef } from 'react';
-import { createCarouselStore, CarouselStore } from '@/lib/zustand/utilityStore';
+import {
+  CarouselStore,
+  createCarouselStore,
+} from "@/lib/zustand/CarouselStore";
+import { useRef } from "react";
 
 export const useCarousel = (initialState?: {
   itemsPerView?: number;
@@ -7,7 +10,7 @@ export const useCarousel = (initialState?: {
   infinite?: boolean;
 }) => {
   const storeRef = useRef<CarouselStore | null>(null);
-  
+
   if (!storeRef.current) {
     storeRef.current = createCarouselStore({
       itemsPerView: initialState?.itemsPerView || 4,
@@ -15,6 +18,6 @@ export const useCarousel = (initialState?: {
       infinite: initialState?.infinite ?? true,
     });
   }
-  
+
   return storeRef.current;
 };
