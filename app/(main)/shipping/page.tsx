@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ContentContainer from '@/components/ui/layouts/ContentContainer'
 import { cn } from '@/lib/utils'
@@ -121,8 +121,8 @@ const ShippingPage = () => {
         }
 
         setOrders(payload.data ?? [])
-      } catch (error: any) {
-        setAlert({ label: error?.message ?? 'Gagal memuat status pengiriman', type: 'error' })
+      } catch (error: unknown) {
+        setAlert({ label: error instanceof Error ? error.message : 'Gagal memuat status pengiriman', type: 'error' })
       } finally {
         setLoading(false)
       }
@@ -185,8 +185,8 @@ const ShippingPage = () => {
               : `Order #${String(order.id).slice(-8)} telah sampai di alamat tujuan.`,
             type: 'success',
           })
-        } catch (error: any) {
-          setAlert({ label: error?.message ?? 'Gagal memperbarui status pengiriman', type: 'error' })
+        } catch (error: unknown) {
+          setAlert({ label: error instanceof Error ? error.message : 'Gagal memperbarui status pengiriman', type: 'error' })
         } finally {
           pendingUpdateRef.current.delete(order.id)
         }
@@ -377,4 +377,10 @@ const ShippingPage = () => {
   )
 }
 
-export default ShippingPage
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <ShippingPage />
+    </Suspense>
+  )
+}

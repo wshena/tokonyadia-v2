@@ -1,17 +1,18 @@
 'use client'
 
 import LoadMoreList from './LoadMoreList'
-import { GetAllProducts } from '@/lib/function'
+import { GetAllProducts, type PaginationMeta } from '@/lib/function'
 import { ProductCard } from './ui/card/ProductCard'
 import { ProductCardSkeleton } from './ui/card/ProductCardSkeleton'
+import type { Product } from '@/lib/db/products'
 
 const fetcher = async (page: number) => {
   return GetAllProducts({ page, limit: 20 })
 }
 
 interface Props {
-  initialData: any[]
-  initialPagination: any
+  initialData: Product[]
+  initialPagination: PaginationMeta
 }
 
 export default function ProductLoadMore({ initialData, initialPagination }: Props) {

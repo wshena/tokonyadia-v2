@@ -12,7 +12,7 @@ export function truncateString(str: string, maxLength: number): string {
   return str.slice(0, maxLength).trimEnd() + "...";
 }
 
-export function getRandomElements(arr: any, count: number) {
+export function getRandomElements<T>(arr: T[], count: number): T[] {
   const shuffled = [...arr];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -25,8 +25,11 @@ export const createSlug = (input: string) =>
   slugify(input, { lower: true, strict: true });
 
 // Fungsi untuk mengambil nilai nested dari object berdasarkan path
-export function getValueByPath(object: any, path: string): any {
-  return path.split(".").reduce((acc, key) => acc && acc[key], object);
+export function getValueByPath(object: unknown, path: string): unknown {
+  return path.split(".").reduce<unknown>((acc, key) => {
+    if (!acc || typeof acc !== "object") return undefined;
+    return (acc as Record<string, unknown>)[key];
+  }, object);
 }
 
 export function sortArray<T>(
@@ -46,20 +49,32 @@ export function sortArray<T>(
         ? aValue.localeCompare(bValue)
         : bValue.localeCompare(aValue);
     }
-    if (aValue < bValue) return order === "asc" ? -1 : 1;
-    if (aValue > bValue) return order === "asc" ? 1 : -1;
-    return 0;
+    const aComparable = String(aValue ?? "");
+    const bComparable = String(bValue ?? "");
+    return order === "asc"
+      ? aComparable.localeCompare(bComparable)
+      : bComparable.localeCompare(aComparable);
   });
 }
 
-export function calculateTotalPrice(products: any[]): number {
+type PriceProduct = {
+  quantity: number;
+  productData?: {
+    price?: {
+      withDiscount?: number;
+      withoutDiscount?: number;
+    };
+  };
+};
+
+export function calculateTotalPrice(products: PriceProduct[]): number {
   return products.reduce((total, product) => {
     // Prioritaskan harga diskon jika ada (dengan pengecekan nilai > 0), jika tidak gunakan harga normal.
+    const price = product.productData?.price;
     const unitPrice =
-      product?.productData?.price.withDiscount &&
-      product?.productData?.price.withDiscount > 0
-        ? product?.productData?.price.withDiscount
-        : product?.productData?.price.withoutDiscount;
+      price?.withDiscount && price.withDiscount > 0
+        ? price.withDiscount
+        : price?.withoutDiscount ?? 0;
 
     // Total harga untuk produk ini = unitPrice * quantity produk
     const productTotal = unitPrice * product.quantity;
@@ -92,7 +107,7 @@ const VALID_STATUSES = ["pending", "completed", "failed", "cancelled"] as const;
 export function toDigitalTransactionStatus(
   value: unknown,
 ): DigitalTransactionStatus | undefined {
-  if (VALID_STATUSES.includes(value as any)) {
+  if (typeof value === "string" && VALID_STATUSES.includes(value as DigitalTransactionStatus)) {
     return value as DigitalTransactionStatus;
   }
   return undefined;

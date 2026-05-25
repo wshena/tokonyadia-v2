@@ -1,17 +1,18 @@
 'use client'
 
 import React from 'react'
-import { GetAllCategories } from '@/lib/function'
+import { GetAllCategories, type PaginationMeta } from '@/lib/function'
 import LoadMoreList from './LoadMoreList'
 import CategoryCard from './ui/card/CategoryCard'
+import type { Category } from '@/lib/db/categories'
 
 const fetcher = async (page: number) => {
   return GetAllCategories({ page, limit: 20 })
 }
 
 interface Props {
-  initialData: any[]
-  initialPagination: any
+  initialData: Category[]
+  initialPagination: PaginationMeta
 }
 
 export default function CategoryCardLoadMore({ initialData, initialPagination }: Props) {

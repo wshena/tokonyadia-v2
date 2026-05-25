@@ -1,16 +1,17 @@
 'use client'
 
-import { GetAllCollections } from '@/lib/function'
+import { GetAllCollections, type PaginationMeta } from '@/lib/function'
 import LoadMoreList from './LoadMoreList'
 import CollectionCard from './ui/card/CollectionCard'
+import type { Collection } from '@/lib/db/collections'
 
 const fetcher = async (page: number) => {
   return GetAllCollections({ page, limit: 20 })
 }
 
 interface Props {
-  initialData: any[]
-  initialPagination: any
+  initialData: Collection[]
+  initialPagination: PaginationMeta
 }
 
 export default function CollectionCardLoadMore({ initialData, initialPagination }: Props) {

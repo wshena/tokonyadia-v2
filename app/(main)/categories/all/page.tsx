@@ -1,10 +1,10 @@
 import CategoryCard from "@/components/ui/card/CategoryCard";
 import ContentContainer from "@/components/ui/layouts/ContentContainer";
-import { getAllCategories } from "@/lib/db/categories";
+import { getAllCategories, type Category } from "@/lib/db/categories";
 import React from "react";
 
 // Get categories grouped by alphabet
-export const getCategoriesGroupedByAlphabet = (categories: any[]) => {
+export const getCategoriesGroupedByAlphabet = (categories: Category[]) => {
   const grouped = categories.reduce(
     (acc, category) => {
       const firstLetter = category.title[0].toUpperCase();

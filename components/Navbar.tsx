@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Logo from './Logo'
@@ -51,7 +52,9 @@ const CartAndLoginLayout = () => {
 
   return (
     <div className="flex items-center gap-3">
-      <CartButton />
+      <Suspense fallback={null}>
+        <CartButton />
+      </Suspense>
       {user?.id ? (
         <UserProfileButton />
       ) : (
@@ -81,8 +84,10 @@ const LogoCategorySearchLayout = () => {
   return (
     <div className="flex items-center gap-3">
       <Logo />
-      <CategoryButton />
-      <SearchForm />
+      <Suspense fallback={null}>
+        <CategoryButton />
+        <SearchForm />
+      </Suspense>
     </div>
   )
 }

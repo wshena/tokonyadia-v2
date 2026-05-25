@@ -1,4 +1,5 @@
 import {create} from 'zustand'
+import type { Product } from '@/lib/db/products'
 
 interface Stock {
   type: string
@@ -7,11 +8,11 @@ interface Stock {
 
 interface ProductState {
   stock: Stock
-  history: any[]
+  history: Product[]
 
   // Actions
   setStock: (stock: Stock) => void
-  addToProductHistory: (product: any) => void
+  addToProductHistory: (product: Product) => void
   clearAllProductHistory: () => void
 }
 
@@ -28,7 +29,7 @@ export const useProductStore = create<ProductState>((set) => ({
 
   addToProductHistory: (product) => set((state) => {
     const exists = state.history.findIndex(
-      item => item?.product_id === product?.product_id && item.variant === product.variant
+      item => item?.product_id === product?.product_id
     )
 
     if (exists !== -1) return state

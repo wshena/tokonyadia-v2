@@ -9,8 +9,10 @@ import { useWishlistStore } from '@/lib/zustand/wishlistStore'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useState } from 'react'
 import Button from '../button/Button'
+import type { Product as ProductData } from '@/lib/db/products'
+import type { Product as CartProduct } from '@/lib/zustand/CartStore'
 
-const AddToCartCard = ({ productData }: { productData: any }) => {
+const AddToCartCard = ({ productData }: { productData: ProductData }) => {
   const router = useRouter()
 
   // Zustand stores
@@ -51,7 +53,7 @@ const AddToCartCard = ({ productData }: { productData: any }) => {
     }
 
     const productInCart = carts?.products.find(
-      (item: any) =>
+      (item: CartProduct) =>
         item?.productData?.product_id === productData?.product_id &&
         item?.variant === stock?.type
     )
@@ -74,8 +76,8 @@ const AddToCartCard = ({ productData }: { productData: any }) => {
         await addToWishlist({ userId: user.id, product: productData })
         setAlert({ label: 'Berhasil menambahkan produk ke wishlist anda', type: 'success' })
       }
-    } catch (error: any) {
-      setAlert({ label: error?.message ?? 'Gagal menyimpan wishlist', type: 'error' })
+    } catch (error: unknown) {
+      setAlert({ label: error instanceof Error ? error.message : 'Gagal menyimpan wishlist', type: 'error' })
     }
   }
 

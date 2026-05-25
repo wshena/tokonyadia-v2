@@ -108,9 +108,9 @@ const DigitalTransactionHistory = () => {
           topupCount,
           tagihanCount,
         })
-      } catch (error: any) {
+      } catch (error: unknown) {
         setAlert({
-          label: error?.message || 'Gagal memuat history transaksi',
+          label: error instanceof Error ? error.message : 'Gagal memuat history transaksi',
           type: 'error',
         })
       } finally {

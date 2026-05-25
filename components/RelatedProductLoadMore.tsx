@@ -4,18 +4,20 @@ import { relatedProductFetcher } from '@/lib/fetcher'   // ← import dari fetch
 import LoadMoreList from './LoadMoreList'
 import { ProductCard } from './ui/card/ProductCard'
 import { ProductCardSkeleton } from './ui/card/ProductCardSkeleton'
+import type { Product } from '@/lib/db/products'
+import type { PaginationMeta } from '@/lib/function'
 
 interface Props {
   productId: string
-  initialData: any[]
-  initialPagination: any
+  initialData: Product[]
+  initialPagination: PaginationMeta
 }
 
 export default function RelatedProductLoadMore({ productId, initialData, initialPagination }: Props) {
   return (
     <LoadMoreList
       fetcher={relatedProductFetcher(productId)}
-      renderItem={(product: any) => (
+      renderItem={(product) => (
         <ProductCard key={product.product_id} {...product} />
       )}
       renderSkeleton={() => <ProductCardSkeleton />}

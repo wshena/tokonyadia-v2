@@ -4,10 +4,12 @@ import { GlobalSearch } from '@/lib/function'
 import { ProductCard } from '@/components/ui/card/ProductCard'
 import { ProductCardSkeleton } from '@/components/ui/card/ProductCardSkeleton'
 import LoadMoreList from './LoadMoreList'
+import type { Product } from '@/lib/db/products'
+import type { PaginationMeta } from '@/lib/function'
 
 interface SearchSection {
-  data: any[]
-  pagination: any
+  data: Product[]
+  pagination: PaginationMeta
   matchedNames?: string[]
 }
 
@@ -28,9 +30,9 @@ const SearchSection = ({
 }: {
   title: string
   matchedNames?: string[]
-  initialData: any[]
-  initialPagination: any
-  fetcher: (page: number) => Promise<any>
+  initialData: Product[]
+  initialPagination: PaginationMeta
+  fetcher: (page: number) => Promise<{ data: Product[]; pagination: PaginationMeta }>
 }) => {
   if (initialData.length === 0) return null
 
@@ -49,7 +51,7 @@ const SearchSection = ({
       {/* Product Grid */}
       <LoadMoreList
         fetcher={fetcher}
-        renderItem={(product: any) => (
+        renderItem={(product) => (
           <ProductCard key={product.product_id} {...product} />
         )}
         renderSkeleton={() => <ProductCardSkeleton />}
@@ -61,6 +63,18 @@ const SearchSection = ({
       />
     </section>
   )
+}
+
+const productSearchFetcher = async (
+  section: 'products' | 'categories' | 'collections',
+  keyword: string,
+  page: number
+) => {
+  const result = await GlobalSearch(section, keyword, { page, limit: 20 })
+  return {
+    ...result,
+    data: result.data as Product[],
+  }
 }
 
 export default function SearchResultClient({
@@ -80,7 +94,7 @@ export default function SearchResultClient({
       <div>
         <h1 className="text-xl font-bold">
           Hasil pencarian:{' '}
-          <span className="text-green-600">"{keyword}"</span>
+          <span className="text-green-600">&quot;{keyword}&quot;</span>
         </h1>
         <p className="text-sm text-gray-400 mt-1">{totalResults} hasil ditemukan</p>
       </div>
@@ -88,7 +102,7 @@ export default function SearchResultClient({
       {/* Tidak ada hasil sama sekali */}
       {totalResults === 0 && (
         <div className="flex flex-col items-center gap-3 py-20">
-          <p className="text-gray-400 text-lg">Tidak ada hasil untuk "{keyword}"</p>
+          <p className="text-gray-400 text-lg">Tidak ada hasil untuk &quot;{keyword}&quot;</p>
           <p className="text-gray-300 text-sm">Coba gunakan kata kunci yang berbeda</p>
         </div>
       )}
@@ -98,7 +112,7 @@ export default function SearchResultClient({
         title="Produk"
         initialData={productResult.data}
         initialPagination={productResult.pagination}
-        fetcher={(page) => GlobalSearch('products', keyword, { page, limit: 20 })}
+        fetcher={(page) => productSearchFetcher('products', keyword, page)}
       />
 
       {/* Section: Dari Kategori */}
@@ -107,7 +121,7 @@ export default function SearchResultClient({
         matchedNames={categoryResult.matchedNames}
         initialData={categoryResult.data}
         initialPagination={categoryResult.pagination}
-        fetcher={(page) => GlobalSearch('categories', keyword, { page, limit: 20 })}
+        fetcher={(page) => productSearchFetcher('categories', keyword, page)}
       />
 
       {/* Section: Dari Koleksi */}
@@ -116,7 +130,7 @@ export default function SearchResultClient({
         matchedNames={collectionResult.matchedNames}
         initialData={collectionResult.data}
         initialPagination={collectionResult.pagination}
-        fetcher={(page) => GlobalSearch('collections', keyword, { page, limit: 20 })}
+        fetcher={(page) => productSearchFetcher('collections', keyword, page)}
       />
     </div>
   )

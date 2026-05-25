@@ -157,7 +157,7 @@ export const updateDigitalTransaction = async (
     status?: DigitalTransactionStatus;
   },
 ) => {
-  const updatePayload: Record<string, any> = {};
+  const updatePayload: Record<string, unknown> = {};
 
   if (updates.serviceId) updatePayload.service_id = updates.serviceId;
   if (updates.serviceLabel) updatePayload.service_label = updates.serviceLabel;
