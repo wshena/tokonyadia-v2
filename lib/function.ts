@@ -16,7 +16,7 @@ interface FetcherOptions {
   ttlMs?: number;
 }
 
-interface PaginationMeta {
+export interface PaginationMeta {
   total: number;
   page: number;
   limit: number;
@@ -25,10 +25,14 @@ interface PaginationMeta {
   hasPrevPage: boolean;
 }
 
-interface PaginatedResponse<T> {
+// Sekarang extend ApiResponse agar kompatibel dengan constraint fetcher
+interface PaginatedResponse<T> extends ApiResponse {
   data: T[];
   pagination: PaginationMeta;
-  message?: string;
+}
+
+interface SingleResponse<T> extends ApiResponse {
+  data: T;
 }
 
 const DEFAULT_TTL_MS = 5 * 60 * 1000;
@@ -37,12 +41,10 @@ const inFlightRequests = new Map<string, Promise<unknown>>();
 
 const createRequestUrl = (url: string, params: FetcherParams = {}) => {
   const searchParams = new URLSearchParams();
-
   Object.entries(params).forEach(([key, value]) => {
     if (value === undefined || value === null || value === "") return;
     searchParams.set(key, String(value));
   });
-
   const queryString = searchParams.toString();
   return queryString ? `${url}?${queryString}` : url;
 };
@@ -63,11 +65,9 @@ const fetcher = async <T extends ApiResponse = ApiResponse>(
 
   if (method === "get" && cacheMode !== "no-store") {
     const cached = memoryCache.get(cacheKey);
-
     if (cached && cached.expiresAt > Date.now()) {
       return cached.data as T;
     }
-
     const inFlight = inFlightRequests.get(cacheKey);
     if (inFlight) return inFlight as Promise<T>;
   }
@@ -75,10 +75,7 @@ const fetcher = async <T extends ApiResponse = ApiResponse>(
   const request = (async () => {
     const response = await fetch(requestUrl, {
       method: method.toUpperCase(),
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-      },
+      headers: { "Content-Type": "application/json", ...headers },
       body: data ? JSON.stringify(data) : undefined,
       cache: cacheMode,
     });
@@ -125,7 +122,11 @@ export const GlobalSearch = async (
   keyword: string,
   params?: FetcherParams,
 ) => {
-  return fetcher("/api/search", { section, keyword, ...params }, "get");
+  return fetcher<PaginatedResponse<Product | Category | Collection>>(
+    "/api/search",
+    { section, keyword, ...params },
+    "get",
+  );
 };
 
 // ===== PRODUCTS =====
@@ -134,7 +135,6 @@ export const GetAllProducts = async (params?: FetcherParams) => {
   return fetcher<PaginatedResponse<Product>>("/api/products", params, "get");
 };
 
-// GET /api/products?keyword=sepatu
 export const SearchProducts = async (
   keyword: string,
   params?: FetcherParams,
@@ -146,7 +146,6 @@ export const SearchProducts = async (
   );
 };
 
-// GET /api/products?category=fashion
 export const GetProductsByCategory = async (
   category: string,
   params?: FetcherParams,
@@ -158,35 +157,42 @@ export const GetProductsByCategory = async (
   );
 };
 
-// GET /api/products?sortBy=price_asc
 export const GetProductsSorted = async (
   sortBy: string,
   params?: FetcherParams,
 ) => {
-  return fetcher("/api/products", { sortBy, ...params }, "get");
+  return fetcher<PaginatedResponse<Product>>(
+    "/api/products",
+    { sortBy, ...params },
+    "get",
+  );
 };
 
-// GET /api/products?keyword=...&category=...&minPrice=...&maxPrice=...&sortBy=...
 export const GetFilteredProducts = async (params?: FetcherParams) => {
-  return fetcher("/api/products", params, "get");
+  return fetcher<PaginatedResponse<Product>>("/api/products", params, "get");
 };
 
-// GET /api/products/[id]
 export const GetProductById = async (id: string) => {
-  return fetcher(`/api/products/${id}`, {}, "get");
+  return fetcher<SingleResponse<Product>>(`/api/products/${id}`, {}, "get");
 };
 
-// GET /api/products/[id]/related
 export const GetRelatedProducts = async (
   id: string,
   params?: FetcherParams,
 ) => {
-  return fetcher(`/api/products/${id}/related`, params, "get");
+  return fetcher<PaginatedResponse<Product>>(
+    `/api/products/${id}/related`,
+    params,
+    "get",
+  );
 };
 
-// GET /api/products?random=true
 export const GetRandomProducts = async (params?: FetcherParams) => {
-  return fetcher("/api/products", { random: true, ...params }, "get");
+  return fetcher<PaginatedResponse<Product>>(
+    "/api/products",
+    { random: true, ...params },
+    "get",
+  );
 };
 
 // ===== CATEGORIES =====
@@ -196,7 +202,7 @@ export const GetAllCategories = async (params?: FetcherParams) => {
 };
 
 export const GetCategoryById = async (id: string) => {
-  return fetcher(`/api/categories/${id}`, {}, "get");
+  return fetcher<SingleResponse<Category>>(`/api/categories/${id}`, {}, "get");
 };
 
 export const SearchCategories = async (
@@ -214,7 +220,11 @@ export const GetCategoriesByProduct = async (
   productId: string,
   params?: FetcherParams,
 ) => {
-  return fetcher("/api/categories", { productId, ...params }, "get");
+  return fetcher<PaginatedResponse<Category>>(
+    "/api/categories",
+    { productId, ...params },
+    "get",
+  );
 };
 
 // ===== COLLECTIONS =====
@@ -228,7 +238,11 @@ export const GetAllCollections = async (params?: FetcherParams) => {
 };
 
 export const GetCollectionById = async (id: string) => {
-  return fetcher(`/api/collections/${id}`, {}, "get");
+  return fetcher<SingleResponse<Collection>>(
+    `/api/collections/${id}`,
+    {},
+    "get",
+  );
 };
 
 export const SearchCollections = async (
@@ -246,5 +260,9 @@ export const GetCollectionsByProduct = async (
   productId: string,
   params?: FetcherParams,
 ) => {
-  return fetcher("/api/collections", { productId, ...params }, "get");
+  return fetcher<PaginatedResponse<Collection>>(
+    "/api/collections",
+    { productId, ...params },
+    "get",
+  );
 };
