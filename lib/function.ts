@@ -1,4 +1,6 @@
 import { Category } from "./db/categories";
+import { Collection } from "./db/collections";
+import { Product } from "./db/products";
 
 type HttpMethod = "get" | "post" | "put" | "delete";
 type FetcherValue = string | number | boolean | null | undefined;
@@ -129,7 +131,7 @@ export const GlobalSearch = async (
 // ===== PRODUCTS =====
 
 export const GetAllProducts = async (params?: FetcherParams) => {
-  return fetcher("/api/products", params, "get");
+  return fetcher<PaginatedResponse<Product>>("/api/products", params, "get");
 };
 
 // GET /api/products?keyword=sepatu
@@ -137,7 +139,11 @@ export const SearchProducts = async (
   keyword: string,
   params?: FetcherParams,
 ) => {
-  return fetcher("/api/products", { keyword, ...params }, "get");
+  return fetcher<PaginatedResponse<Product>>(
+    "/api/products",
+    { keyword, ...params },
+    "get",
+  );
 };
 
 // GET /api/products?category=fashion
@@ -145,7 +151,11 @@ export const GetProductsByCategory = async (
   category: string,
   params?: FetcherParams,
 ) => {
-  return fetcher("/api/products", { category, ...params }, "get");
+  return fetcher<PaginatedResponse<Product>>(
+    "/api/products",
+    { category, ...params },
+    "get",
+  );
 };
 
 // GET /api/products?sortBy=price_asc
@@ -193,7 +203,11 @@ export const SearchCategories = async (
   keyword: string,
   params?: FetcherParams,
 ) => {
-  return fetcher("/api/categories", { keyword, ...params }, "get");
+  return fetcher<PaginatedResponse<Category>>(
+    "/api/categories",
+    { keyword, ...params },
+    "get",
+  );
 };
 
 export const GetCategoriesByProduct = async (
@@ -206,7 +220,11 @@ export const GetCategoriesByProduct = async (
 // ===== COLLECTIONS =====
 
 export const GetAllCollections = async (params?: FetcherParams) => {
-  return fetcher("/api/collections", params, "get");
+  return fetcher<PaginatedResponse<Collection>>(
+    "/api/collections",
+    params,
+    "get",
+  );
 };
 
 export const GetCollectionById = async (id: string) => {
@@ -217,7 +235,11 @@ export const SearchCollections = async (
   keyword: string,
   params?: FetcherParams,
 ) => {
-  return fetcher("/api/collections", { keyword, ...params }, "get");
+  return fetcher<PaginatedResponse<Collection>>(
+    "/api/collections",
+    { keyword, ...params },
+    "get",
+  );
 };
 
 export const GetCollectionsByProduct = async (
