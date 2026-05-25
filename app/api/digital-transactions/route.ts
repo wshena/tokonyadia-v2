@@ -1,64 +1,71 @@
-import { createClient } from '@/utils/supabase/server'
-import { createDigitalTransaction, getUserDigitalTransactions } from '@/lib/db/digitalTransactions'
-import { noStoreHeaders } from '@/lib/cache'
-import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from "@/utils/supabase/server";
+import {
+  createDigitalTransaction,
+  DigitalTransactionStatus,
+  getUserDigitalTransactions,
+} from "@/lib/db/digitalTransactions";
+import { noStoreHeaders } from "@/lib/cache";
+import { NextRequest, NextResponse } from "next/server";
+import { toDigitalTransactionStatus } from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient();
     const {
       data: { user },
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json(
-        { message: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const searchParams = request.nextUrl.searchParams
-    const category = searchParams.get('category') as 'topup' | 'tagihan' | null
-    const status = searchParams.get('status')
-    const limit = parseInt(searchParams.get('limit') ?? '10')
-    const offset = parseInt(searchParams.get('offset') ?? '0')
+    const searchParams = request.nextUrl.searchParams;
+    const category = searchParams.get("category") as "topup" | "tagihan" | null;
+    const status = toDigitalTransactionStatus(searchParams.get("status"));
+    const limit = parseInt(searchParams.get("limit") ?? "10");
+    const offset = parseInt(searchParams.get("offset") ?? "0");
 
     const result = await getUserDigitalTransactions(supabase, user.id, {
       category: category || undefined,
       status: status || undefined,
       limit,
       offset,
-    })
+    });
 
-    return NextResponse.json({
-      data: result.data,
-      count: result.count,
-      message: 'Digital transactions fetched successfully',
-    }, { headers: noStoreHeaders })
-  } catch (error: unknown) {
-    console.error('GET digital transactions error:', error)
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : 'Failed to fetch digital transactions' },
-      { status: 500 }
-    )
+      {
+        data: result.data,
+        count: result.count,
+        message: "Digital transactions fetched successfully",
+      },
+      { headers: noStoreHeaders },
+    );
+  } catch (error: unknown) {
+    console.error("GET digital transactions error:", error);
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch digital transactions",
+      },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient();
     const {
       data: { user },
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json(
-        { message: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json()
+    const body = await request.json();
 
     const transaction = await createDigitalTransaction(supabase, user.id, {
       serviceId: body.serviceId,
@@ -68,22 +75,27 @@ export async function POST(request: NextRequest) {
       nominalLabel: body.nominalLabel,
       paymentMethod: body.paymentMethod,
       fieldValues: body.fieldValues,
-      status: body.status || 'completed',
+      status: toDigitalTransactionStatus(body.status) ?? "completed",
       transactionNotes: body.transactionNotes,
-    })
+    });
 
     return NextResponse.json(
       {
         data: transaction,
-        message: 'Digital transaction created successfully',
+        message: "Digital transaction created successfully",
       },
-      { status: 201, headers: noStoreHeaders }
-    )
+      { status: 201, headers: noStoreHeaders },
+    );
   } catch (error: unknown) {
-    console.error('POST digital transaction error:', error)
+    console.error("POST digital transaction error:", error);
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : 'Failed to create digital transaction' },
-      { status: 500 }
-    )
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to create digital transaction",
+      },
+      { status: 500 },
+    );
   }
 }
