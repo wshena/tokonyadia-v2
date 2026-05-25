@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { CarouselStore } from '@/lib/zustand/utilityStore';
+import React from "react";
+import { CarouselStore } from "@/lib/zustand/CarouselStore";
 
 interface CarouselDotsProps {
   store: CarouselStore;
@@ -15,9 +15,9 @@ interface CarouselDotsProps {
 
 const CarouselDots: React.FC<CarouselDotsProps> = ({
   store,
-  className = '',
-  dotClassName = 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400',
-  activeDotClassName = 'bg-blue-600 w-6',
+  className = "",
+  dotClassName = "w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400",
+  activeDotClassName = "bg-blue-600 w-6",
   maxDots,
   showNumbers = false,
   customCount,
@@ -34,9 +34,9 @@ const CarouselDots: React.FC<CarouselDotsProps> = ({
   // Hitung jumlah dots
   const calculateDotsCount = () => {
     if (customCount !== undefined) return customCount;
-    
+
     if (childrenLength === 0) return 0;
-    
+
     if (infinite) {
       const maxVisibleSlides = Math.max(0, childrenLength - itemsPerView + 1);
       return Math.ceil(maxVisibleSlides / scrollBy);
@@ -52,7 +52,7 @@ const CarouselDots: React.FC<CarouselDotsProps> = ({
 
   const handleDotClick = (index: number) => {
     if (isTransitioning) return;
-    
+
     const slideIndex = index * scrollBy;
     goToSlide(slideIndex);
   };
@@ -68,14 +68,14 @@ const CarouselDots: React.FC<CarouselDotsProps> = ({
   };
 
   const activeDotIndex = getActiveDotIndex();
-  
+
   if (dotsCount <= 0) return null;
 
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
       {Array.from({ length: dotsCount }).map((_, index) => {
         const isActive = index === activeDotIndex;
-        
+
         return (
           <button
             key={index}
@@ -86,13 +86,15 @@ const CarouselDots: React.FC<CarouselDotsProps> = ({
               flex items-center justify-center
               disabled:cursor-not-allowed
               ${isActive ? activeDotClassName : dotClassName}
-              ${showNumbers ? '' : ''}
+              ${showNumbers ? "" : ""}
             `}
             aria-label={`Go to slide ${index + 1}`}
-            aria-current={isActive ? 'true' : 'false'}
+            aria-current={isActive ? "true" : "false"}
           >
             {showNumbers ? (
-              <span className={`text-xs font-medium ${isActive ? 'text-white' : 'text-gray-600'}`}>
+              <span
+                className={`text-xs font-medium ${isActive ? "text-white" : "text-gray-600"}`}
+              >
                 {index + 1}
               </span>
             ) : null}

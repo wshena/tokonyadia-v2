@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { CarouselStore } from '@/lib/zustand/utilityStore';
+import React from "react";
+import { CarouselStore } from "@/lib/zustand/CarouselStore";
 
 interface CarouselButtonProps {
-  direction: 'prev' | 'next';
+  direction: "prev" | "next";
   store: CarouselStore; // Wajib: store instance dari Carousel
   className?: string;
   disabledClassName?: string;
@@ -16,8 +16,8 @@ interface CarouselButtonProps {
 const CarouselButton: React.FC<CarouselButtonProps> = ({
   direction,
   store,
-  className = '',
-  disabledClassName = 'opacity-50 cursor-not-allowed',
+  className = "",
+  disabledClassName = "opacity-50 cursor-not-allowed",
   children,
   showDefaultIcon = true,
   onClick,
@@ -32,7 +32,8 @@ const CarouselButton: React.FC<CarouselButtonProps> = ({
   const goToNext = store((state) => state.goToNext);
 
   const isPrevDisabled = !infinite && currentIndex <= 0;
-  const isNextDisabled = !infinite && currentIndex >= childrenLength - itemsPerView;
+  const isNextDisabled =
+    !infinite && currentIndex >= childrenLength - itemsPerView;
 
   const handleClick = () => {
     if (onClick) {
@@ -42,14 +43,14 @@ const CarouselButton: React.FC<CarouselButtonProps> = ({
 
     if (isTransitioning) return;
 
-    if (direction === 'prev') {
+    if (direction === "prev") {
       goToPrev();
     } else {
       goToNext();
     }
   };
 
-  const isDisabled = direction === 'prev' ? isPrevDisabled : isNextDisabled;
+  const isDisabled = direction === "prev" ? isPrevDisabled : isNextDisabled;
 
   return (
     <button
@@ -57,9 +58,9 @@ const CarouselButton: React.FC<CarouselButtonProps> = ({
       disabled={isDisabled}
       className={`
         ${className}
-        ${isDisabled ? disabledClassName : ''}
+        ${isDisabled ? disabledClassName : ""}
       `}
-      aria-label={direction === 'prev' ? 'Previous slide' : 'Next slide'}
+      aria-label={direction === "prev" ? "Previous slide" : "Next slide"}
     >
       {children}
     </button>
