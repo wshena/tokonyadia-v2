@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { OrderItem } from "@/types/order";
 import type { OrderStatus } from "@/types/order";
 import { formatCurrency } from "@/utils/order";
+import { createSlug } from "@/lib/utils";
 
 type Props = {
   item: OrderItem;
@@ -11,6 +12,8 @@ type Props = {
 };
 
 export function OrderItemCard({ item, status, currency }: Props) {
+  const slug = createSlug(item.product_title);
+
   return (
     <div className="flex items-start gap-4 py-4">
       {/* Product image */}
@@ -50,7 +53,7 @@ export function OrderItemCard({ item, status, currency }: Props) {
           {formatCurrency(item.subtotal, currency)}
         </p>
         <Link
-          href={`/product/${item.product_id}`}
+          href={`/product/${item.product_id}/${slug}`}
           className="text-xs text-green-600 hover:underline"
         >
           Beli Lagi
