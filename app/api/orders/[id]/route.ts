@@ -1,71 +1,117 @@
-import { deleteOrder, getOrderById, updateOrder } from '@/lib/db/order'
-import { noStoreHeaders } from '@/lib/cache'
-import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import { deleteOrder, getOrderById, updateOrder } from "@/lib/db/order";
+import { noStoreHeaders } from "@/lib/cache";
+import { createClient } from "@/utils/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import {
+  insertNotification,
+  getOrderStatusNotification,
+} from "@/lib/db/notification";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { id } = await params;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
-  const order = await getOrderById(supabase, id)
+  const order = await getOrderById(supabase, id);
 
   if (!order || order.user_id !== user.id) {
-    return NextResponse.json({ success: false, message: 'Order tidak ditemukan' }, { status: 404 })
+    return NextResponse.json(
+      { success: false, message: "Order tidak ditemukan" },
+      { status: 404 },
+    );
   }
 
-  return NextResponse.json({ success: true, data: order }, { headers: noStoreHeaders })
+  return NextResponse.json(
+    { success: true, data: order },
+    { headers: noStoreHeaders },
+  );
 }
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id }   = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
+      );
     }
 
-    const order = await getOrderById(supabase, id)
+    const order = await getOrderById(supabase, id);
     if (!order || order.user_id !== user.id) {
-      return NextResponse.json({ success: false, message: 'Order tidak ditemukan' }, { status: 404 })
+      return NextResponse.json(
+        { success: false, message: "Order tidak ditemukan" },
+        { status: 404 },
+      );
     }
 
-    const body = await request.json()
-    const nextStatus = body?.status ? String(body.status).toLowerCase() : undefined
-    const nextPaymentMethod = body?.payment_method ?? body?.paymentMethod
-    const nextDeliveryMethod = body?.delivery_method ?? body?.deliveryMethod
+    const body = await request.json();
+    const nextStatus = body?.status
+      ? String(body.status).toLowerCase()
+      : undefined;
+    const nextPaymentMethod = body?.payment_method ?? body?.paymentMethod;
+    const nextDeliveryMethod = body?.delivery_method ?? body?.deliveryMethod;
 
     if (!nextStatus && !nextPaymentMethod && !nextDeliveryMethod) {
       return NextResponse.json(
-        { success: false, message: 'Minimal satu field pembaruan wajib diisi' },
-        { status: 400 }
-      )
+        { success: false, message: "Minimal satu field pembaruan wajib diisi" },
+        { status: 400 },
+      );
     }
 
-    const allowedStatuses = ['pending', 'paid', 'shipped', 'delivered', 'cancelled']
+    const allowedStatuses = [
+      "pending",
+      "paid",
+      "shipped",
+      "delivered",
+      "cancelled",
+    ];
     if (nextStatus && !allowedStatuses.includes(nextStatus)) {
-      return NextResponse.json({ success: false, message: 'Status tidak valid' }, { status: 400 })
+      return NextResponse.json(
+        { success: false, message: "Status tidak valid" },
+        { status: 400 },
+      );
     }
 
     if (nextStatus) {
-      if (order.status === 'delivered' && nextStatus !== 'delivered') {
-        return NextResponse.json({ success: false, message: 'Order yang sudah delivered tidak bisa diubah statusnya' }, { status: 400 })
+      if (order.status === "delivered" && nextStatus !== "delivered") {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Order yang sudah delivered tidak bisa diubah statusnya",
+          },
+          { status: 400 },
+        );
       }
 
-      if (order.status === 'cancelled' && nextStatus !== 'cancelled') {
-        return NextResponse.json({ success: false, message: 'Order yang sudah cancelled tidak bisa diubah statusnya' }, { status: 400 })
+      if (order.status === "cancelled" && nextStatus !== "cancelled") {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Order yang sudah cancelled tidak bisa diubah statusnya",
+          },
+          { status: 400 },
+        );
       }
     }
 
@@ -73,35 +119,64 @@ export async function PATCH(
       ...(nextStatus ? { status: nextStatus } : {}),
       ...(nextPaymentMethod ? { payment_method: nextPaymentMethod } : {}),
       ...(nextDeliveryMethod ? { delivery_method: nextDeliveryMethod } : {}),
-    })
+    });
 
-    return NextResponse.json({ success: true, data: updated }, { headers: noStoreHeaders })
+    if (nextStatus && nextStatus !== order.status) {
+      const { title, message } = getOrderStatusNotification(id, nextStatus);
+      await insertNotification(supabase, {
+        userId: user.id,
+        type: "order_update",
+        title,
+        message,
+        link: `/orders/${id}`,
+      });
+    }
+
+    return NextResponse.json(
+      { success: true, data: updated },
+      { headers: noStoreHeaders },
+    );
   } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Gagal memperbarui order' },
-      { status: 500 }
-    )
+      {
+        success: false,
+        message:
+          error instanceof Error ? error.message : "Gagal memperbarui order",
+      },
+      { status: 500 },
+    );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id }   = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { id } = await params;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   // ← validasi kepemilikan
-  const order = await getOrderById(supabase, id)
+  const order = await getOrderById(supabase, id);
   if (!order || order.user_id !== user.id) {
-    return NextResponse.json({ success: false, message: 'Order tidak ditemukan' }, { status: 404 })
+    return NextResponse.json(
+      { success: false, message: "Order tidak ditemukan" },
+      { status: 404 },
+    );
   }
 
-  await deleteOrder(supabase, id)
-  return NextResponse.json({ success: true, message: 'Order berhasil dihapus' }, { headers: noStoreHeaders })
+  await deleteOrder(supabase, id);
+  return NextResponse.json(
+    { success: true, message: "Order berhasil dihapus" },
+    { headers: noStoreHeaders },
+  );
 }
