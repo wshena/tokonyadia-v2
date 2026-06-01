@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       type: "order_update",
       title: "🛍️ Pesanan Berhasil Dibuat",
       message: `Pesanan kamu telah berhasil dibuat dan sedang menunggu pembayaran.`,
-      link: `/orders/${order.id}`,
+      link: `/order/${order.id}`,
     });
 
     return NextResponse.json(

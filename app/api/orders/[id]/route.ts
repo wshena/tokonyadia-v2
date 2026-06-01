@@ -128,7 +128,7 @@ export async function PATCH(
         type: "order_update",
         title,
         message,
-        link: `/orders/${id}`,
+        link: `/order/${id}`,
       });
     }
 
