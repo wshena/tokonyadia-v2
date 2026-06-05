@@ -10,6 +10,7 @@ type Props = {
   isLoading: boolean;
   onRead: (id: string) => void;
   onMarkAllAsRead: () => void;
+  isModal?: boolean;
 };
 
 export function NotificationDrawer({
@@ -17,11 +18,16 @@ export function NotificationDrawer({
   isLoading,
   onRead,
   onMarkAllAsRead,
+  isModal = false,
 }: Props) {
   const hasUnread = notifications.some((n) => !n.is_read);
 
+  const containerClassName = isModal
+    ? "w-full bg-white rounded-2xl shadow-2xl overflow-hidden"
+    : "absolute right-0 top-10 w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden";
+
   return (
-    <div className="absolute right-0 top-10 w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+    <div className={containerClassName}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <h3 className="font-semibold text-gray-900 text-sm">Notifikasi</h3>

@@ -142,7 +142,8 @@ const DigitalProductTabs = () => {
   };
 
   return (
-    <section className="rounded-md border border-gray-200 bg-white p-5 shadow-sm md:p-7">
+    <section className="rounded-md border border-gray-200 bg-white p-3 shadow-sm md:p-7">
+      {/* header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <span className="text-sm font-semibold uppercase tracking-[0.22em] text-green-600">
@@ -161,6 +162,7 @@ const DigitalProductTabs = () => {
         </div>
       </div>
 
+      {/* tab services select - top up / tagihan */}
       <div className="mt-6 flex gap-3 rounded-2xl bg-gray-100 p-2">
         {(Object.keys(categoryLabels) as DigitalServiceCategory[]).map(
           (category) => {
@@ -180,7 +182,7 @@ const DigitalProductTabs = () => {
                 <p className="font-semibold">
                   {categoryLabels[category].title}
                 </p>
-                <p className="mt-1 text-sm">
+                <p className="hidden md:inline-block mt-1 text-sm">
                   {categoryLabels[category].description}
                 </p>
               </button>
@@ -189,7 +191,27 @@ const DigitalProductTabs = () => {
         )}
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-3">
+      {/* options select */}
+      <div className="mt-6 flex w-full flex-nowrap items-center gap-3 overflow-x-auto pb-2 md:flex-wrap md:overflow-visible md:pb-0">
+        {services.map((service) => {
+          const isActive = activeService.id === service.id;
+
+          return (
+            <button
+              key={service.id}
+              type="button"
+              onClick={() => selectService(service)}
+              className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors md:hidden ${
+                isActive
+                  ? "border-green-600 bg-green-600 text-white"
+                  : "border-gray-200 bg-white text-gray-700 hover:border-green-300 hover:text-green-700"
+              }`}
+            >
+              {service.label}
+            </button>
+          );
+        })}
+
         {visibleServices.map((service) => {
           const isActive = activeService.id === service.id;
 
@@ -198,7 +220,7 @@ const DigitalProductTabs = () => {
               key={service.id}
               type="button"
               onClick={() => selectService(service)}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+              className={`hidden rounded-full border px-4 py-2 text-sm font-medium transition-colors md:inline-flex ${
                 isActive
                   ? "border-green-600 bg-green-600 text-white"
                   : "border-gray-200 bg-white text-gray-700 hover:border-green-300 hover:text-green-700"
@@ -210,7 +232,7 @@ const DigitalProductTabs = () => {
         })}
 
         {hiddenServices.length > 0 && (
-          <div ref={moreOptionsRef} className="relative">
+          <div ref={moreOptionsRef} className="relative hidden md:block">
             <button
               type="button"
               onClick={() => setIsMoreOptionsOpen((current) => !current)}

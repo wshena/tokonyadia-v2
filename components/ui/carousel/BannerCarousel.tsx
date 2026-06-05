@@ -1,51 +1,51 @@
-'use client'
+"use client";
 
-import Image from 'next/image';
-import Carousel from './Carousel';
-import CarouselItem from './CarouselItem';
-import React, { useMemo, useState, useRef, useEffect } from 'react'
-import { useCarouselStoreInstance } from '@/hooks/useCarouselStoreInstance';
-import Link from 'next/link';
-import CarouselButton from './CarouselButton';
-import { AngleLeftIcon, AngleRightIcon } from '../../icon';
-import { cn } from '@/lib/utils';
-import CarouselDots from './CarouselDots';
+import Image from "next/image";
+import Carousel from "./Carousel";
+import CarouselItem from "./CarouselItem";
+import React, { useMemo, useState, useRef, useEffect } from "react";
+import { useCarouselStoreInstance } from "@/hooks/useCarouselStoreInstance";
+import Link from "next/link";
+import CarouselButton from "./CarouselButton";
+import { AngleLeftIcon, AngleRightIcon } from "../../icon";
+import { cn } from "@/lib/utils";
+import CarouselDots from "./CarouselDots";
 
 const Banner = ({ image }: { image: string }) => {
   return (
-    <div className='w-full h-full rounded-[10px] md:rounded-[20px]'>
+    <div className="w-full h-full rounded-sm md:rounded-[20px]">
       <Image
         src={image}
         alt="Banner Image"
         fill
-        priority={image === '/homeCarousel/item.jpg.webp'}
+        priority={image === "/homeCarousel/item.jpg.webp"}
         sizes="100vw"
-        className='rounded-[10px] md:rounded-[20px] object-cover'
+        className="rounded-[5px] md:rounded-md"
       />
     </div>
-  )
-}
+  );
+};
 
-const BannerCarousel = ({images}:{images:string[]}) => {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [slideWidth, setSlideWidth] = useState(0)
+const BannerCarousel = ({ images }: { images: string[] }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [slideWidth, setSlideWidth] = useState(0);
 
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current) {
-        setSlideWidth(containerRef.current.offsetWidth)
+        setSlideWidth(containerRef.current.offsetWidth);
       }
-    }
+    };
 
-    updateWidth()
+    updateWidth();
 
-    const resizeObserver = new ResizeObserver(updateWidth)
+    const resizeObserver = new ResizeObserver(updateWidth);
     if (containerRef.current) {
-      resizeObserver.observe(containerRef.current)
+      resizeObserver.observe(containerRef.current);
     }
 
-    return () => resizeObserver.disconnect()
-  }, [])
+    return () => resizeObserver.disconnect();
+  }, []);
 
   const [config] = useState<CarouselConfig>({
     itemsPerView: 1,
@@ -56,31 +56,43 @@ const BannerCarousel = ({images}:{images:string[]}) => {
     showDots: false,
   });
 
-  const { store: carouselStore } = useCarouselStoreInstance(
-    'banner-carousel',
-    {
-      itemsPerView: config.itemsPerView,
-      scrollBy: config.scrollBy,
-      infinite: config.infinite,
-    }
+  const { store: carouselStore } = useCarouselStoreInstance("banner-carousel", {
+    itemsPerView: config.itemsPerView,
+    scrollBy: config.scrollBy,
+    infinite: config.infinite,
+  });
+
+  const carouselItems = useMemo(
+    () =>
+      images.map((item, idx) => (
+        <CarouselItem
+          key={`${item} + ${idx}`}
+          onClick={() => {}}
+          className="rounded-[10px] md:rounded-[20px]"
+        >
+          <Link href={"#"} className="rounded-md">
+            <div className="relative w-full aspect-1280/600 md:aspect-1208/300">
+              <Banner image={item} />
+            </div>
+          </Link>
+        </CarouselItem>
+      )),
+    [images],
   );
 
-  const carouselItems = useMemo(() => (
-    images.map((item, idx) => (
-      <CarouselItem key={`${item} + ${idx}`} onClick={() => {}} className='rounded-[10px] md:rounded-[20px]'>
-        <Link href={'#'} className='rounded-md'>
-          <div className='relative w-full aspect-1280/600 md:aspect-1208/300'>
-            <Banner image={item} />
-          </div>
-        </Link>
-      </CarouselItem>
-    ))
-  ), [images]);
-  
-  if (slideWidth === 0) return <div ref={containerRef} className='w-full aspect-1280/600 md:aspect-1208/300 rounded-[10px] md:rounded-[20px] bg-gray-100 animate-pulse' />
+  if (slideWidth === 0)
+    return (
+      <div
+        ref={containerRef}
+        className="w-full aspect-1280/600 md:aspect-1208/300 rounded-[10px] md:rounded-[20px] bg-gray-100 animate-pulse"
+      />
+    );
 
   return (
-    <div ref={containerRef} className='group relative w-full rounded-[10px] md:rounded-[20px]'>
+    <div
+      ref={containerRef}
+      className="group relative w-full rounded-[10px] md:rounded-[20px]"
+    >
       <Carousel
         store={carouselStore}
         itemsPerView={config.itemsPerView}
@@ -95,51 +107,55 @@ const BannerCarousel = ({images}:{images:string[]}) => {
       </Carousel>
 
       {/* prev button */}
-      <div className={cn(
-        'transition-all duration-300 ease-in-out',
-        'absolute top-0 left-0 h-full',
-        'flex items-center justify-center',
-        'opacity-0',
-        'group-hover:opacity-100 group-hover:-translate-x-5'
-      )}>
+      <div
+        className={cn(
+          "transition-all duration-300 ease-in-out",
+          "absolute top-0 left-0 h-full",
+          "flex items-center justify-center",
+          "opacity-0",
+          "group-hover:opacity-100 group-hover:-translate-x-5",
+        )}
+      >
         <CarouselButton
           direction="prev"
           store={carouselStore}
           className="p-2 rounded-full cursor-pointer bg-white"
         >
-          <AngleLeftIcon size={30} color='black' />
+          <AngleLeftIcon size={30} color="black" />
         </CarouselButton>
       </div>
 
       {/* next button */}
-      <div className={cn(
-        'transition-all duration-300 ease-in-out',
-        'absolute top-0 right-0 h-full',
-        'flex items-center justify-center',
-        'opacity-0',
-        'group-hover:opacity-100 group-hover:translate-x-5'
-      )}>
+      <div
+        className={cn(
+          "transition-all duration-300 ease-in-out",
+          "absolute top-0 right-0 h-full",
+          "flex items-center justify-center",
+          "opacity-0",
+          "group-hover:opacity-100 group-hover:translate-x-5",
+        )}
+      >
         <CarouselButton
           direction="next"
           store={carouselStore}
           className="p-2 rounded-full cursor-pointer bg-white"
         >
-          <AngleRightIcon size={30} color='black' />
+          <AngleRightIcon size={30} color="black" />
         </CarouselButton>
       </div>
 
       {/* carousel dots */}
-      <div className="absolute bottom-0 w-full h-10 flex items-center justify-center">
+      <div className="absolute -bottom-2 md:bottom-0 w-full h-10 flex items-center justify-center">
         <CarouselDots
           store={carouselStore}
           className="space-x-4"
-          dotClassName="w-3 h-3 bg-white/70 rounded-full cursor-pointer"
-          activeDotClassName="w-3 h-3 bg-white rounded-full cursor-pointer"
+          dotClassName="w-2 h-2 md:w-3 md:h-3 bg-white/70 rounded-full cursor-pointer"
+          activeDotClassName="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full cursor-pointer"
           customCount={images?.length}
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BannerCarousel
+export default BannerCarousel;

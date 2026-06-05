@@ -4,9 +4,9 @@ import { useAssistant } from "@/hooks/useAssistant";
 import { AssistantMessages } from "./AssistantMessages";
 import { SparklesIcon, XIcon, RotateCcwIcon, SendIcon } from "lucide-react";
 
-type Props = { onClose: () => void };
+type Props = { onClose: () => void; isModal?: boolean };
 
-export function AssistantChat({ onClose }: Props) {
+export function AssistantChat({ onClose, isModal = false }: Props) {
   const { messages, input, setInput, isStreaming, sendMessage, clearMessages } =
     useAssistant();
 
@@ -23,8 +23,12 @@ export function AssistantChat({ onClose }: Props) {
     "Sepatu wanita murah",
   ];
 
+  const containerClassName = isModal
+    ? "flex h-full w-full max-h-[80vh] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white"
+    : "flex h-120 w-80 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl";
+
   return (
-    <div className="flex h-120 w-80 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
+    <div className={containerClassName}>
       {/* Header */}
       <div className="flex items-center justify-between bg-green-600 px-4 py-3">
         <div className="flex items-center gap-2">
